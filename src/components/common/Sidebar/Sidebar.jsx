@@ -43,7 +43,7 @@ function getMenuItems() {
     { icon: <FaGraduationCap />, label: "미션", link: "/mission" },
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
-    { icon: <FaRankingStar />, label: "랭킹" },
+    { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
   ];
 }
 
@@ -56,7 +56,7 @@ function getLecturerMenuItems() {
     { icon: <FaBook />, label: "미션 제출 현황", link: "/challenge" },
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
-    { icon: <FaRankingStar />, label: "랭킹" },
+    { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
   ];
 }
 

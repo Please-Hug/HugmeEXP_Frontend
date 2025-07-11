@@ -9,8 +9,8 @@ import DailyQuest from "../../components/Dashboard/DailyQuest";
 import AttendanceCheck from "../../components/Dashboard/AttendanceCheck";
 import UserProfile from "../../components/Dashboard/UserProfile";
 import RecentDiary from "../../components/Dashboard/RecentDiary";
-import BookmarkForm   from "../../components/Dashboard/BookmarkForm";
-import BookmarkList    from "../../components/Dashboard/BookmarkList";
+import BookmarkForm from "../../components/Dashboard/BookmarkForm";
+import BookmarkList from "../../components/Dashboard/BookmarkList";
 import useUserStore from "../../stores/userStore";
 import api from "../../api/axiosInstance";
 import useBreadcrumbStore from "../../stores/breadcrumbStore";
@@ -19,7 +19,6 @@ import BookmarkSection from "../../components/Dashboard/BookmarkSection";
 function DashboardPage() {
   const userInfo = useUserStore((state) => state.userInfo);
   const { setBreadcrumbItems } = useBreadcrumbStore();
-  
 
   useEffect(() => {
     if (userInfo) {
@@ -53,10 +52,10 @@ function DashboardPage() {
 
       {/* — 북마크 섹션 시작 — */}
       <div>
-        <BookmarkSection/>
+        <BookmarkSection />
       </div>
       {/* — 북마크 섹션 끝 — */}
-      
+
       <div className={styles.dashboardContent}>
         <div className={styles.dashboardLeft}>
           <RecentLearning />
