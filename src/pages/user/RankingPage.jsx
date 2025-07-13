@@ -26,12 +26,12 @@ const RankingPage = () => {
 
   // 사용자별 미션 그룹 정보를 표시하는 함수
   const getUserMissionGroupsText = (user) => {
-    // user 객체에서 userMission 정보를 찾기
-    if (user.userMissions && user.userMissions.length > 0) {
-      const missionNames = user.userMissions
-        .map((userMission) => userMission.mission?.name)
+    // user 객체에서 missionGroups 정보를 찾기
+    if (user.missionGroups && user.missionGroups.length > 0) {
+      const missionNames = user.missionGroups
+        .map((missionGroup) => missionGroup.name)
         .filter(Boolean) // null/undefined 제거
-        .join(", ");
+        .join(" | ");
       return missionNames || "참여 중인 미션이 없습니다";
     }
 
