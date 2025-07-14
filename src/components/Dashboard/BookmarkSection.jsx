@@ -218,7 +218,7 @@ function BookmarkSection() {
                 />
                 </label>
                 <label htmlFor="bookmark-title" className={styles.label}>
-                표시할 텍스트 (선택)
+                표시할 텍스트
                 <input
                     id="bookmark-title"
                     type="text"
