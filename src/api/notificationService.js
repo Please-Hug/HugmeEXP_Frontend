@@ -89,7 +89,7 @@ export async function markAsRead(notificationId) {
 
 //     return eventSource;
 // }
-export function subscribeToNotifications(onCreatedCallback, onDeletedCallback) {
+export function subscribeToNotifications(onCreatedCallback, onDeletedCallback, loadingCallback) {
     const accessToken = localStorage.getItem("accessToken");
 
     if (!accessToken) {
@@ -135,6 +135,8 @@ export function subscribeToNotifications(onCreatedCallback, onDeletedCallback) {
         console.error("SSE 오류:", error);
         eventSource.close();
     };
+
+    loadingCallback?.();
 
     return eventSource;
 }

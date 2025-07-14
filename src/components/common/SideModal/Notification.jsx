@@ -9,9 +9,14 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
     const dropdownRef = useRef(null);
     const [isFetched, setIsFetched] = useState(false);
     const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [filtered, setFiltered] = useState([]);
 
     // sse 구독함수
     useEffect(() => {
+        if (loading) 
+            return;
+        setLoading(true);
         const eventSource = subscribeToNotifications(
             (newNotification) => {
                 console.log("SSE Event ", newNotification);
@@ -24,6 +29,9 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
             (deletedId) => {
                 console.log("알림 삭제됨:", deletedId);
                 setNotifications((prev) => prev.filter((n) => n.id !== deletedId));
+            },
+            () => {
+                setLoading(false);
             }
         );
 
@@ -95,7 +103,11 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
 
     const activityCount = notifications.filter(n => n.category === "ACTIVITY" && !n.read).length;
     const rewardCount = notifications.filter(n => n.category === "REWARD" && !n.read).length;
-    const filtered = notifications.filter(n => n.category === selectedTab);
+    //const filtered = notifications.filter(n => n.category === selectedTab);
+    useEffect(() => {
+        const filteredNotifications = notifications.filter(n => n.category === selectedTab);
+        setFiltered(filteredNotifications);
+    }, [selectedTab, notifications]);
     console.log("현재 탭:", selectedTab, "필터링 후:", filtered);
 
     return (
