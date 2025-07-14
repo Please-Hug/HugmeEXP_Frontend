@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getStudyDiary, updateStudyDiary, uploadStudyDiaryImage } from "../../api/studyDiaryService";
+import { getStudyDiary, updateStudyDiary } from "../../api/studyDiaryService";
 import StudyDiaryEditor from "./components/StudyDiaryEditor";
 import styles from "./StudyDiaryEditPage.module.scss";
 
@@ -11,8 +11,7 @@ function StudyDiaryEditPage() {
   
   const [formData, setFormData] = useState({
     title: "",
-    content: "",
-    imageUrl: ""
+    content: ""
   });
   
   const [originalData, setOriginalData] = useState(null);
@@ -34,8 +33,7 @@ function StudyDiaryEditPage() {
         const data = response.data;
         setFormData({
           title: data.title || "",
-          content: data.content || "",
-          imageUrl: data.imageUrl || ""
+          content: data.content || ""
         });
         setOriginalData(data);
       }
@@ -71,7 +69,9 @@ function StudyDiaryEditPage() {
       return;
     }
     
-    setErrors({ ...errors, title: "" });
+    const newErrors = { ...errors };
+    delete newErrors.title;
+    setErrors(newErrors);
     setFormData({ ...formData, title: value });
   };
 
@@ -83,27 +83,10 @@ function StudyDiaryEditPage() {
       return;
     }
     
-    setErrors({ ...errors, content: "" });
+    const newErrors = { ...errors };
+    delete newErrors.content;
+    setErrors(newErrors);
     setFormData({ ...formData, content: value || "" });
-  };
-
-  // 대표 이미지 업로드 처리
-  const handleMainImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const response = await uploadStudyDiaryImage(file);
-      const imageUrl = response?.data?.imageUrl;
-      
-      if (imageUrl) {
-        setFormData({ ...formData, imageUrl });
-        alert("대표 이미지가 변경되었습니다.");
-      }
-    } catch (error) {
-      console.error("이미지 업로드 실패:", error);
-      alert("이미지 업로드에 실패했습니다.");
-    }
   };
 
   // 유효성 검사
@@ -128,10 +111,11 @@ function StudyDiaryEditPage() {
 
   // 변경사항 확인
   const hasChanges = () => {
+    if (!originalData) return false;
+    
     return (
-      formData.title !== originalData?.title ||
-      formData.content !== originalData?.content ||
-      formData.imageUrl !== originalData?.imageUrl
+      formData.title !== originalData.title ||
+      formData.content !== originalData.content
     );
   };
 
@@ -263,38 +247,6 @@ function StudyDiaryEditPage() {
           </div>
         </div>
 
-        {/* 대표 이미지 (선택사항) */}
-        <div className={styles.formGroup}>
-          <label htmlFor="mainImage">
-            대표 이미지 <span className={styles.optional}>(선택사항)</span>
-          </label>
-          <div className={styles.imageUpload}>
-            {formData.imageUrl ? (
-              <div className={styles.imagePreview}>
-                <img src={formData.imageUrl} alt="대표 이미지" />
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, imageUrl: "" })}
-                  className={styles.removeButton}
-                >
-                  제거
-                </button>
-              </div>
-            ) : (
-              <label className={styles.uploadButton}>
-                <input
-                  id="mainImage"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleMainImageUpload}
-                  style={{ display: "none" }}
-                />
-                대표 이미지 선택
-              </label>
-            )}
-          </div>
-        </div>
-
         {/* 내용 입력 */}
         <div className={styles.formGroup}>
           <label>
@@ -324,7 +276,7 @@ function StudyDiaryEditPage() {
           <button
             type="submit"
             className={styles.submitButton}
-            disabled={submitting || Object.keys(errors).length > 0}
+            disabled={submitting || !hasChanges() || Object.keys(errors).length > 0}
           >
             {submitting ? "수정 중..." : "수정 완료"}
           </button>

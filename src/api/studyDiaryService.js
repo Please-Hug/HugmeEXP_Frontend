@@ -84,8 +84,8 @@ export const searchStudyDiaries = async (keyword, page = 0, size = 10) => {
   }
 };
 
-// 오늘 하루 인기 배움일기 조회
-export const getTodayPopularStudyDiaries = async (
+// 일주일간 인기 배움일기 조회
+export const getWeeklyPopularStudyDiaries = async (
   page = 0,
   size = 10,
   sort = "likeCount",
@@ -93,11 +93,11 @@ export const getTodayPopularStudyDiaries = async (
 ) => {
   try {
     const response = await api.get(
-      `/api/v1/studydiaries/today/popular?page=${page}&size=${size}&sort=${sort}&direction=${direction}`
+      `/api/v1/studydiaries/weekly/popular?page=${page}&size=${size}&sort=${sort}&direction=${direction}`
     );
     return response.data;
   } catch (error) {
-    console.error("오늘 인기 배움일기 조회 실패:", error);
+    console.error("일주일간 인기 배움일기 조회 실패:", error);
     throw error;
   }
 };

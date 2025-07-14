@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getStudyDiaries, searchStudyDiaries, getTodayPopularStudyDiaries } from "../../api/studyDiaryService";
+import { getStudyDiaries, searchStudyDiaries, getWeeklyPopularStudyDiaries } from "../../api/studyDiaryService";
 import styles from "./StudyDiaryListPage.module.scss";
 
 function StudyDiaryListPage() {
@@ -30,8 +30,8 @@ function StudyDiaryListPage() {
       let response;
       
       if (sortType === "인기") {
-        // 인기 정렬일 때는 오늘 인기 배움일기 API 호출
-        response = await getTodayPopularStudyDiaries(currentPage, 10, "likeCount", "DESC");
+        // 인기 정렬일 때는 일주일간 인기 배움일기 API 호출
+        response = await getWeeklyPopularStudyDiaries(currentPage, 10, "likeCount", "DESC");
       } else {
         // 최신 정렬일 때는 기존 API 호출
         response = await getStudyDiaries(currentPage, 10, "createdAt");
