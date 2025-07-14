@@ -29,8 +29,8 @@ import useTokenPayload from "../../../stores/tokenPayloadStore.js";
 
 function getQuickMenuItems() {
   return [
-    { icon: <FaLightbulb />, label: "AI 안아줘요" },
-    { icon: <FaBolt />, label: "빠른 검색" },
+    // { icon: <FaLightbulb />, label: "AI 안아줘요" },
+    // { icon: <FaBolt />, label: "빠른 검색" },
     { icon: <FaBell />, label: "알림" },
   ];
 }
