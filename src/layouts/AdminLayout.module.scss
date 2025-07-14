@@ -1,0 +1,116 @@
+.AdminLayout {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;
+  width: 100%;
+
+  .sidebar {
+    width: 250px;
+    background-color: #f8fafc;
+    border-right: 1px solid #e2e8f0;
+    padding: 20px;
+  }
+
+  .sidebarHeader {
+    margin-bottom: 2rem;
+  }
+
+  .logo {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+  }
+
+  .adminInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .adminName {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .adminRole {
+    font-size: 0.875rem;
+    color: #94a3b8;
+  }
+
+  .nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .navItem {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    color: #374151;
+    
+    &:hover {
+      background-color: #f1f5f9;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #3b82f6;
+      outline-offset: 2px;
+    }
+
+    &.active {
+      background-color: #e2e8f0;
+      color: #1e293b;
+      font-weight: 600;
+    }
+  }
+
+  .navIcon {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .contentHeader {
+    background: white;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .breadcrumb {
+    font-size: 0.875rem;
+    color: #64748b;
+    
+    span:first-child {
+      font-weight: 600;
+      color: #3b82f6;
+    }
+  }
+
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    background-color: #f8fafc;
+  }
+
+  .loadingMessage {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 16px;
+    color: #6b7280;
+  }
+}

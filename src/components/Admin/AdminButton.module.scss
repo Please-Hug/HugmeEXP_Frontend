@@ -1,0 +1,27 @@
+.AdminButton {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+
+  .button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: #2563eb;
+    }
+  }
+
+  .icon {
+    margin-right: 6px;
+    font-size: 14px;
+  }
+}

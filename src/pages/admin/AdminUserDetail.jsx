@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getUser, updateUser, deleteUser, changeUserRole } from '../../api/adminService';
+import styles from './AdminUserDetail.module.scss';
 
 export default function AdminUserDetail() {
   const { username } = useParams();
@@ -72,7 +73,6 @@ export default function AdminUserDetail() {
       if (err.response) {
         const errorMessage = err.response.data?.message || '알 수 없는 오류';
         
-        // 전화번호 형식 에러 메시지
         if (errorMessage.includes('phoneNumber') && errorMessage.includes('일치해야 합니다')) {
           alert('전화번호 형식이 올바르지 않습니다. 전화번호의 양식은 010-0000-0000 입니다.');
         } else {
@@ -125,126 +125,118 @@ export default function AdminUserDetail() {
   };
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">회원 상세 정보</h2>
+    <div className={styles.AdminUserDetail}>
+      <h2 className={styles.title}>회원 상세 정보</h2>
       {user ? (
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-1">아이디</label>
-            <input
-              type="text"
-              name="username"
-              value={form.username}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">이름</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">설명</label>
-            <textarea
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              rows="3"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">전화번호</label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={form.phoneNumber}
-              onChange={handleChange}
-              placeholder="010-0000-0000"
-              className="w-full border px-3 py-2 rounded"
-            />
-          </div>
-          <div>
-            <label className="block mb-1">권한</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleRoleChange}
-              className="w-full border px-3 py-2 rounded"
-            >
-              <option value="USER">USER</option>
-              <option value="LECTURER">LECTURER</option> 
-              <option value="ADMIN">ADMIN</option>
-            </select>
-          </div>
-          
-          <div className="bg-gray-50 p-4 rounded">
-            <h3 className="font-semibold mb-2">수치 정보</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <span className="font-medium block mb-1">ID:</span> 
-                <span className="text-sm">{user.id}</span>
-              </div>
-              <div>
-                <span className="font-medium block mb-1">레벨:</span>
-                <span className="text-sm">{user.level}</span>
-              </div>
-              <div>
-                <span className="font-medium block mb-1">현재 총 경험치:</span>
-                <span className="text-sm">{user.currentTotalExp}</span>
-              </div>
-              <div>
-                <span className="font-medium block mb-1">다음 레벨 경험치:</span>
-                <span className="text-sm">{user.nextLevelTotalExp}</span>
-              </div>
-              <div>
-                <label className="font-medium block mb-1">경험치 (강제 리셋):</label>
-                <input
-                  type="number"
-                  name="exp"
-                  value={form.exp}
-                  onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded text-sm"
-                  min="0"
-                />
-              </div>
-              <div>
-                <label className="font-medium block mb-1">포인트 (강제 리셋):</label>
-                <input
-                  type="number"
-                  name="point"
-                  value={form.point}
-                  onChange={handleChange}
-                  className="w-full border px-2 py-1 rounded text-sm"
-                  min="0"
-                />
+        <div className={styles.content}>
+          <div className={styles.card}>
+            <div className={styles.readOnlyField}>
+              <span className={styles.readOnlyLabel}>아이디:</span>
+              <span className={styles.readOnlyValue}>{user.username}</span>
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label>이름</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label>설명</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                rows="3"
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label>전화번호</label>
+              <input
+                type="text"
+                name="phoneNumber"
+                value={form.phoneNumber}
+                onChange={handleChange}
+                placeholder="010-0000-0000"
+              />
+            </div>
+            
+            <div className={styles.formGroup}>
+              <label>권한</label>
+              <select
+                name="role"
+                value={form.role}
+                onChange={handleRoleChange}
+              >
+                <option value="USER">USER</option>
+                <option value="LECTURER">LECTURER</option> 
+                <option value="ADMIN">ADMIN</option>
+              </select>
+            </div>
+            
+            <div className={styles.numericInfo}>
+              <h3>수치 정보</h3>
+              <div className={styles.numericFields}>
+                <div>
+                  <span className={styles.fieldLabel}>레벨:</span>
+                  <span className={styles.fieldValue}>{user.level}</span>
+                </div>
+                <div>
+                  <span className={styles.fieldLabel}>현재 총 경험치:</span>
+                  <span className={styles.fieldValue}>{user.currentTotalExp}</span>
+                </div>
+                <div>
+                  <span className={styles.fieldLabel}>다음 레벨 경험치:</span>
+                  <span className={styles.fieldValue}>{user.nextLevelTotalExp}</span>
+                </div>
+                <div>
+                  <label className={styles.fieldLabel}>경험치 (강제 리셋):</label>
+                  <input
+                    type="number"
+                    name="exp"
+                    value={form.exp}
+                    onChange={handleChange}
+                    className={styles.numberInput}
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className={styles.fieldLabel}>포인트 (강제 리셋):</label>
+                  <input
+                    type="number"
+                    name="point"
+                    value={form.point}
+                    onChange={handleChange}
+                    className={styles.numberInput}
+                    min="0"
+                  />
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex space-x-2 pt-4">
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-            >
-              저장
-            </button>
-            <button
-              onClick={handleDelete}
-              className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              삭제
-            </button>
+            <div className={styles.buttonGroup}>
+              <button
+                onClick={handleSave}
+                className={styles.saveButton}
+              >
+                저장
+              </button>
+              <button
+                onClick={handleDelete}
+                className={styles.deleteButton}
+              >
+                삭제
+              </button>
+            </div>
           </div>
         </div>
       ) : (
-        <p>로딩 중...</p>
+        <p className={styles.loadingMessage}>로딩 중...</p>
       )}
     </div>
   );
