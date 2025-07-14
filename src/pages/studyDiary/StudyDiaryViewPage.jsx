@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getStudyDiary, deleteStudyDiary, createComment, deleteComment, toggleLike, getImagePresignedUrl } from "../../api/studyDiaryService";
 import styles from "./StudyDiaryViewPage.module.scss";
 import useUserStore from "../../stores/userStore";
+import useTokenPayload from "../../stores/tokenPayloadStore";
 import MDEditor from "@uiw/react-md-editor";
 import "@uiw/react-markdown-preview/markdown.css";
 import remarkGfm from "remark-gfm";
@@ -17,9 +18,24 @@ function StudyDiaryViewPage() {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [isTogglingLike, setIsTogglingLike] = useState(false);
   const userInfo = useUserStore((state) => state.userInfo);
+  const { tokenPayload } = useTokenPayload();
   
   // 현재 로그인한 사용자가 글 작성자인지 확인
   const isAuthor = diary && userInfo && userInfo.name === diary.name;
+  
+  // 현재 사용자가 관리자인지 확인
+  const isAdmin = ["ADMIN", "ROLE_ADMIN"].includes(tokenPayload?.role);
+  
+  // 디버깅 로그
+  console.log("🔍 권한 체크 디버깅:", {
+    tokenPayload: tokenPayload,
+    userRole: tokenPayload?.role,
+    isAdmin: isAdmin,
+    isAuthor: isAuthor,
+    userInfo: userInfo,
+    diaryAuthor: diary?.name,
+    showDeleteButton: isAuthor || isAdmin
+  });
 
   useEffect(() => {
     fetchDiary();
@@ -296,19 +312,21 @@ function StudyDiaryViewPage() {
         >
           ← 배움일기 목록으로
         </button>
-        {isAuthor && (
+        {(isAuthor || isAdmin) && (
           <div className={styles.actions}>
-            <button 
-              className={styles.editButton}
-              onClick={() => navigate(`/study-diary/edit/${id}`)}
-            >
-              수정
-            </button>
+            {isAuthor && (
+              <button 
+                className={styles.editButton}
+                onClick={() => navigate(`/study-diary/edit/${id}`)}
+              >
+                수정
+              </button>
+            )}
             <button 
               className={styles.deleteButton}
               onClick={handleDelete}
             >
-              삭제
+              {isAdmin && !isAuthor ? "관리자 삭제" : "삭제"}
             </button>
           </div>
         )}
@@ -378,11 +396,11 @@ function StudyDiaryViewPage() {
                         {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
                       </span>
                     </div>
-                    {userInfo?.name === comment.name && (
+                    {(userInfo?.name === comment.name || isAdmin) && (
                       <button
                         className={styles.deleteCommentButton}
                         onClick={() => handleCommentDelete(comment.id)}
-                        title="댓글 삭제"
+                        title={isAdmin && userInfo?.name !== comment.name ? "관리자 권한으로 삭제" : "댓글 삭제"}
                       >
                         ✕
                       </button>
