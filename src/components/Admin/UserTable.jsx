@@ -1,16 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import defaultProfileIcon from '../../assets/images/user/empty-user-profile.svg';
 import styles from './UserTable.module.scss';
+import emptyUserProfile from '../../assets/images/user/empty-user-profile.svg';
+import api from '../../api/axiosInstance';
 
-export default function UserTable({ users }) {
-  // users가 배열이 아니면 로딩 메시지나 빈 상태 표시
-  if (!Array.isArray(users)) {
-    return <p className={styles.loadingMessage}>회원 목록을 불러오는 중입니다…</p>;
+export default function UserTable({ users, loading }) {
+  if (loading) {
+    return (
+      <div className={styles.UserTable}>
+        <div className={styles.loadingMessage}>
+          로딩 중...
+        </div>
+      </div>
+    );
   }
 
-  if (users.length === 0) {
-    return <p className={styles.emptyMessage}>회원이 없습니다.</p>;
+  if (!users || users.length === 0) {
+    return (
+      <div className={styles.UserTable}>
+        <div className={styles.emptyMessage}>
+          등록된 회원이 없습니다.
+        </div>
+      </div>
+    );
   }
 
   const getRoleBadgeClass = (role) => {
@@ -19,8 +31,10 @@ export default function UserTable({ users }) {
         return `${styles.roleBadge} ${styles.admin}`;
       case 'LECTURER':
         return `${styles.roleBadge} ${styles.lecturer}`;
-      default:
+      case 'USER':
         return `${styles.roleBadge} ${styles.user}`;
+      default:
+        return styles.roleBadge;
     }
   };
 
@@ -30,11 +44,10 @@ export default function UserTable({ users }) {
         <thead>
           <tr>
             <th>프로필</th>
-            <th>ID</th>
             <th>이름</th>
-            <th>아이디</th>
-            <th>권한</th>
-            <th>액션</th>
+            <th>이메일</th>
+            <th>역할</th>
+            <th>관리</th>
           </tr>
         </thead>
         <tbody>
@@ -42,14 +55,17 @@ export default function UserTable({ users }) {
             <tr key={user.id}>
               <td>
                 <img
-                  src={user.profileImage || defaultProfileIcon}
-                  alt={`${user.username} 프로필`}
+                  src={
+                    user.profileImage
+                      ? `${api.defaults.baseURL}${user.profileImage}`
+                      : emptyUserProfile
+                  }
+                  alt={`${user.name} 프로필`}
                   className={styles.profileImage}
                 />
               </td>
-              <td>{user.id}</td>
-              <td>{user.name || user.username}</td>
-              <td>{user.username || '아이디 없음'}</td>
+              <td>{user.name}</td>
+              <td>{user.email || user.username || '이메일 없음'}</td>
               <td>
                 <span className={getRoleBadgeClass(user.role)}>
                   {user.role}

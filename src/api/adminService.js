@@ -1,9 +1,9 @@
 import api from './axiosInstance';
 const BASE = '/api/v1/admin/users';
 
-export const getUsers = async () => {
+export const getUsers = async (page = 0, size = 10) => {
   try {
-    const response = await api.get(BASE);
+    const response = await api.get(`${BASE}?page=${page}&size=${size}`);
     return response.data;
   } catch (error) {
     console.error("getUsers 실패:", error);
