@@ -106,6 +106,13 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
             onClose();
         }
 
+        // 배움일기 상세 페이지 이동
+        if(noti.type === "DIARY_COMMENT" || noti.type === "DIARY_LIKE"){
+            navigate(`/study-diary/${noti.targetId}`);
+            onClose();
+            return
+        }
+
         // TODO: 나중에 다른 타입 분기 추가
     }
     
