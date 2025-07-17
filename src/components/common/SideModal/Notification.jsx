@@ -40,7 +40,16 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
         };
     }, [setNotifications]);
 
-    
+    useEffect(() => {
+        fetchNotifications()
+            .then((data) => {
+                setNotifications(data);
+            })
+            .catch((error) => {
+                console.error("초기 알림 불러오기 실패:", error);
+            });
+    }, []);
+
 
 
     // 외부 클릭 시 닫기
