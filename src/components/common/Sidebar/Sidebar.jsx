@@ -158,6 +158,13 @@ function Sidebar() {
                 >
                   {item.icon}
                   <span>{item.label}</span>
+
+                  {item.label === "알림" && notifications.filter((n) => !n.read).length > 0 && (
+                    <span className={styles.notificationBadge}>
+                      {notifications.filter((n) => !n.read).length}
+                    </span>
+                  )}
+                  
                 </li>
               ))}
             </ul>

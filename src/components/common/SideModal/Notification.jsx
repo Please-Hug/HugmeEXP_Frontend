@@ -40,7 +40,16 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
         };
     }, [setNotifications]);
 
-    
+    useEffect(() => {
+        fetchNotifications()
+            .then((data) => {
+                setNotifications(data);
+            })
+            .catch((error) => {
+                console.error("초기 알림 불러오기 실패:", error);
+            });
+    }, []);
+
 
 
     // 외부 클릭 시 닫기
@@ -95,6 +104,13 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
         if(noti.type === "PRAISE_RECEIVED") {
             onOpenModal("PRAISE",noti.targetId);
             onClose();
+        }
+
+        // 배움일기 상세 페이지 이동
+        if(noti.type === "DIARY_COMMENT" || noti.type === "DIARY_LIKE"){
+            navigate(`/study-diary/${noti.targetId}`);
+            onClose();
+            return
         }
 
         // TODO: 나중에 다른 타입 분기 추가
