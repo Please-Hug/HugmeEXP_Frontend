@@ -187,7 +187,7 @@ function formatTimeAgo(dateStr) {
 }
 
 function mapTypeToCategory(type) {
-    if (["PRAISE_RECEIVED", "DIARY_COMMENT", "DIARY_LIKE", "MiSSION_FEEDBACK"].includes(type)) return "ACTIVITY";
+    if (["PRAISE_RECEIVED", "DIARY_COMMENT", "DIARY_LIKE", "MISSION_FEEDBACK"].includes(type)) return "ACTIVITY";
     if (["LEVEL_UP", "MISSION_REWARD"].includes(type)) return "REWARD";
     return "ACTIVITY";
 }
