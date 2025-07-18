@@ -113,6 +113,11 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
             return
         }
 
+        if(noti.type === "MISSION_FEEDBACK") {
+            navigate(`/mission/${noti.targetId}`);
+            onClose();
+            return;
+        }
         // TODO: 나중에 다른 타입 분기 추가
     }
     
@@ -182,7 +187,7 @@ function formatTimeAgo(dateStr) {
 }
 
 function mapTypeToCategory(type) {
-    if (["PRAISE_RECEIVED", "DIARY_COMMENT", "DIARY_LIKE"].includes(type)) return "ACTIVITY";
+    if (["PRAISE_RECEIVED", "DIARY_COMMENT", "DIARY_LIKE", "MiSSION_FEEDBACK"].includes(type)) return "ACTIVITY";
     if (["LEVEL_UP", "MISSION_REWARD"].includes(type)) return "REWARD";
     return "ACTIVITY";
 }
