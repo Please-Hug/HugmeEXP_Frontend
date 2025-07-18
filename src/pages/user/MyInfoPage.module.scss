@@ -147,19 +147,37 @@
   color: #999;
 }
 
-.saveButton {
-  width: 100%;
-  padding: 12px;
-  background-color: #4c84ff;
+.buttonGroup {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.changePasswordButton, .saveButton {
+  flex: 1;
+  padding: 15px;
   color: white;
   border: none;
   border-radius: 8px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s;
+}
+
+.changePasswordButton {
+    background-color: #ccc;
+
+    &:hover {
+        background-color: #bbb;
+    }
+}
+
+.saveButton {
+  background-color: #a08bff;
 
   &:hover {
-    background-color: #3a6dd8;
+    background-color: #8a78e6;
   }
 }
 
