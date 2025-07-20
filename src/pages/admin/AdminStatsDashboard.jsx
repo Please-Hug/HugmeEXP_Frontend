@@ -158,7 +158,7 @@ const AdminStatsDashboard = () => {
         <div className={styles.card}>
           <div className={styles.cardIcon}>🎯</div>
           <div className={styles.cardContent}>
-            <h3>총 포인트</h3>
+            <h3>총 구름조각</h3>
             <p className={styles.number}>
               {statsData.users.reduce((sum, user) => sum + (user.point || 0), 0).toLocaleString()}
             </p>
@@ -184,7 +184,7 @@ const AdminStatsDashboard = () => {
 
         {/* 포인트 분포 */}
         <div className={styles.chartCard}>
-          <h3>포인트 구간별 분포</h3>
+          <h3>구름조각 구간별 분포</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
