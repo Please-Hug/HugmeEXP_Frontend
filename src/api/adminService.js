@@ -1,5 +1,10 @@
 import api from './axiosInstance';
+
 const BASE = '/api/v1/admin/users';
+
+// ========================
+// 기본 사용자 관리 API
+// ========================
 
 export const getUsers = async (page = 0, size = 10) => {
   try {
@@ -54,76 +59,63 @@ export const changeUserRole = async (username, role) => {
     throw error;
   }
 };
-// 기존 adminService.js에 추가할 통계 관련 API 함수들
 
-// 기존 adminService.js에 추가할 함수들
-// (기존 import 및 함수들은 그대로 두고 아래 함수들만 추가)
+// ========================
+// 통계 관련 API
+// ========================
 
 /**
  * 전체 사용자 통계 조회
  */
 export const getUserStats = async () => {
-  alert('getUserStats 함수가 호출되었습니다!'); // 테스트용
-  
   try {
-    // 기본 관리자 API 사용 (정상 작동하는 것으로 확인됨)
-    const response = await api.get('/api/v1/admin/users', {
+    // 1. 사용자 목록 조회
+    const usersResponse = await api.get('/api/v1/admin/users', {
       params: { 
         page: 0, 
-        size: 200 // 전체 사용자를 확실히 포함하도록 더 크게 설정
+        size: 200
       }
     });
     
-    const users = response.data.data.content;
+    const users = usersResponse.data.data.content;
     
-    // API 응답 원본 확인
-    console.log('=== API 응답 원본 확인 ===');
-    console.log('response.data.data:', response.data.data);
-    console.log('content 길이:', response.data.data.content?.length);
-    console.log('totalElements:', response.data.data.totalElements);
-    console.log('totalPages:', response.data.data.totalPages);
-    console.log('페이지 정보:', {
-      number: response.data.data.number,
-      size: response.data.data.size,
-      numberOfElements: response.data.data.numberOfElements
-    });
+    // 2. 활성 사용자 통계 조회 (새로운 API 사용)
+    const activeStatsResponse = await api.get('/api/v1/admin/attendance/active-stats');
+    const activeStats = activeStatsResponse.data.data;
     
     // 통계 계산
     const totalUsers = users.length;
-    // 활성 사용자 기준: 레벨 2 이상 또는 포인트 50 이상
-    const activeUsers = users.filter(user => 
-      user.level >= 2 || user.point >= 50
-    ).length; 
+    const activeUsers = activeStats.activeUsers;
+
+    // 레벨별 분포 - 실제 데이터 사용
+    const levelDistribution = users.reduce((acc, user) => {
+      const level = user.level || 0;
+      acc[level] = (acc[level] || 0) + 1;
+      return acc;
+    }, {});
     
-    // 권한별 분포만 계산 (현재 사용 가능한 데이터)
+    // 포인트 구간별 분포 - 실제 데이터 사용
+    const pointRanges = {
+      '0-100': 0,
+      '101-500': 0,
+      '501-1000': 0,
+      '1000+': 0
+    };
+    
+    users.forEach(user => {
+      const points = user.point || 0;
+      if (points <= 100) pointRanges['0-100']++;
+      else if (points <= 500) pointRanges['101-500']++;
+      else if (points <= 1000) pointRanges['501-1000']++;
+      else pointRanges['1000+']++;
+    });
+    
+    // 권한별 분포
     const roleDistribution = users.reduce((acc, user) => {
       const role = user.role;
       acc[role] = (acc[role] || 0) + 1;
       return acc;
     }, {});
-    
-    // 레벨별 분포 - 실제 데이터 사용
-const levelDistribution = users.reduce((acc, user) => {
-  const level = user.level || 0;
-  acc[level] = (acc[level] || 0) + 1;
-  return acc;
-}, {});
-
-// 포인트 구간별 분포 - 실제 데이터 사용
-const pointRanges = {
-  '0-100': 0,
-  '101-500': 0,
-  '501-1000': 0,
-  '1000+': 0
-};
-
-users.forEach(user => {
-  const points = user.point || 0;
-  if (points <= 100) pointRanges['0-100']++;
-  else if (points <= 500) pointRanges['101-500']++;
-  else if (points <= 1000) pointRanges['501-1000']++;
-  else pointRanges['1000+']++;
-});
     
     return {
       totalUsers,
@@ -132,12 +124,11 @@ users.forEach(user => {
       pointDistribution: pointRanges,
       roleDistribution,
       users,
-      // 실제 데이터가 아님을 표시
-      isEstimated: true
+      activeUserRate: activeStats.activeUserRate,
+      baseDate: activeStats.baseDate
     };
   } catch (error) {
     console.error('사용자 통계 조회 실패:', error);
-    alert(`API 에러 발생: ${error.message}\n상태: ${error.response?.status}\n데이터: ${JSON.stringify(error.response?.data)}`);
     throw error;
   }
 };
@@ -188,29 +179,12 @@ export const getUserAttendanceStats = async (username) => {
 };
 
 /**
- * 월별 가입자 통계 (사용자 목록의 createdAt 기반)
- * 실제로는 백엔드에서 createdAt을 제공해야 하지만, 현재는 임시로 레벨 기반으로 추정
+ * 월별 가입자 통계 조회
  */
 export const getMonthlyRegistrationStats = async () => {
   try {
-    const response = await api.get('/api/v1/admin/users', {
-      params: { page: 0, size: 10000 }
-    });
-    
-    const users = response.data.data.content;
-    
-    // 임시: 레벨이 높을수록 오래된 사용자로 가정하여 월별 분포 생성
-    const monthlyStats = {};
-    const currentDate = new Date();
-    
-    // 최근 12개월 데이터 생성
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthlyStats[key] = Math.floor(Math.random() * 20) + 5; // 임시 데이터
-    }
-    
-    return monthlyStats;
+    const response = await api.get('/api/v1/admin/users/monthly-stats');
+    return response.data.data;
   } catch (error) {
     console.error('월별 가입자 통계 조회 실패:', error);
     throw error;

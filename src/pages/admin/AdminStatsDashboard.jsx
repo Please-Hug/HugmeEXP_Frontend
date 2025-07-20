@@ -2,51 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { getUserStats } from '../../api/adminService';
 import styles from './AdminStatsDashboard.module.scss';
+import MonthlyRegistrationChart from '../../components/Admin/MonthlyRegistrationChart';
 
 const AdminStatsDashboard = () => {
   const [statsData, setStatsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log('=== AdminStatsDashboard 컴포넌트 마운트됨 ===');
-
   useEffect(() => {
     let isMounted = true; // cleanup 플래그
     
-    console.log('=== useEffect 실행됨 ===');
-    
     const loadData = async () => {
-      try {
-        console.log('=== API 호출 시작 ===');
-        const data = await getUserStats();
-        console.log('=== API 호출 성공 ===');
-        console.log('총 사용자:', data.totalUsers);
-        console.log('활성 사용자:', data.activeUsers); 
-        console.log('레벨별 분포:', data.levelDistribution);
-        console.log('포인트 분포:', data.pointDistribution);
-        console.log('권한별 분포:', data.roleDistribution);
-        if (isMounted) {
-          setStatsData(data);
-        }
-      } catch (err) {
-        console.log('=== API 호출 실패 ===', err);
-        if (isMounted) {
-          setError('통계 데이터를 불러오는데 실패했습니다.');
-          console.error('Stats fetch error:', err);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+    try {
+      const data = await getUserStats();
+      if (isMounted) {
+        setStatsData(data);
       }
-    };
+    } catch (err) {
+      if (isMounted) {
+        setError('통계 데이터를 불러오는데 실패했습니다.');
+      }
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+  };
 
-    loadData();
-
-    return () => {
-      isMounted = false; // 컴포넌트 언마운트 시 플래그 설정
-    };
-  }, []);
+  loadData();
+  return () => { isMounted = false; };
+}, []);
 
   if (loading) {
     return (
@@ -267,21 +252,8 @@ const AdminStatsDashboard = () => {
           </div>
         </div>
 
-        {/* 월별 가입자 추이 - 실제 데이터 준비 후 활성화 */}
-        {/* 
-        <div className={styles.chartCard}>
-          <h3>월별 가입자 추이</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#00C49F" strokeWidth={2} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        */}
+        {/* 월별 가입자 추이*/}
+        <MonthlyRegistrationChart />
       </div>
     </div>
   );
