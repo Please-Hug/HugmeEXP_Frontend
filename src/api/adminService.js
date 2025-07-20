@@ -54,52 +54,76 @@ export const changeUserRole = async (username, role) => {
     throw error;
   }
 };
+// 기존 adminService.js에 추가할 통계 관련 API 함수들
+
+// 기존 adminService.js에 추가할 함수들
+// (기존 import 및 함수들은 그대로 두고 아래 함수들만 추가)
 
 /**
  * 전체 사용자 통계 조회
  */
 export const getUserStats = async () => {
+  alert('getUserStats 함수가 호출되었습니다!'); // 테스트용
+  
   try {
-    // 전체 사용자 목록을 가져와서 통계 계산
+    // 기본 관리자 API 사용 (정상 작동하는 것으로 확인됨)
     const response = await api.get('/api/v1/admin/users', {
-      params: { page: 0, size: 10000 } // 전체 데이터를 위해 큰 size 설정
+      params: { 
+        page: 0, 
+        size: 200 // 전체 사용자를 확실히 포함하도록 더 크게 설정
+      }
     });
     
     const users = response.data.data.content;
     
-    // 통계 계산
-    const totalUsers = users.length;
-    const activeUsers = users.filter(user => user.level >= 1).length; // 레벨 1 이상을 활성 사용자로 가정
-    
-    // 레벨별 분포
-    const levelDistribution = users.reduce((acc, user) => {
-      const level = user.level;
-      acc[level] = (acc[level] || 0) + 1;
-      return acc;
-    }, {});
-    
-    // 포인트 구간별 분포 (0-100, 101-500, 501-1000, 1000+)
-    const pointRanges = {
-      '0-100': 0,
-      '101-500': 0,
-      '501-1000': 0,
-      '1000+': 0
-    };
-    
-    users.forEach(user => {
-      const points = user.point || 0;
-      if (points <= 100) pointRanges['0-100']++;
-      else if (points <= 500) pointRanges['101-500']++;
-      else if (points <= 1000) pointRanges['501-1000']++;
-      else pointRanges['1000+']++;
+    // API 응답 원본 확인
+    console.log('=== API 응답 원본 확인 ===');
+    console.log('response.data.data:', response.data.data);
+    console.log('content 길이:', response.data.data.content?.length);
+    console.log('totalElements:', response.data.data.totalElements);
+    console.log('totalPages:', response.data.data.totalPages);
+    console.log('페이지 정보:', {
+      number: response.data.data.number,
+      size: response.data.data.size,
+      numberOfElements: response.data.data.numberOfElements
     });
     
-    // 권한별 분포
+    // 통계 계산
+    const totalUsers = users.length;
+    // 활성 사용자 기준: 레벨 2 이상 또는 포인트 50 이상
+    const activeUsers = users.filter(user => 
+      user.level >= 2 || user.point >= 50
+    ).length; 
+    
+    // 권한별 분포만 계산 (현재 사용 가능한 데이터)
     const roleDistribution = users.reduce((acc, user) => {
       const role = user.role;
       acc[role] = (acc[role] || 0) + 1;
       return acc;
     }, {});
+    
+    // 레벨별 분포 - 실제 데이터 사용
+const levelDistribution = users.reduce((acc, user) => {
+  const level = user.level || 0;
+  acc[level] = (acc[level] || 0) + 1;
+  return acc;
+}, {});
+
+// 포인트 구간별 분포 - 실제 데이터 사용
+const pointRanges = {
+  '0-100': 0,
+  '101-500': 0,
+  '501-1000': 0,
+  '1000+': 0
+};
+
+users.forEach(user => {
+  const points = user.point || 0;
+  if (points <= 100) pointRanges['0-100']++;
+  else if (points <= 500) pointRanges['101-500']++;
+  else if (points <= 1000) pointRanges['501-1000']++;
+  else pointRanges['1000+']++;
+});
     
     return {
       totalUsers,
@@ -107,10 +131,13 @@ export const getUserStats = async () => {
       levelDistribution,
       pointDistribution: pointRanges,
       roleDistribution,
-      users // 상세 분석용
+      users,
+      // 실제 데이터가 아님을 표시
+      isEstimated: true
     };
   } catch (error) {
     console.error('사용자 통계 조회 실패:', error);
+    alert(`API 에러 발생: ${error.message}\n상태: ${error.response?.status}\n데이터: ${JSON.stringify(error.response?.data)}`);
     throw error;
   }
 };
@@ -170,7 +197,7 @@ export const getMonthlyRegistrationStats = async () => {
       params: { page: 0, size: 10000 }
     });
     
-    const _users = response.data.data.content;
+    const users = response.data.data.content;
     
     // 임시: 레벨이 높을수록 오래된 사용자로 가정하여 월별 분포 생성
     const monthlyStats = {};

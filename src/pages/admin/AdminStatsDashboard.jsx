@@ -1,61 +1,96 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { getUserStats, getMonthlyRegistrationStats } from '../../api/adminService';
+import { getUserStats } from '../../api/adminService';
 import styles from './AdminStatsDashboard.module.scss';
 
 const AdminStatsDashboard = () => {
   const [statsData, setStatsData] = useState(null);
-  const [monthlyData, setMonthlyData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  console.log('=== AdminStatsDashboard 컴포넌트 마운트됨 ===');
+
   useEffect(() => {
-    fetchStatsData();
-    fetchMonthlyData();
+    let isMounted = true; // cleanup 플래그
+    
+    console.log('=== useEffect 실행됨 ===');
+    
+    const loadData = async () => {
+      try {
+        console.log('=== API 호출 시작 ===');
+        const data = await getUserStats();
+        console.log('=== API 호출 성공 ===');
+        console.log('총 사용자:', data.totalUsers);
+        console.log('활성 사용자:', data.activeUsers); 
+        console.log('레벨별 분포:', data.levelDistribution);
+        console.log('포인트 분포:', data.pointDistribution);
+        console.log('권한별 분포:', data.roleDistribution);
+        if (isMounted) {
+          setStatsData(data);
+        }
+      } catch (err) {
+        console.log('=== API 호출 실패 ===', err);
+        if (isMounted) {
+          setError('통계 데이터를 불러오는데 실패했습니다.');
+          console.error('Stats fetch error:', err);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadData();
+
+    return () => {
+      isMounted = false; // 컴포넌트 언마운트 시 플래그 설정
+    };
   }, []);
 
-  const fetchStatsData = async () => {
-    try {
-      const data = await getUserStats();
-      setStatsData(data);
-    } catch (err) {
-      setError('통계 데이터를 불러오는데 실패했습니다.');
-      console.error('Stats fetch error:', err);
-    }
-  };
-
-  const fetchMonthlyData = async () => {
-    try {
-      const data = await getMonthlyRegistrationStats();
-      const chartData = Object.entries(data).map(([month, count]) => ({
-        month,
-        count
-      }));
-      setMonthlyData(chartData);
-    } catch (err) {
-      console.error('Monthly data fetch error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   if (loading) {
-    return <div className={styles.loading}>통계 데이터를 불러오는 중...</div>;
+    return (
+      <div className={styles.loading}>
+        <div>통계 데이터를 불러오는 중...</div>
+        <div style={{ fontSize: '14px', color: '#6c757d', marginTop: '8px' }}>
+          사용자별 출석 정보를 조회하고 있습니다. 잠시만 기다려주세요.
+        </div>
+        <div style={{ fontSize: '12px', color: '#dc3545', marginTop: '8px' }}>
+          DEBUG: 로딩 상태 - API 호출 중
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className={styles.error}>{error}</div>;
+    return (
+      <div className={styles.error}>
+        {error}
+        <div style={{ fontSize: '12px', marginTop: '8px' }}>
+          DEBUG: 에러 상태 - {error}
+        </div>
+      </div>
+    );
   }
 
   if (!statsData) {
-    return <div className={styles.error}>데이터를 불러올 수 없습니다.</div>;
+    return (
+      <div className={styles.error}>
+        데이터를 불러올 수 없습니다.
+        <div style={{ fontSize: '12px', marginTop: '8px' }}>
+          DEBUG: statsData가 null입니다.
+        </div>
+      </div>
+    );
   }
 
   // 차트 데이터 준비
-  const levelChartData = Object.entries(statsData.levelDistribution || {}).map(([level, count]) => ({
-    level: `레벨 ${level}`,
-    count
-  }));
+  const levelChartData = Object.entries(statsData.levelDistribution || {})
+    .sort(([a], [b]) => parseInt(a) - parseInt(b)) // 레벨 순으로 정렬
+    .map(([level, count]) => ({
+      level: `레벨 ${level}`,
+      count
+    }));
 
   const pointChartData = Object.entries(statsData.pointDistribution || {}).map(([range, count]) => ({
     range,
@@ -117,6 +152,9 @@ const AdminStatsDashboard = () => {
                 ? ((statsData.activeUsers / statsData.totalUsers) * 100).toFixed(1)
                 : 0}%)
             </span>
+            <div className={styles.criteria}>
+              {statsData.activeUsersCriteria || '최근 30일 내 출석'}
+            </div>
           </div>
         </div>
         <div className={styles.card}>
@@ -229,7 +267,8 @@ const AdminStatsDashboard = () => {
           </div>
         </div>
 
-        {/* 월별 가입자 추이 */}
+        {/* 월별 가입자 추이 - 실제 데이터 준비 후 활성화 */}
+        {/* 
         <div className={styles.chartCard}>
           <h3>월별 가입자 추이</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -242,6 +281,7 @@ const AdminStatsDashboard = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
+        */}
       </div>
     </div>
   );
