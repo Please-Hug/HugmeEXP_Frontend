@@ -1,0 +1,11 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main {
+  display: flex;
+  flex: 1; 
+  overflow: hidden; /* 자식 요소가 부모를 넘지 않도록 설정 */
+}
