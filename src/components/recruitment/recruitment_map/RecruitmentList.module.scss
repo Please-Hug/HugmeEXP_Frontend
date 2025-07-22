@@ -1,41 +1,7 @@
-.container {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background-color: #ffffff;
-  border-right: 1px solid #e0e0e0;
-}
-
 .listContainer {
+  flex: 1;
   padding: 12px;
   overflow-y: auto;
-  flex: 1;
-}
-
-.jobItem {
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  cursor: pointer;
-  background-color: white;
-  transition: background-color 0.2s, box-shadow 0.2s;
-}
-
-.selectedJobItem {
-  background-color: #e3f2fd;
-  border: 1px solid #2196f3;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-.jobTitle {
-  margin: 0 0 4px 0;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.jobCompany {
-  margin: 0;
-  font-size: 14px;
-  color: #555;
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
 }

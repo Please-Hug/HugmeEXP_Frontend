@@ -1,11 +1,36 @@
-.container {
+.pageContainer {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background-color: #f4f6f8; // 부드러운 배경색
+  overflow: hidden;
 }
 
-.main {
+.mainContent {
   display: flex;
-  flex: 1; 
-  overflow: hidden; /* 자식 요소가 부모를 넘지 않도록 설정 */
+  flex: 1;
+  padding: 0.5rem 1.5rem 1.5rem 1.5rem;
+  gap: 1.5rem; // 목록과 지도 사이의 간격
+  overflow: hidden;
+}
+
+.listWrapper {
+  flex: 1; // 너비 비율
+  max-width: 400px; // 최대 너비 제한
+  min-height: 0; // flex 자식 요소의 높이가 부모를 넘어 확장되는 것을 방지
+
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden; // 내부 컨텐츠가 넘치지 않도록
+}
+
+.mapWrapper {
+  flex: 2; // 너비 비율
+  display: flex;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden; // 지도가 모서리를 벗어나지 않도록
 }
