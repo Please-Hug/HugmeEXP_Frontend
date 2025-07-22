@@ -2,68 +2,17 @@ import React, { useState } from "react";
 import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/RecruitmentPageHeader";
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
 import MapContainer from "../../components/recruitment/recruitment_map/MapContainer";
-// import { jobs } from "../mocks/jobs";
 
 import RecruitmentFilter from "../../components/recruitment/recruitment_map/RecruitmentFilter";
 import styles from "./RecruitmentMap.module.scss";
-
-const jobs = [
-  {
-    title: "서버 백엔드 개발[신입]",
-    company: "goorm",
-    lat: 37.504897,
-    lng: 127.049611,
-    type: "backend",
-    region: "seoul",
-    salary: 3500,
-    experience: "신입",
-    skills: ["Python", "AWS", "git"],
-    education: 30,
-  },
-  {
-    title: "프론트엔드 개발자 (React)",
-    company: "네이버",
-    lat: 37.3595704,
-    lng: 127.105399,
-    type: "frontend",
-    region: "bundang",
-    salary: 4500,
-    experience: "경력",
-    skills: ["javascript", "html", "AWS"],
-    education: 30,
-  },
-  {
-    title: "UI/UX 디자이너",
-    company: "카카오",
-    lat: 37.402056,
-    lng: 127.108212,
-    type: "designer",
-    region: "bundang",
-    salary: 6500,
-    experience: "경력",
-    skills: ["git"],
-    education: 20,
-  },
-  {
-    title: "안드로이드 개발자 (경력)",
-    company: "배달의민족",
-    lat: 37.5015396,
-    lng: 127.0410122,
-    type: "mobile",
-    region: "seoul",
-    salary: 2800,
-    experience: "인턴",
-    skills: ["Android", "Kotlin"],
-    education: 10,
-  },
-];
+import { jobs } from "../../data/jobs";
 
 function RecruitmentMapPage() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [filterType, setFilterType] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [salary, setSalary] = useState(0);
-  const [experience, setExperience] = useState("all");
+  const [experience, setExperience] = useState(0); // 0: 경력무관, 1: 신입, 2: 1년 ... 11: 10년
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [education, setEducation] = useState(0);
 
@@ -85,9 +34,7 @@ function RecruitmentMapPage() {
   const handleExperienceChange = (value) => setExperience(value);
   const handleSkillChange = (skill) => {
     setSelectedSkills((prev) =>
-      prev.includes(skill)
-        ? prev.filter((s) => s !== skill)
-        : [...prev, skill]
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
     );
   };
   const handleEducationChange = (value) => setEducation(parseInt(value, 10));
@@ -104,7 +51,24 @@ function RecruitmentMapPage() {
       return true;
     };
 
-    const experienceMatch = experience === "all" || job.experience === experience;
+    const experienceMatch = () => {
+      // 사용자가 '경력무관' 선택 시 모든 공고 포함
+      if (experience === 0) return true;
+      // 공고가 '경력무관'일 경우 항상 포함
+      if (job.experience === 'all') return true;
+
+      // '신입' 처리
+      const jobIsNew = job.experience === 'new';
+      const filterIsNew = experience === 1;
+      if (filterIsNew) return jobIsNew;
+
+      // 연차 비교
+      const jobExpYear = parseInt(job.experience, 10);
+      if (isNaN(jobExpYear)) return jobIsNew; // job.experience가 'new' 같은 문자열일 경우
+      
+      // 사용자가 설정한 경력(N년 이하)보다 요구 경력이 낮거나 같으면 통과
+      return jobExpYear <= (experience - 1);
+    };
 
     const skillsMatch =
       selectedSkills.length === 0 ||
@@ -116,14 +80,14 @@ function RecruitmentMapPage() {
       typeMatch &&
       regionMatch &&
       salaryMatch() &&
-      experienceMatch &&
+      experienceMatch() &&
       skillsMatch &&
       educationMatch
     );
   });
 
   return (
-    <div className={styles.container}>
+    <div className={styles.pageContainer}>
       <RecruitmentMapHeader />
       <RecruitmentFilter
         onFilterChange={handleFilterChange}
@@ -139,17 +103,22 @@ function RecruitmentMapPage() {
         education={education}
         onEducationChange={handleEducationChange}
       />
-      <main className={styles.main}>
-        <RecruitmentList
-          jobs={filteredJobs}
-          selectedJob={selectedJob}
-          onSelectJob={handleSelectJob}
-        />
-        <MapContainer
-          jobs={filteredJobs}
-          selectedJob={selectedJob}
-          onSelectJob={handleSelectJob}
-        />
+
+      <main className={styles.mainContent}>
+        <div className={styles.listWrapper}>
+          <RecruitmentList
+            jobs={filteredJobs}
+            selectedJob={selectedJob}
+            onSelectJob={handleSelectJob}
+          />
+        </div>
+        <div className={styles.mapWrapper}>
+          <MapContainer
+            jobs={filteredJobs}
+            selectedJob={selectedJob}
+            onSelectJob={handleSelectJob}
+          />
+        </div>
       </main>
     </div>
   );

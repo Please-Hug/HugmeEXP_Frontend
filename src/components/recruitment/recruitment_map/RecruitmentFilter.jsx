@@ -9,8 +9,7 @@ import {
   FaLinux,
   FaAndroid,
   FaApple,
-}
-from "react-icons/fa";
+} from "react-icons/fa";
 import { SiSpring, SiMysql, SiKotlin } from "react-icons/si";
 
 const skills = [
@@ -34,7 +33,22 @@ const salaryLevels = {
   6000: "6000 이상",
 };
 
+const useDropdown = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef(null);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return { isOpen, setIsOpen, ref };
+};
 
 function RecruitmentFilter({
   onFilterChange,
@@ -50,10 +64,12 @@ function RecruitmentFilter({
   education,
   onEducationChange,
 }) {
-  const [isSkillsDropdownOpen, setIsSkillsDropdownOpen] = useState(false);
-  const [isSalaryDropdownOpen, setIsSalaryDropdownOpen] = useState(false);
-  const skillsFilterRef = useRef(null);
-  const salaryFilterRef = useRef(null);
+  const jobTypeDropdown = useDropdown();
+  const regionDropdown = useDropdown();
+  const experienceDropdown = useDropdown();
+  const educationDropdown = useDropdown();
+  const salaryDropdown = useDropdown();
+  const skillsDropdown = useDropdown();
 
   const handleSalarySliderChange = (e) => {
     const value = e.target.value;
@@ -61,123 +77,130 @@ function RecruitmentFilter({
     onSalaryChange(salaryValue);
   };
 
-  // 외부 클릭 감지 로직을 함수로 분리
-  const useOutsideAlerter = (ref, close) => {
-    useEffect(() => {
-      function handleClickOutside(event) {
-        if (ref.current && !ref.current.contains(event.target)) {
-          close();
-        }
-      }
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, [ref, close]);
-  }
+  const handleExperienceSliderChange = (e) => {
+    onExperienceChange(parseInt(e.target.value, 10));
+  };
 
-  // 각 드롭다운에 외부 클릭 감지 적용
-  useOutsideAlerter(skillsFilterRef, () => setIsSkillsDropdownOpen(false));
-  useOutsideAlerter(salaryFilterRef, () => setIsSalaryDropdownOpen(false));
+  const jobTypes = { all: '직무', frontend: '프론트엔드', backend: '백엔드', designer: '디자이너', mobile: '모바일' };
+  const regions = { all: '지역', seoul: '서울', bundang: '분당' };
+  const experienceLabels = ['무관', '신입', '1년', '2년', '3년', '4년', '5년', '6년', '7년', '8년', '9년', '10년'];
+
+  const getExperienceButtonText = () => {
+    if (experience === 0) return '경력 무관';
+    if (experience === 1) return '신입';
+    return `${experience - 1}년 이하`;
+  };
+  const educations = { 0: '학력', 10: '고졸', 20: '초대졸', 30: '대졸', 40: '석사', 50: '박사' };
+
+  const getButtonClass = (isActive) => `${styles.filterButton} ${isActive ? styles.active : ''}`;
 
   return (
     <div className={styles.filterContainer}>
       {/* 직무 필터 */}
-      <div className={styles.filterGroup}>
-        <label className={styles.label}>직무</label>
-        <select
-          value={filterType}
-          onChange={(e) => onFilterChange(e.target.value)}
-          className={styles.select}
-        >
-          <option value="all">전체</option>
-          <option value="frontend">프론트엔드</option>
-          <option value="backend">백엔드</option>
-          <option value="designer">디자이너</option>
-          <option value="mobile">모바일</option>
-        </select>
+      <div className={styles.filterGroup} ref={jobTypeDropdown.ref}>
+        <button className={getButtonClass(filterType !== 'all')} onClick={() => jobTypeDropdown.setIsOpen(!jobTypeDropdown.isOpen)}>
+          {jobTypes[filterType] || '직무'}
+        </button>
+        {jobTypeDropdown.isOpen && (
+          <div className={styles.dropdownMenu}>
+            {Object.entries(jobTypes).map(([key, value]) => (
+              <div key={key} className={styles.dropdownItem} onClick={() => { onFilterChange(key); jobTypeDropdown.setIsOpen(false); }}>
+                {value}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 지역 필터 */}
-      <div className={styles.filterGroup}>
-        <label className={styles.label}>지역</label>
-        <select
-          value={regionFilter}
-          onChange={(e) => onRegionFilterChange(e.target.value)}
-          className={styles.select}
-        >
-          <option value="all">전체</option>
-          <option value="seoul">서울</option>
-          <option value="bundang">분당</option>
-        </select>
+      <div className={styles.filterGroup} ref={regionDropdown.ref}>
+        <button className={getButtonClass(regionFilter !== 'all')} onClick={() => regionDropdown.setIsOpen(!regionDropdown.isOpen)}>
+          {regions[regionFilter] || '지역'}
+        </button>
+        {regionDropdown.isOpen && (
+          <div className={styles.dropdownMenu}>
+            {Object.entries(regions).map(([key, value]) => (
+              <div key={key} className={styles.dropdownItem} onClick={() => { onRegionFilterChange(key); regionDropdown.setIsOpen(false); }}>
+                {value}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 경력 필터 */}
-      <div className={styles.filterGroup}>
-        <label className={styles.label}>경력</label>
-        <select
-          value={experience}
-          onChange={(e) => onExperienceChange(e.target.value)}
-          className={styles.select}
-        >
-          <option value="all">전체</option>
-          <option value="신입">신입</option>
-          <option value="인턴">인턴</option>
-          <option value="경력">경력</option>
-        </select>
+      <div className={styles.filterGroup} ref={experienceDropdown.ref}>
+        <button className={getButtonClass(experience !== 0)} onClick={() => experienceDropdown.setIsOpen(!experienceDropdown.isOpen)}>
+          {getExperienceButtonText()}
+        </button>
+        {experienceDropdown.isOpen && (
+          <div className={styles.dropdownMenu}>
+            <div className={styles.experienceSlider}>
+              <input
+                type="range"
+                min="0"
+                max="11"
+                value={experience}
+                onChange={handleExperienceSliderChange}
+              />
+              <div className={styles.experienceLevels}>
+                <span>무관</span>
+                <span>신입</span>
+                <span>2년</span>
+                <span>4년</span>
+                <span>6년</span>
+                <span>8년</span>
+                <span>10년</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 학력 필터 */}
-      <div className={styles.filterGroup}>
-        <label className={styles.label}>학력</label>
-        <select
-          value={education}
-          onChange={(e) => onEducationChange(e.target.value)}
-          className={styles.select}
-        >
-          <option value={0}>무관</option>
-          <option value={10}>고졸</option>
-          <option value={20}>초대졸</option>
-          <option value={30}>대졸</option>
-          <option value={40}>석사</option>
-          <option value={50}>박사</option>
-        </select>
+      <div className={styles.filterGroup} ref={educationDropdown.ref}>
+        <button className={getButtonClass(education !== '0')} onClick={() => educationDropdown.setIsOpen(!educationDropdown.isOpen)}>
+          {educations[education] || '학력'}
+        </button>
+        {educationDropdown.isOpen && (
+          <div className={styles.dropdownMenu}>
+            {Object.entries(educations).map(([key, value]) => (
+              <div key={key} className={styles.dropdownItem} onClick={() => { onEducationChange(key); educationDropdown.setIsOpen(false); }}>
+                {value}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 연봉 필터 */}
-      <div className={`${styles.filterGroup} ${styles.salaryFilter}`} ref={salaryFilterRef}>
-        <button 
-          className={styles.salaryButton}
-          onClick={() => setIsSalaryDropdownOpen(!isSalaryDropdownOpen)}
-        >
-          연봉: {salaryLevels[salary]}
+      <div className={styles.filterGroup} ref={salaryDropdown.ref}>
+        <button className={getButtonClass(salary > 0)} onClick={() => salaryDropdown.setIsOpen(!salaryDropdown.isOpen)}>
+          {salary > 0 ? `연봉: ${salaryLevels[salary]}` : '연봉'}
         </button>
-        {isSalaryDropdownOpen && (
-           <div className={styles.salaryDropdown}>
+        {salaryDropdown.isOpen && (
+          <div className={styles.dropdownMenu} style={{ padding: '1rem', width: '250px' }}>
              <input
                type="range"
                min="0"
-               max="3"
+               max={Object.keys(salaryLevels).length - 1}
                step="1"
                value={Object.keys(salaryLevels).indexOf(String(salary))}
                onChange={handleSalarySliderChange}
                className={styles.slider}
              />
-             <span className={styles.salaryValue}>{salaryLevels[salary]}</span>
-           </div>
+             <div className={styles.salaryValue}>{salaryLevels[salary]}</div>
+          </div>
         )}
       </div>
 
       {/* 기술 스택 필터 */}
-      <div className={`${styles.filterGroup} ${styles.skillsFilter}`} ref={skillsFilterRef}>
-        <button 
-          className={styles.skillsButton}
-          onClick={() => setIsSkillsDropdownOpen(!isSkillsDropdownOpen)}
-        >
+      <div className={styles.filterGroup} ref={skillsDropdown.ref}>
+        <button className={getButtonClass(selectedSkills.length > 0)} onClick={() => skillsDropdown.setIsOpen(!skillsDropdown.isOpen)}>
           기술 스택 {selectedSkills.length > 0 && `(${selectedSkills.length})`}
         </button>
-        {isSkillsDropdownOpen && (
-          <div className={styles.skillsDropdown}>
+        {skillsDropdown.isOpen && (
+          <div className={styles.dropdownMenu} style={{ width: '400px', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', padding: '1rem' }}>
             {skills.map((skill) => (
               <div key={skill.name} className={styles.skillTag}>
                 <input
