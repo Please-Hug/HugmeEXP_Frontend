@@ -4,7 +4,8 @@ import styles from "./DashboardMenu.module.scss";
 
 function DashboardMenu() {
   const menuItems = [
-    // { path: "/dashboard", label: "홈", end: true },
+    { path: "/dashboard", label: "홈", end: true },
+    { path: "/recruitment/map", label: "채용맵" },
     // { path: "/activity", label: "활동" },
     // { path: "/settings", label: "설정" },
   ];
