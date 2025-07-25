@@ -3,6 +3,7 @@ import styles from "./MyInfoPage.module.scss";
 import emptyUserProfile from "../../assets/images/user/empty-user-profile.svg";
 import { FaPen, FaTrash, FaUpload } from "react-icons/fa6";
 import api from "../../api/axiosInstance.js";
+import PasswordChangeModal from "../../components/user/PasswordChangeModal.jsx";
 
 function MyInfoPage() {
   const [name, setName] = useState("");
@@ -10,6 +11,7 @@ function MyInfoPage() {
   const [phone, setPhone] = useState("");
   const [profileImg, setProfileImg] = useState(emptyUserProfile);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [errors, setErrors] = useState({});
 
   const fileInputRef = useRef(null);
@@ -229,10 +231,16 @@ function MyInfoPage() {
           </p>
         </div>
 
-        <button className={styles.saveButton} onClick={handleSave}>
-          변경 사항 저장
-        </button>
+        <div className={styles.buttonGroup}>
+          <button className={styles.changePasswordButton} onClick={() => setIsPasswordModalOpen(true)}>
+            비밀번호 변경
+          </button>
+          <button className={styles.saveButton} onClick={handleSave}>
+            변경 사항 저장
+          </button>
+        </div>
       </div>
+      {isPasswordModalOpen && <PasswordChangeModal onClose={() => setIsPasswordModalOpen(false)} />}
     </div>
   );
 }
