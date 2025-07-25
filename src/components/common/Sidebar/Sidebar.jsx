@@ -15,6 +15,7 @@ import {
   FaCartShopping,
   FaRankingStar,
   FaAnglesLeft,
+  FaDoorOpen,
 } from "react-icons/fa6";
 import logo from "../../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
@@ -42,6 +43,7 @@ function getMenuItems() {
     { icon: <FaThumbsUp />, label: "칭찬", link: "/praises" },
     { icon: <FaGraduationCap />, label: "미션", link: "/mission" },
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
+    { icon: <FaDoorOpen />, label: "스터디룸", link: "/studyroom" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
     { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
   ];
@@ -55,6 +57,7 @@ function getLecturerMenuItems() {
     { icon: <FaGraduationCap />, label: "미션", link: "/mission" },
     { icon: <FaBook />, label: "미션 제출 현황", link: "/challenge" },
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
+    { icon: <FaDoorOpen />, label: "스터디룸", link: "/studyroom" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
     { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
   ];
