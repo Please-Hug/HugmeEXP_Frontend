@@ -65,12 +65,11 @@ function RegisterPage() {
         }
       );
 
-      const { accessToken, refreshToken } = response.data.data;
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
+      const { username, name, role } = response.data.data;
+      console.log("회원가입 데이터", response.data);
 
       alert("회원가입에 성공했습니다.");
-      navigate("/");
+      navigate("/login");
     } catch (err) {
       console.error("회원가입 오류:", err);
       alert(err.response?.data?.message || "회원가입 중 오류가 발생했습니다.");
