@@ -5,7 +5,7 @@ import useTokenPayload from '../stores/tokenPayloadStore';
 import { getCurrentUser } from '../api/userService';
 import { jwtDecode } from 'jwt-decode';
 import styles from './AdminLayout.module.scss';
-import { FaUsers, FaHouse, FaListCheck, FaStore } from 'react-icons/fa6'; // 아이콘 import 추가
+import { FaUsers, FaHouse, FaListCheck, FaStore, FaChartBar } from 'react-icons/fa6'; // FaChartBar 추가
 
 export default function AdminLayout() {
   const userInfo = useUserStore((state) => state.userInfo);
@@ -103,6 +103,18 @@ export default function AdminLayout() {
               <FaUsers />
             </span>
             회원 관리
+          </NavLink>
+
+          <NavLink
+            to="/admin/stats"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon}>
+              <FaChartBar />
+            </span>
+            사용자 통계
           </NavLink>
           
           <NavLink
