@@ -196,7 +196,7 @@ function RecruitmentFilter({
                 type="range"
                 min="0"
                 max="6"
-                value={experienceLevels.indexOf(experience)}
+                value={Math.max(0, experienceLevels.indexOf(experience))}
                 onChange={handleExperienceSliderChange}
               />
               <div className={styles.experienceLevels}>
@@ -241,7 +241,7 @@ function RecruitmentFilter({
               min="0"
               max={salaryKeys.length - 1}
               step="1"
-              value={salaryKeys.indexOf(salary)}
+              value={Math.max(0, salaryKeys.indexOf(salary))}
               onChange={handleSalarySliderChange}
               className={styles.slider}
             />
