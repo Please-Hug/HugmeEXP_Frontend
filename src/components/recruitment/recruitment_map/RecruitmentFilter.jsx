@@ -66,6 +66,7 @@ function RecruitmentFilter({
   onSkillChange,
   education,
   onEducationChange,
+  onSearch,
 }) {
   const jobTypeDropdown = useDropdown();
   const regionDropdown = useDropdown();
@@ -73,6 +74,7 @@ function RecruitmentFilter({
   const educationDropdown = useDropdown();
   const salaryDropdown = useDropdown();
   const skillsDropdown = useDropdown();
+  const [keyword, setKeyword] = useState("");
 
   const handleSalarySliderChange = (e) => {
     const value = parseInt(e.target.value, 10);
@@ -98,6 +100,10 @@ function RecruitmentFilter({
   const educations = { 0: '학력', 10: '고졸', 20: '초대졸', 30: '대졸', 40: '석사', 50: '박사' };
 
   const getButtonClass = (isActive) => `${styles.filterButton} ${isActive ? styles.active : ''}`;
+
+  const handleSearchClick = () => {
+    onSearch(keyword);
+  };
 
   return (
     <div className={styles.filterContainer}>
@@ -222,6 +228,21 @@ function RecruitmentFilter({
             ))}
           </div>
         )}
+      </div>
+
+      {/* 검색창 */}
+      <div className={styles.searchGroup}>
+        <input
+          type="text"
+          placeholder="지역, 회사, 키워드 검색"
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
+          className={styles.searchInput}
+        />
+        <button onClick={handleSearchClick} className={styles.searchButton}>
+          검색
+        </button>
       </div>
     </div>
   );
