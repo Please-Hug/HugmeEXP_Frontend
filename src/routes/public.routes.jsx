@@ -1,8 +1,13 @@
 import PublicLayout from "../layouts/PublicLayout";
 import HomePage from "../pages/home/HomePage";
+import RecruitmentMapPage from "../pages/recruitment/RecruitmentMap";
+
 export default [
   {
     element: <PublicLayout />,
-    children: [{ path: "/", element: <HomePage /> }],
+    children: [
+      { path: "/", element: <HomePage /> },
+      { path: "/recruitment/map", element: <RecruitmentMapPage /> },
+    ],
   },
 ];

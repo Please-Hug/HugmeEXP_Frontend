@@ -1,0 +1,130 @@
+.filterContainer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #e9ecef;
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  padding-bottom: 15px; /* 스크롤바와 드롭다운 공간 확보 */
+
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+  }
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.filterGroup {
+  position: relative;
+}
+
+.filterButton {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1px solid #ced4da;
+  background-color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+
+  &:hover {
+    border-color: #007bff;
+  }
+
+  &.active {
+    border-color: #007bff;
+    color: #007bff;
+    font-weight: 600;
+  }
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 180px;
+}
+
+.dropdownItem {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 0.9rem;
+
+  &:hover {
+    background-color: #f0f0f0;
+  }
+}
+
+.slider {
+  width: 100%;
+  cursor: pointer;
+}
+
+.salaryValue {
+  font-weight: 500;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.skillTag {
+  display: flex;
+  align-items: center;
+
+  input[type="checkbox"] {
+    display: none;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
+
+  input[type="checkbox"]:checked + label {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+
+    svg {
+      color: white !important;
+    }
+  }
+}
+
+.experienceSlider {
+  padding: 15px;
+  min-width: 250px;
+
+  input[type="range"] {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+
+.experienceLevels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #888;
+  padding: 0 5px;
+}
