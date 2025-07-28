@@ -34,7 +34,7 @@ function MapContainer({ jobs, selectedJob, onSelectJob, mapCenter }) {
       >
         {jobs.map((job) => (
           <MapMarker
-            key={`${job.title}-${job.lat}`}
+            key={job.id || `${job.company}-${job.title}-${job.lat}-${job.lng}`}
             position={{ lat: job.lat, lng: job.lng }} // 마커를 표시할 위치
             onClick={() => onSelectJob(job)} // 마커에 클릭 이벤트 등록
           />
