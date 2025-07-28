@@ -113,25 +113,29 @@ function RecruitmentMapPage() {
       <main className={styles.mainContent}>
         <div className={styles.listWrapper}>
           <RecruitmentSearch onSearch={handleSearch} />
-          <RecruitmentFilter
-            onFilterChange={handleFilterChange}
-            filterType={filterType}
-            onRegionFilterChange={handleRegionFilterChange}
-            regionFilter={regionFilter}
-            salary={salary}
-            onSalaryChange={handleSalaryChange}
-            experience={experience}
-            onExperienceChange={handleExperienceChange}
-            selectedSkills={selectedSkills}
-            onSkillChange={handleSkillChange}
-            education={education}
-            onEducationChange={handleEducationChange}
-          />
-          <RecruitmentList
-            jobs={filteredJobs}
-            selectedJob={selectedJob}
-            onSelectJob={handleSelectJob}
-          />
+          <div className={styles.filterWrapper}>
+            <RecruitmentFilter
+              onFilterChange={handleFilterChange}
+              filterType={filterType}
+              onRegionFilterChange={handleRegionFilterChange}
+              regionFilter={regionFilter}
+              salary={salary}
+              onSalaryChange={handleSalaryChange}
+              experience={experience}
+              onExperienceChange={handleExperienceChange}
+              selectedSkills={selectedSkills}
+              onSkillChange={handleSkillChange}
+              education={education}
+              onEducationChange={handleEducationChange}
+            />
+          </div>
+          <div className={styles.listContainer}>
+            <RecruitmentList
+              jobs={filteredJobs}
+              selectedJob={selectedJob}
+              onSelectJob={handleSelectJob}
+            />
+          </div>
         </div>
         <div className={styles.mapWrapper}>
           <MapContainer

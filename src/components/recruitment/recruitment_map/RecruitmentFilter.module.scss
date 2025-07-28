@@ -4,7 +4,9 @@
   padding: 1rem;
   background-color: #fff;
   border-bottom: 1px solid #e9ecef;
-  overflow-x: auto;
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  padding-bottom: 15px; /* 스크롤바와 드롭다운 공간 확보 */
+
   white-space: nowrap;
 
   &::-webkit-scrollbar {
@@ -43,7 +45,7 @@
   position: absolute;
   top: 100%;
   left: 0;
-  z-index: 20;
+  z-index: 50;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 8px;
@@ -105,7 +107,7 @@
 
     svg {
       color: white !important;
-    } 
+    }
   }
 }
 
@@ -113,7 +115,7 @@
   padding: 15px;
   min-width: 250px;
 
-  input[type='range'] {
+  input[type="range"] {
     width: 100%;
     margin-bottom: 8px;
   }
