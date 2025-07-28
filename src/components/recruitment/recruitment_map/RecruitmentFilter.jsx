@@ -83,17 +83,20 @@ function RecruitmentFilter({
     onSalaryChange(salaryValue);
   };
 
+  const experienceLevels = [0, 1, 2, 4, 6, 8, 10];
+
   const handleExperienceSliderChange = (e) => {
-    onExperienceChange(parseInt(e.target.value, 10));
+    const sliderValue = parseInt(e.target.value, 10);
+    onExperienceChange(experienceLevels[sliderValue]);
   };
 
   const jobTypes = { all: '직무', frontend: '프론트엔드', backend: '백엔드', designer: '디자이너', mobile: '모바일' };
   const regions = { all: '지역', seoul: '서울', bundang: '분당' };
 
   const getExperienceButtonText = () => {
-    if (experience === 0) return '경력'; // 기본값
+    if (experience === -1 || experience === 0) return '경력';
     if (experience === 1) return '신입';
-    return `${experience - 1}년 이하`;
+    return `${experience}년 이하`;
   };
   const educations = { 0: '학력', 10: '고졸', 20: '초대졸', 30: '대졸', 40: '석사', 50: '박사' };
 
@@ -144,8 +147,8 @@ function RecruitmentFilter({
               <input
                 type="range"
                 min="0"
-                max="11"
-                value={experience}
+                max="6"
+                value={experienceLevels.indexOf(experience)}
                 onChange={handleExperienceSliderChange}
               />
               <div className={styles.experienceLevels}>
@@ -170,7 +173,14 @@ function RecruitmentFilter({
         {educationDropdown.isOpen && (
           <div className={styles.dropdownMenu}>
             {Object.entries(educations).map(([key, value]) => (
-              <div key={key} className={styles.dropdownItem} onClick={() => { onEducationChange(key); educationDropdown.setIsOpen(false); }}>
+              <div
+                key={key}
+                className={styles.dropdownItem}
+                onClick={() => {
+                  onEducationChange(Number(key));
+                  educationDropdown.setIsOpen(false);
+                }}
+              >
                 {value}
               </div>
             ))}
