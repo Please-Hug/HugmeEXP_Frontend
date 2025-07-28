@@ -4,6 +4,7 @@ import RecruitmentList from "../../components/recruitment/recruitment_map/Recrui
 import MapContainer from "../../components/recruitment/recruitment_map/MapContainer";
 
 import RecruitmentFilter from "../../components/recruitment/recruitment_map/RecruitmentFilter";
+import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
 import { jobs } from "../../data/jobs";
 
@@ -109,24 +110,23 @@ function RecruitmentMapPage() {
   return (
     <div className={styles.pageContainer}>
       <RecruitmentMapHeader />
-      <RecruitmentFilter
-        onFilterChange={handleFilterChange}
-        filterType={filterType}
-        onRegionFilterChange={handleRegionFilterChange}
-        regionFilter={regionFilter}
-        salary={salary}
-        onSalaryChange={handleSalaryChange}
-        experience={experience}
-        onExperienceChange={handleExperienceChange}
-        selectedSkills={selectedSkills}
-        onSkillChange={handleSkillChange}
-        education={education}
-        onEducationChange={handleEducationChange}
-        onSearch={handleSearch}
-      />
-
       <main className={styles.mainContent}>
         <div className={styles.listWrapper}>
+          <RecruitmentSearch onSearch={handleSearch} />
+          <RecruitmentFilter
+            onFilterChange={handleFilterChange}
+            filterType={filterType}
+            onRegionFilterChange={handleRegionFilterChange}
+            regionFilter={regionFilter}
+            salary={salary}
+            onSalaryChange={handleSalaryChange}
+            experience={experience}
+            onExperienceChange={handleExperienceChange}
+            selectedSkills={selectedSkills}
+            onSkillChange={handleSkillChange}
+            education={education}
+            onEducationChange={handleEducationChange}
+          />
           <RecruitmentList
             jobs={filteredJobs}
             selectedJob={selectedJob}

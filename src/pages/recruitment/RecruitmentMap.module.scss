@@ -9,13 +9,18 @@
 .mainContent {
   display: flex;
   flex: 1;
-  padding: 0.5rem 1.5rem 1.5rem 1.5rem;
-  gap: 1.5rem; // 목록과 지도 사이의 간격
+  padding: 0.2rem 0.5rem;
+  gap: 0.5rem; // 목록과 지도 사이의 간격
   overflow: hidden;
 }
 
 .listWrapper {
-  flex: 1; // 너비 비율
+  width: 400px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  border-right: 1px solid #e9ecef; // 너비 비율
   max-width: 400px; // 최대 너비 제한
   min-height: 0; // flex 자식 요소의 높이가 부모를 넘어 확장되는 것을 방지
 
@@ -28,7 +33,7 @@
 }
 
 .mapWrapper {
-  flex: 2; // 너비 비율
+  flex-grow: 1; // 너비 비율
   display: flex;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
