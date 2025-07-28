@@ -30,8 +30,11 @@ const salaryLevels = {
   0: "회사 내규에 따름",
   3000: "3000 ~ 4000",
   4000: "4000 ~ 5000",
+  5000: "5000 ~ 6000",
   6000: "6000 이상",
 };
+
+const salaryKeys = Object.keys(salaryLevels).map(Number).sort((a, b) => a - b);
 
 const useDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -72,8 +75,11 @@ function RecruitmentFilter({
   const skillsDropdown = useDropdown();
 
   const handleSalarySliderChange = (e) => {
-    const value = e.target.value;
-    const salaryValue = Object.keys(salaryLevels)[value];
+    const value = parseInt(e.target.value, 10);
+    const salaryKeys = Object.keys(salaryLevels)
+      .map(Number)
+      .sort((a, b) => a - b);
+    const salaryValue = salaryKeys[value];
     onSalaryChange(salaryValue);
   };
 
@@ -83,10 +89,9 @@ function RecruitmentFilter({
 
   const jobTypes = { all: '직무', frontend: '프론트엔드', backend: '백엔드', designer: '디자이너', mobile: '모바일' };
   const regions = { all: '지역', seoul: '서울', bundang: '분당' };
-  const experienceLabels = ['무관', '신입', '1년', '2년', '3년', '4년', '5년', '6년', '7년', '8년', '9년', '10년'];
 
   const getExperienceButtonText = () => {
-    if (experience === 0) return '경력 무관';
+    if (experience === 0) return '경력'; // 기본값
     if (experience === 1) return '신입';
     return `${experience - 1}년 이하`;
   };
@@ -159,7 +164,7 @@ function RecruitmentFilter({
 
       {/* 학력 필터 */}
       <div className={styles.filterGroup} ref={educationDropdown.ref}>
-        <button className={getButtonClass(education !== '0')} onClick={() => educationDropdown.setIsOpen(!educationDropdown.isOpen)}>
+        <button className={getButtonClass(education !== 0)} onClick={() => educationDropdown.setIsOpen(!educationDropdown.isOpen)}>
           {educations[education] || '학력'}
         </button>
         {educationDropdown.isOpen && (
@@ -183,9 +188,9 @@ function RecruitmentFilter({
              <input
                type="range"
                min="0"
-               max={Object.keys(salaryLevels).length - 1}
+               max={salaryKeys.length - 1}
                step="1"
-               value={Object.keys(salaryLevels).indexOf(String(salary))}
+               value={salaryKeys.indexOf(salary)}
                onChange={handleSalarySliderChange}
                className={styles.slider}
              />
