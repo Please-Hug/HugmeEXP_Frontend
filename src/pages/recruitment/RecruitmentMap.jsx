@@ -6,6 +6,7 @@ import MapContainer from "../../components/recruitment/recruitment_map/MapContai
 import RecruitmentFilter from "../../components/recruitment/recruitment_map/RecruitmentFilter";
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
+import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
 import { jobs } from "../../data/jobs";
 
 function RecruitmentMapPage() {
@@ -17,7 +18,8 @@ function RecruitmentMapPage() {
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [education, setEducation] = useState(0);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 }); // 기본 중심: 서울시청
-
+  const [mapBounds, setMapBounds] = useState(null);
+  const [isMapSearchActive, setIsMapSearchActive] = useState(false);
 
   const handleSelectJob = (job) => {
     setSelectedJob(job);
@@ -26,11 +28,13 @@ function RecruitmentMapPage() {
   const handleFilterChange = (type) => {
     setFilterType(type);
     setSelectedJob(null);
+    setIsMapSearchActive(false);
   };
 
   const handleRegionFilterChange = (region) => {
     setRegionFilter(region);
     setSelectedJob(null);
+    setIsMapSearchActive(false);
   };
 
   const handleSalaryChange = (value) => setSalary(parseInt(value, 10));
@@ -42,11 +46,20 @@ function RecruitmentMapPage() {
   };
   const handleEducationChange = (value) => setEducation(parseInt(value, 10));
 
+  const handleBoundsChange = (bounds) => {
+    setMapBounds(bounds);
+  };
+
+  const handleSearchCurrentMap = () => {
+    setIsMapSearchActive(true);
+  };
+
   const handleSearch = (keyword) => {
     if (!keyword.trim()) {
       alert("검색어를 입력해주세요.");
       return;
     }
+    setIsMapSearchActive(false);
     const ps = new window.kakao.maps.services.Places();
     ps.keywordSearch(keyword, (data, status) => {
       if (status === window.kakao.maps.services.Status.OK) {
@@ -64,6 +77,13 @@ function RecruitmentMapPage() {
     const typeMatch = filterType === "all" || job.type === filterType;
     const regionMatch = regionFilter === "all" || job.region === regionFilter;
 
+    const boundsMatch = !isMapSearchActive || !mapBounds || (
+      job.lat >= mapBounds.southWest.lat &&
+      job.lat <= mapBounds.northEast.lat &&
+      job.lng >= mapBounds.southWest.lng &&
+      job.lng <= mapBounds.northEast.lng
+    );
+
     const salaryMatch = () => {
       if (salary === 0) return true; // '전체' 또는 '회사 내규'는 모든 연봉을 포함
       if (salary === 3000) return job.salary >= 3000 && job.salary < 4000;
@@ -76,19 +96,19 @@ function RecruitmentMapPage() {
       // 사용자가 '경력무관' 선택 시 모든 공고 포함
       if (experience === 0) return true;
       // 공고가 '경력무관'일 경우 항상 포함
-      if (job.experience === 'all') return true;
+      if (job.experience === "all") return true;
 
       // '신입' 처리
-      const jobIsNew = job.experience === 'new';
+      const jobIsNew = job.experience === "new";
       const filterIsNew = experience === 1;
       if (filterIsNew) return jobIsNew;
 
       // 연차 비교
       const jobExpYear = parseInt(job.experience, 10);
       if (isNaN(jobExpYear)) return jobIsNew; // job.experience가 'new' 같은 문자열일 경우
-      
+
       // 사용자가 설정한 경력(N년 이하)보다 요구 경력이 낮거나 같으면 통과
-      return jobExpYear <= (experience - 1);
+      return jobExpYear <= experience - 1;
     };
 
     const skillsMatch =
@@ -97,14 +117,7 @@ function RecruitmentMapPage() {
 
     const educationMatch = education === 0 || job.education <= education;
 
-    return (
-      typeMatch &&
-      regionMatch &&
-      salaryMatch() &&
-      experienceMatch() &&
-      skillsMatch &&
-      educationMatch
-    );
+    return typeMatch && regionMatch && salaryMatch() && experienceMatch && skillsMatch && educationMatch && boundsMatch;
   });
 
   return (
@@ -138,11 +151,14 @@ function RecruitmentMapPage() {
           </div>
         </div>
         <div className={styles.mapWrapper}>
+          <MapBoundsDisplay bounds={mapBounds} />
           <MapContainer
+          onSearchCurrentMap={handleSearchCurrentMap}
             jobs={filteredJobs}
             selectedJob={selectedJob}
             onSelectJob={handleSelectJob}
             mapCenter={mapCenter}
+            onBoundsChange={handleBoundsChange}
           />
         </div>
       </main>
