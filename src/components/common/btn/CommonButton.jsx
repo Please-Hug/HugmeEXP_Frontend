@@ -24,16 +24,13 @@ function CommonButton({
     border,
   };
 
-  // hover props가 제공되었을 때만 hover 스타일을 만듭니다.
-  const hoverStyle = {
-    backgroundColor: hoverBackgroundColor,
-    color: hoverColor,
-  };
-
-  // isHovered 상태에 따라 적용할 최종 스타일을 결정합니다.
-  // hover props가 없는 경우, SCSS 파일의 :hover 스타일이 적용됩니다.
-  const currentStyle = isHovered
-    ? { ...baseStyle, ...hoverStyle }
+  // hover props가 제공되었을 때만 hover 스타일을 적용합니다.
+  const currentStyle = isHovered && (hoverBackgroundColor || hoverColor)
+    ? {
+        ...baseStyle,
+        ...(hoverBackgroundColor && { backgroundColor: hoverBackgroundColor }),
+        ...(hoverColor && { color: hoverColor }),
+      }
     : baseStyle;
 
   return (

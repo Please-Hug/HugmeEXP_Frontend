@@ -41,11 +41,8 @@ function MapContainer({
     const sw = newBounds.getSouthWest();
     const ne = newBounds.getNorthEast();
 
-    // 대각선 거리 계산
-    const polyline = new window.kakao.maps.Polyline({
-      path: [sw, ne],
-    });
-    const distanceInMeters = polyline.getLength();
+    // 대각선 거리 계산 (Haversine 공식 사용)
+    const distanceInMeters = window.kakao.maps.geometry.computeDistanceBetween(sw, ne);
     const distanceInKm = distanceInMeters / 1000;
 
     let displayDistance;

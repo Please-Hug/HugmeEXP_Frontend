@@ -157,7 +157,6 @@ function RecruitmentMapPage() {
             jobs={filteredJobs}
             selectedJob={selectedJob}
             onSelectJob={handleSelectJob}
-            mapCenter={mapCenter}
             onBoundsChange={handleBoundsChange}
           />
         </div>
