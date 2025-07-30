@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 import ReactDOM from "react-dom";
 import styles from "./RecruitmentFilter.module.scss";
 import {
@@ -191,22 +193,67 @@ function RecruitmentFilter({
       case "experience":
         content = (
           <div className={styles.dropdownMenu}>
-            <div className={styles.experienceSlider}>
-              <input
-                type="range"
-                min="0"
-                max="6"
-                value={Math.max(0, experienceLevels.indexOf(experience))}
-                onChange={handleExperienceSliderChange}
-              />
-              <div className={styles.experienceLevels}>
-                <span>무관</span>
-                <span>신입</span>
-                <span>2년</span>
-                <span>4년</span>
-                <span>6년</span>
-                <span>8년</span>
-                <span>10년</span>
+            <div className={styles.filterGroup}>
+              <h4>경력</h4>
+              <div className={styles.rangeContainer}>
+                <div className={styles.rangeSliderWrapper}>
+                  {/* Background rail */}
+                  <div className={styles.sliderRail}></div>
+                  
+                  {/* Active track between handles */}
+                  <div 
+                    className={styles.sliderTrack} 
+                    style={{
+                      left: `${(experience[0] / 11) * 100}%`,
+                      width: `${((experience[1] - experience[0]) / 11) * 100}%`
+                    }}
+                  ></div>
+                  
+                  {/* Min handle slider */}
+                  <div className={styles.sliderHandleContainer} style={{ zIndex: 1 }}>
+                    <Slider
+                      min={0}
+                      max={11}
+                      value={experience[0]}
+                      onChange={(value) => {
+                        if (value <= experience[1]) {
+                          onExperienceChange([value, experience[1]]);
+                        }
+                      }}
+                      trackStyle={{ backgroundColor: 'transparent' }}
+                      railStyle={{ backgroundColor: 'transparent' }}
+                      handleStyle={{ borderColor: '#007bff', backgroundColor: '#007bff' }}
+                    />
+                  </div>
+                  
+                  {/* Max handle slider */}
+                  <div className={styles.sliderHandleContainer}>
+                    <Slider
+                      min={0}
+                      max={11}
+                      value={experience[1]}
+                      onChange={(value) => {
+                        if (value >= experience[0]) {
+                          onExperienceChange([experience[0], value]);
+                        }
+                      }}
+                      trackStyle={{ backgroundColor: 'transparent' }}
+                      railStyle={{ backgroundColor: 'transparent' }}
+                      handleStyle={{ borderColor: '#007bff', backgroundColor: '#007bff' }}
+                    />
+                  </div>
+                </div>
+                <div className={styles.experienceRangeLabels}>
+                  <span>{experience[0] === 0 ? '신입' : `${experience[0] - 1}년`}</span>
+                  <span>{experience[1] - 1}년</span>
+                </div>
+                <div className={styles.experienceLabel}>
+                  <span>
+                    {experience[0] === experience[1]
+                      ? (experience[0] === 0 ? "경력무관" : `${experience[0] - 1}년`)
+                      : `${experience[0] === 0 ? '신입' : `${experience[0] - 1}년`} ~ ${experience[1] - 1}년`}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
