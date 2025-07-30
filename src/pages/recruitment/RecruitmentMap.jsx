@@ -4,7 +4,7 @@ import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/R
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
 import MapContainer from "../../components/recruitment/recruitment_map/MapContainer";
 
-import RecruitmentFilter from "../../components/recruitment/recruitment_map/RecruitmentFilter";
+import { RecruitmentFilter } from "../../components/recruitment/recruitment_filter";
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
 import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
@@ -16,7 +16,7 @@ function RecruitmentMapPage() {
   const [filterType, setFilterType] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [salary, setSalary] = useState(0);
-  const [experience, setExperience] = useState(0); // 0: 경력무관, 1: 신입, 2: 1년 ... 11: 10년
+  const [experience, setExperience] = useState([-1, 10]); // Default range: -1 (경력무관) to 10 years
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [education, setEducation] = useState(0);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 }); // 기본 중심: 서울시청
@@ -45,7 +45,15 @@ function RecruitmentMapPage() {
   };
 
   const handleSalaryChange = (value) => setSalary(parseInt(value, 10));
-  const handleExperienceChange = (value) => setExperience(value);
+  const handleExperienceChange = (value) => {
+    console.log("experience value", value);
+    if (Array.isArray(value)) {
+      setExperience(value);
+    } else {
+      // Handle single value if needed, or convert to a range
+      setExperience([value, value]);
+    }
+  };
   const handleSkillChange = (skill) => {
     setSelectedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
@@ -63,10 +71,10 @@ function RecruitmentMapPage() {
         experience,
         education,
         selectedSkills,
-        regionFilter,
         isMapSearchActive,
         mapBounds,
       });
+      console.log("params", params);
       if (!params) {
         setRecruitments([]);
         return;
