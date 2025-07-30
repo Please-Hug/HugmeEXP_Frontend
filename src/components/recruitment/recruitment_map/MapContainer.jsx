@@ -37,6 +37,7 @@ function MapContainer({
 
   // 지도 경계 변경 핸들러
   const handleBoundsChanged = (mapInstance) => {
+    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.geometry) return;
     const newBounds = mapInstance.getBounds();
     const sw = newBounds.getSouthWest();
     const ne = newBounds.getNorthEast();
@@ -99,17 +100,17 @@ function MapContainer({
         onCreate={setMap} // onCreate에서는 map 객체만 설정합니다.
         onIdle={handleBoundsChanged} // 지도 움직임이 멈췄을 때만 경계를 업데이트합니다.
       >
-        {jobs.map((job) => (
+        {Array.isArray(jobs) && jobs.map((job) => (
           <MapMarker
-            key={job.id || `${job.company}-${job.title}-${job.lat}-${job.lng}`}
-            position={{ lat: job.lat, lng: job.lng }}
+            key={job.id || `${job.companyName}-${job.title}-${job.latitude}-${job.longitude}`}
+            position={{ lat: job.latitude, lng: job.longitude }}
             onClick={() => onSelectJob(job)}
           />
         ))}
 
         {selectedJob && (
           <CustomOverlayMap
-            position={{ lat: selectedJob.lat, lng: selectedJob.lng }}
+            position={{ lat: selectedJob.latitude, lng: selectedJob.longitude }}
           >
             <div className={styles.overlay}>{selectedJob.company}</div>
           </CustomOverlayMap>
