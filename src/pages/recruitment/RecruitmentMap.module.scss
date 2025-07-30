@@ -40,6 +40,7 @@
 }
 
 .mapWrapper {
+  position: relative;
   flex-grow: 1; // 너비 비율
   display: flex;
   border-radius: 12px;
