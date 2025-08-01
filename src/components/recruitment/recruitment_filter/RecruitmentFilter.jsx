@@ -103,9 +103,8 @@ function RecruitmentFilter({
   const getExperienceButtonText = () => {
     if (Array.isArray(experience)) {
       if (experience[0] === -1) return "경력무관";
-      console.log("experience", experience);
       if (experience[0] === experience[1]) {
-        return experience[0] === 0 ? "경력무관" : `${experience[0]}년`;
+        return experience[0] === 0 ? "신입" : `${experience[0]}년`;
       }
       return `${experience[0] === 0 ? "신입" : `${experience[0]}년`} ~ ${experience[1]}년`;
     }
@@ -246,7 +245,7 @@ function RecruitmentFilter({
         <button
           className={getButtonClass(
             Array.isArray(experience) &&
-              (experience[0] !== 0 || experience[1] !== 10)
+              (experience[0] !== -1 || experience[1] !== 10)
           )}
           onClick={(e) => handleDropdownToggle("experience", e)}
         >

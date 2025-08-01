@@ -46,13 +46,7 @@ function RecruitmentMapPage() {
 
   const handleSalaryChange = (value) => setSalary(parseInt(value, 10));
   const handleExperienceChange = (value) => {
-    console.log("experience value", value);
-    if (Array.isArray(value)) {
-      setExperience(value);
-    } else {
-      // Handle single value if needed, or convert to a range
-      setExperience([value, value]);
-    }
+    setExperience(value);
   };
   const handleSkillChange = (skill) => {
     setSelectedSkills((prev) =>
@@ -74,7 +68,7 @@ function RecruitmentMapPage() {
         isMapSearchActive,
         mapBounds,
       });
-      console.log("params", params);
+
       if (!params) {
         setRecruitments([]);
         return;
@@ -85,11 +79,11 @@ function RecruitmentMapPage() {
 
       try {
         const data = await getRecruitments(params);
-        console.log("recruitments", data);
+
         setRecruitments(data);
       } catch (err) {
         console.error("채용 정보 조회 실패:", err);
-        setError(err.response ? err.response.data : "서버 오류");
+        setError(err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다.");
         setRecruitments([]);
       } finally {
         setLoading(false);

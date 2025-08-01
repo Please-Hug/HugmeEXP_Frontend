@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import PropTypes from 'prop-types';
 
 const DropdownPortal = ({ children, position }) => {
   const el = document.getElementById("dropdown-root");
@@ -13,6 +14,14 @@ const DropdownPortal = ({ children, position }) => {
   };
 
   return ReactDOM.createPortal(<div style={style}>{children}</div>, el);
+};
+
+DropdownPortal.propTypes = {
+  children: PropTypes.node.isRequired,
+  position: PropTypes.shape({
+    top: PropTypes.number.isRequired,
+    left: PropTypes.number.isRequired
+  }).isRequired
 };
 
 export default DropdownPortal;

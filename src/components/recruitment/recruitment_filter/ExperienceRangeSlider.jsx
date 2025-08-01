@@ -8,8 +8,14 @@ const experienceLevels = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10];
 
 const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
   // Find indices in experienceLevels array that match current experience values
-  const minIndex = Math.max(0, experienceLevels.findIndex(level => level === experience[0]));
-  const maxIndex = Math.max(0, experienceLevels.findIndex(level => level === experience[1]));
+  const minIndex = experienceLevels.findIndex(level => level === experience[0]);
+  const maxIndex = experienceLevels.findIndex(level => level === experience[1]);
+  
+  // Validate experience values
+  if (minIndex === -1 || maxIndex === -1) {
+    console.error('Invalid experience values provided:', experience);
+    return null; // Return null to prevent rendering with invalid values
+  }
   
   // Function to get the label for an experience level
   const getExperienceLabel = (level) => {

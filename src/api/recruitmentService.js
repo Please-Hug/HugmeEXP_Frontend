@@ -1,5 +1,12 @@
 import api from './axiosInstance';
 
+// 급여 범위 상수 정의
+const SALARY_RANGES = {
+  3000: { min: 3000, max: 3999 },
+  4000: { min: 4000, max: 4999 },
+  6000: { min: 6000, max: null }
+};
+
 // API 파라미터 유효성 검사 및 변환
 export const validateAndBuildParams = (filters) => {
   const { salary, experience, education, selectedSkills, regionFilter, isMapSearchActive, mapBounds } = filters;
@@ -7,20 +14,23 @@ export const validateAndBuildParams = (filters) => {
 
   // Salary
   if (salary) {
-    if (salary === 3000) {
-      params.salaryMin = 3000;
-      params.salaryMax = 3999;
-    } else if (salary === 4000) {
-      params.salaryMin = 4000;
-      params.salaryMax = 4999;
-    } else if (salary === 6000) {
-      params.salaryMin = 6000;
+    const salaryRange = SALARY_RANGES[salary];
+    if (salaryRange) {
+      params.salaryMin = salaryRange.min;
+      if (salaryRange.max) {
+        params.salaryMax = salaryRange.max;
+      }
     }
   }
 
   // Experience
-  if (experience > 0) {
-    params.experience = experience - 1; // 0: 신입, 1: 1년차...
+  if (Array.isArray(experience)) {
+    // 배열의 첫 번째 값(최소 경력) 사용
+    if (experience[0] > -1) {
+      params.experience = experience[0]; // -1: 신입, 0: 1년차...
+    }
+  } else if (typeof experience === 'number' && experience > 0) {
+    params.experience = experience - 1;
   }
 
   // Education

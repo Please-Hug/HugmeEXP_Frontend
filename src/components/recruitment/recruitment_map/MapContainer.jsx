@@ -112,7 +112,7 @@ function MapContainer({
           <CustomOverlayMap
             position={{ lat: selectedJob.latitude, lng: selectedJob.longitude }}
           >
-            <div className={styles.overlay}>{selectedJob.company}</div>
+            <div className={styles.overlay}>{selectedJob.companyName}</div>
           </CustomOverlayMap>
         )}
       </KakaoMap>
