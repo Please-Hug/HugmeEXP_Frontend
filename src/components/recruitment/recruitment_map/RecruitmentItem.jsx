@@ -8,12 +8,13 @@ function RecruitmentItem({ job, isSelected, onSelectJob }) {
   const formatExperience = (min, max) => {
     if (min === 0 && max === 0) return '신입';
     if (min === 0) return `신입~${max}년`;
-    if (max === null || max === undefined || min === max) return `${min}년 이상`;
+    if (max === null || max === undefined) return `${min}년 이상`;
+    if (min === max) return `${min}년`;
     return `${min}~${max}년`;
   };
 
   // 경력 정보 가져오기
-  const experienceText = job.experienceMin !== undefined && job.experienceMax !== undefined
+  const experienceText = job.experienceMin != null && job.experienceMax != null
     ? formatExperience(job.experienceMin, job.experienceMax)
     : '경력 정보 없음';
 
