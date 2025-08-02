@@ -18,8 +18,9 @@ const AdminStatsDashboard = () => {
       if (isMounted) {
         setStatsData(data);
       }
-    } catch (err) {
+    } catch (error) {
       if (isMounted) {
+        console.error('통계 데이터 로드 실패:', error);
         setError('통계 데이터를 불러오는데 실패했습니다.');
       }
     } finally {
@@ -39,9 +40,6 @@ const AdminStatsDashboard = () => {
         <div>통계 데이터를 불러오는 중...</div>
         <div style={{ fontSize: '14px', color: '#6c757d', marginTop: '8px' }}>
           사용자별 출석 정보를 조회하고 있습니다. 잠시만 기다려주세요.
-        </div>
-        <div style={{ fontSize: '12px', color: '#dc3545', marginTop: '8px' }}>
-          DEBUG: 로딩 상태 - API 호출 중
         </div>
       </div>
     );
@@ -160,7 +158,7 @@ const AdminStatsDashboard = () => {
           <div className={styles.cardContent}>
             <h3>총 구름조각</h3>
             <p className={styles.number}>
-              {statsData.users.reduce((sum, user) => sum + (user.point || 0), 0).toLocaleString()}
+              {(statsData.users || []).reduce((sum, user) => sum + (user.point || 0), 0).toLocaleString()}
             </p>
           </div>
         </div>

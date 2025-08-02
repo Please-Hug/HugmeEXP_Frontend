@@ -1,0 +1,190 @@
+// 마커 관련 전역 스타일
+:global {
+  // 인포윈도우 내부 스타일
+  .marker-distance {
+    font-size: 14px !important;
+    color: #007bff !important;
+    font-weight: 500 !important;
+    margin-bottom: 8px !important;
+  }
+
+  // 카카오맵 인포윈도우 커스터마이징
+  .infowindow {
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    
+    .info {
+      border: none !important;
+      border-radius: 8px !important;
+      
+      .title {
+        background: none !important;
+        border: none !important;
+        padding: 0 !important;
+      }
+    }
+  }
+
+  // 마커 애니메이션 효과
+  .marker-bounce {
+    animation: markerBounce 0.6s ease-in-out;
+  }
+
+  @keyframes markerBounce {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+
+  .marker-pulse {
+    animation: markerPulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes markerPulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  // 클러스터 마커 호버 효과
+  .cluster-marker {
+    transition: transform 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  // 마커 선택 상태 표시
+  .marker-selected {
+    filter: drop-shadow(0 0 8px rgba(255, 126, 20, 0.6));
+  }
+
+  // 현재 위치 마커 펄스 효과
+  .current-location-marker {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      background: rgba(0, 123, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: locationPulse 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes locationPulse {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(2.5);
+      opacity: 0;
+    }
+  }
+}
+
+// 마커 유틸리티 클래스들
+.markerUtils {
+  // 마커 컨테이너
+  .markerContainer {
+    position: relative;
+    display: inline-block;
+  }
+
+  // 마커 상태별 스타일
+  .markerAvailable {
+    --marker-color: #28a745;
+  }
+
+  .markerFull {
+    --marker-color: #dc3545;
+  }
+
+  .markerSelected {
+    --marker-color: #fd7e14;
+  }
+
+  .markerCurrent {
+    --marker-color: #007bff;
+  }
+
+  // 마커 라벨
+  .markerLabel {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 1000;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: rgba(0, 0, 0, 0.8);
+    }
+  }
+
+  // 마커 배지 (개수 표시)
+  .markerBadge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    border: 2px solid white;
+    z-index: 10;
+  }
+}
+
+// 반응형 마커 (모바일에서 크기 조정)
+@media (max-width: 768px) {
+  :global {
+    .marker-mobile {
+      transform: scale(1.2);
+    }
+
+    .infowindow {
+      max-width: 250px !important;
+      font-size: 14px !important;
+    }
+  }
+}
+
+// 다크모드 지원
+@media (prefers-color-scheme: dark) {
+  :global {
+    .infowindow {
+      background: #2d3748 !important;
+      color: #e2e8f0 !important;
+      
+      .info {
+        background: #2d3748 !important;
+      }
+    }
+  }
+}

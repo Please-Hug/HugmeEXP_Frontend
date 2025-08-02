@@ -15,6 +15,7 @@ import {
   FaCartShopping,
   FaRankingStar,
   FaAnglesLeft,
+  FaMapLocationDot,
 } from "react-icons/fa6";
 import logo from "../../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +33,7 @@ function getQuickMenuItems() {
     // { icon: <FaLightbulb />, label: "AI 안아줘요" },
     // { icon: <FaBolt />, label: "빠른 검색" },
     { icon: <FaBell />, label: "알림" },
+    { icon: <FaMapLocationDot />, label: "스터디룸 예약", link: "/studyroom" }, // 새로 추가
   ];
 }
 
@@ -153,6 +155,9 @@ function Sidebar() {
                   onClick={() => {
                     if (item.label === "알림") {
                       setIsNotificationOpen(!isNotificationOpen); // 알림 모달 열기
+                    } else if (item.link) {
+                      // 스터디룸 예약 등 링크가 있는 경우 해당 페이지로 이동
+                      navigate(item.link);
                     }
                   }}
                 >

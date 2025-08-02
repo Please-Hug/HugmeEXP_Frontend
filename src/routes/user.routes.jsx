@@ -21,6 +21,8 @@ import MissionGroupPage from "../pages/mission/MissionGroupPage";
 import MissionDetailPage from "../pages/mission/MissionDetailPage";
 import ChallengeListPage from "../pages/mission/ChallengeListPage";
 
+import StudyRoomMap from "../pages/studyRoom/StudyRoomMap";
+
 export default [
   {
     element: (
@@ -120,6 +122,11 @@ export default [
       {
         path: "/my-activity",
         element: <MyStudyDiaryActivity />,
+      },
+      // 스터디룸 관련 라우트
+      {
+        path: "/studyroom",
+        element: <StudyRoomMap />,
       },
       // { path: "/settings", element: <SettingsPage /> },
       // ... 추가 사용자 경로

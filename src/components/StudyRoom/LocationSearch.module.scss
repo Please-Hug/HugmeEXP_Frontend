@@ -1,0 +1,292 @@
+.locationSearch {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  background: white;
+
+  .searchTabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 1rem;
+
+    .tabButton {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #e9ecef;
+      background: #f8f9fa;
+      color: #6c757d;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 6px;
+
+      &:hover {
+        background: #e9ecef;
+      }
+
+      &.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+    }
+  }
+
+  .nearbySearch {
+    .currentLocationButton {
+      width: 100%;
+      padding: 0.75rem;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+
+      &:hover:not(:disabled) {
+        background: #218838;
+      }
+
+      &:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+      }
+
+      .buttonSpinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    .currentLocationInfo {
+      background: #f8f9fa;
+      padding: 0.75rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+
+      .coordinates {
+        color: #495057;
+        font-family: monospace;
+        margin-bottom: 0.5rem;
+      }
+
+      .locationAccuracy {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+
+        .accuracyDot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+
+        .accuracyMessage {
+          font-weight: 500;
+        }
+
+        .accuracyValue {
+          color: #6c757d;
+        }
+
+        &.high .accuracyMessage {
+          color: #28a745;
+        }
+
+        &.medium .accuracyMessage {
+          color: #ffc107;
+        }
+
+        &.low .accuracyMessage {
+          color: #dc3545;
+        }
+      }
+    }
+
+    .radiusControl {
+      margin-bottom: 1rem;
+
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+      }
+
+      .radiusSlider {
+        width: 100%;
+        margin-bottom: 0.25rem;
+        accent-color: #007bff;
+      }
+
+      .radiusLabels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        color: #6c757d;
+      }
+    }
+  }
+
+  .textSearch {
+    .searchInputGroup {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+
+      .searchInput {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 0.875rem;
+
+        &:focus {
+          outline: none;
+          border-color: #007bff;
+          box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        &::placeholder {
+          color: #6c757d;
+        }
+      }
+    }
+
+    .searchHints {
+      .hint {
+        font-size: 0.75rem;
+        color: #6c757d;
+        background: #f8f9fa;
+        padding: 0.5rem;
+        border-radius: 4px;
+        border-left: 3px solid #007bff;
+      }
+    }
+  }
+
+  .searchButton {
+    padding: 0.75rem 1rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+
+    &:hover:not(:disabled) {
+      background: #0056b3;
+    }
+
+    &:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .buttonSpinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  }
+
+  .viewAllSection {
+    margin: 1rem 0;
+    
+    .viewAllButton {
+      width: 100%;
+      padding: 0.75rem;
+      background: #6c757d;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:hover:not(:disabled) {
+        background: #5a6268;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  .helpText {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+
+    .helpItem {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.75rem;
+      color: #6c757d;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .helpIcon {
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+}
+
+// 반응형 디자인
+@media (max-width: 768px) {
+  .locationSearch {
+    padding: 1rem;
+
+    .searchTabs {
+      .tabButton {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+      }
+    }
+
+    .textSearch {
+      .searchInputGroup {
+        flex-direction: column;
+        
+        .searchInput {
+          margin-bottom: 0.5rem;
+        }
+      }
+    }
+  }
+}
