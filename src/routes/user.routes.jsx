@@ -16,6 +16,7 @@ import MyInfoPage from "../pages/user/MyInfoPage";
 import RankingPage from "../pages/user/RankingPage";
 import ShopPage from "../pages/Shop/ShopPage";
 import ShopHistoryPage from "../pages/Shop/ShopHistoryPage";
+import StudyRoomReservationPage from "../pages/user/StudyRoomReservationPage";
 
 import MissionGroupPage from "../pages/mission/MissionGroupPage";
 import MissionDetailPage from "../pages/mission/MissionDetailPage";
@@ -85,6 +86,10 @@ export default [
       {
         path: "/shopHistory",
         element: <ShopHistoryPage />,
+      },
+      {
+        path: "/studyroom-reservation",
+        element: <StudyRoomReservationPage />,
       },
       {
         path: "/mission-group/:missionGroupId",

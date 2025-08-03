@@ -15,6 +15,7 @@ import {
   FaCartShopping,
   FaRankingStar,
   FaAnglesLeft,
+  FaDoorOpen,
 } from "react-icons/fa6";
 import logo from "../../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
@@ -44,6 +45,7 @@ function getMenuItems() {
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
     { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
+    { icon: <FaDoorOpen />, label: "스터디룸 예약", link: "/studyroom-reservation" },
   ];
 }
 
@@ -57,6 +59,7 @@ function getLecturerMenuItems() {
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
     { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
+    { icon: <FaDoorOpen />, label: "스터디룸 예약", link: "/studyroom-reservation" },
   ];
 }
 
