@@ -77,15 +77,75 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
 
   const handleCoordinateChange = (e) => {
     const { name, value } = e.target;
+    
+    // 빈 값이면 0으로 설정
+    if (value === '') {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: 0,
+      }));
+      return;
+    }
+    
+    const numValue = parseFloat(value);
+    
+    // NaN 체크
+    if (isNaN(numValue)) {
+      return;
+    }
+    
+    // 유효성 검사
+    if (name === "latitude") {
+      if (numValue < -90.0 || numValue > 90.0) {
+        setError("위도는 -90에서 90 사이여야 합니다.");
+      } else {
+        setError("");
+      }
+    } else if (name === "longitude") {
+      if (numValue < -180.0 || numValue > 180.0) {
+        setError("경도는 -180에서 180 사이여야 합니다.");
+      } else {
+        setError("");
+      }
+    }
+    
     setFormData((prev) => ({
       ...prev,
-      [name]: parseFloat(value) || 0,
+      [name]: numValue,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    
+    // 필수 필드 검증
+    if (!formData.name || !formData.name.trim()) {
+      setError("이름은 필수입니다.");
+      return;
+    }
+    
+    if (!formData.simpleAddress || !formData.simpleAddress.trim()) {
+      setError("간단 주소는 필수입니다.");
+      return;
+    }
+    
+    if (!formData.openTime || !formData.closeTime) {
+      setError("운영 시간은 필수입니다.");
+      return;
+    }
+    
+    // 좌표 유효성 검사
+    if (formData.latitude < -90.0 || formData.latitude > 90.0) {
+      setError("위도는 -90에서 90 사이여야 합니다.");
+      return;
+    }
+    
+    if (formData.longitude < -180.0 || formData.longitude > 180.0) {
+      setError("경도는 -180에서 180 사이여야 합니다.");
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -126,7 +186,7 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className={styles.modalContent}>
         <h2>{studyHall ? "스터디홀 수정" : "스터디홀 생성"}</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className={styles.formGroup}>
             <label htmlFor="name">이름 *</label>
             <input
@@ -185,11 +245,12 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
                 name="latitude"
                 type="number"
                 step="0.000001"
-                min="-90"
-                max="90"
+                min="-90.0"
+                max="90.0"
                 value={formData.latitude}
                 onChange={handleCoordinateChange}
                 required
+                title="위도는 -90에서 90 사이여야 합니다."
               />
             </div>
 
@@ -200,11 +261,12 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
                 name="longitude"
                 type="number"
                 step="0.000001"
-                min="-180"
-                max="180"
+                min="-180.0"
+                max="180.0"
                 value={formData.longitude}
                 onChange={handleCoordinateChange}
                 required
+                title="경도는 -180에서 180 사이여야 합니다."
               />
             </div>
 
