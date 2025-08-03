@@ -2,34 +2,15 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background: #e9ecef;
-  
+  min-height: 400px; /* 최소 높이 추가 */
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+
   .map {
     width: 100%;
     height: 100%;
-    border-radius: 0;
-  }
-
-  .mapLoading {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-
-    .spinner {
-      width: 30px;
-      height: 30px;
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #007bff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    min-height: 400px; /* 최소 높이 추가 */
   }
 
   .mapControls {
@@ -38,79 +19,156 @@
     right: 20px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    z-index: 100;
+    gap: 10px;
+    z-index: 1000;
 
-    .controlButton {
+    .currentLocationBtn {
+      width: 45px;
+      height: 45px;
       background: white;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 0.875rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 18px;
       cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s;
-      min-width: 70px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
 
-      &:hover:not(:disabled) {
-        background: #f8f9fa;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      &:hover {
+        background: #f0f0f0;
+        border-color: #007bff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
-      &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+      &:active {
+        transform: translateY(0);
       }
     }
-  }
 
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
-}
+    .zoomControls {
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 
-// 인포윈도우 스타일 (전역으로 적용)
-:global {
-  .infoWindow {
-    padding: 12px;
-    min-width: 200px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      .zoomBtn {
+        width: 45px;
+        height: 35px;
+        background: white;
+        border: none;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s ease;
 
-    .hallName {
-      font-size: 16px;
-      font-weight: 600;
-      color: #212529;
-      margin-bottom: 8px;
-    }
+        &:hover {
+          background: #f0f0f0;
+          color: #007bff;
+        }
 
-    .distance {
-      font-size: 14px;
-      color: #007bff;
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
+        &:active {
+          background: #e0e0e0;
+        }
 
-    .hallInfo {
-      margin-bottom: 8px;
-      
-      div {
-        font-size: 13px;
-        color: #6c757d;
-        margin-bottom: 4px;
-        
-        &:last-child {
-          margin-bottom: 0;
+        &:first-child {
+          border-bottom: 1px solid #ddd;
         }
       }
     }
+  }
 
-    .address {
-      font-size: 12px;
-      color: #6c757d;
-      border-top: 1px solid #e9ecef;
-      padding-top: 8px;
-      margin-top: 8px;
+  .noResults {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    text-align: center;
+
+    p {
+      margin: 0 0 8px 0;
+      color: #666;
+      font-size: 16px;
+    }
+
+    small {
+      color: #999;
+      font-size: 14px;
+    }
+  }
+
+  .debugInfo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    font-family: monospace;
+
+    div {
+      margin: 2px 0;
+    }
+  }
+}
+
+// 정보창 스타일 (전역 스타일로 적용)
+:global {
+  .infoWindow {
+    padding: 15px;
+    max-width: 250px;
+    font-family: inherit;
+
+    .infoTitle {
+      font-weight: bold;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+    }
+
+    .infoContent {
+      p {
+        margin: 5px 0;
+        font-size: 13px;
+        color: #666;
+        line-height: 1.4;
+
+        strong {
+          color: #333;
+        }
+      }
+
+      .infoButtons {
+        margin-top: 10px;
+        text-align: center;
+
+        button {
+          background: #007bff;
+          color: white;
+          border: none;
+          padding: 6px 12px;
+          border-radius: 4px;
+          font-size: 12px;
+          cursor: pointer;
+          transition: background 0.2s ease;
+
+          &:hover {
+            background: #0056b3;
+          }
+        }
+      }
     }
   }
 }
@@ -119,13 +177,53 @@
 @media (max-width: 768px) {
   .mapContainer {
     .mapControls {
+      top: 15px;
+      right: 15px;
+      gap: 8px;
+
+      .currentLocationBtn {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+      }
+
+      .zoomControls {
+        .zoomBtn {
+          width: 40px;
+          height: 32px;
+          font-size: 16px;
+        }
+      }
+    }
+
+    .noResults {
+      padding: 15px;
+
+      p {
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .mapContainer {
+    .mapControls {
       top: 10px;
       right: 10px;
-      
-      .controlButton {
-        padding: 6px 10px;
-        font-size: 0.75rem;
-        min-width: 60px;
+
+      .currentLocationBtn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+      }
+
+      .zoomControls {
+        .zoomBtn {
+          width: 35px;
+          height: 28px;
+          font-size: 14px;
+        }
       }
     }
   }

@@ -1,189 +1,317 @@
-// 마커 관련 전역 스타일
-:global {
-  // 인포윈도우 내부 스타일
-  .marker-distance {
-    font-size: 14px !important;
-    color: #007bff !important;
-    font-weight: 500 !important;
-    margin-bottom: 8px !important;
-  }
+.studyHallMarker {
+  position: relative;
+  cursor: pointer;
+  z-index: 10;
 
-  // 카카오맵 인포윈도우 커스터마이징
-  .infowindow {
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-    
-    .info {
-      border: none !important;
-      border-radius: 8px !important;
-      
-      .title {
-        background: none !important;
-        border: none !important;
-        padding: 0 !important;
-      }
-    }
-  }
-
-  // 마커 애니메이션 효과
-  .marker-bounce {
-    animation: markerBounce 0.6s ease-in-out;
-  }
-
-  @keyframes markerBounce {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-  }
-
-  .marker-pulse {
-    animation: markerPulse 1.5s ease-in-out infinite;
-  }
-
-  @keyframes markerPulse {
-    0% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1); }
-  }
-
-  // 클러스터 마커 호버 효과
-  .cluster-marker {
-    transition: transform 0.2s ease;
-    cursor: pointer;
-
-    &:hover {
-      transform: scale(1.1);
-    }
-  }
-
-  // 마커 선택 상태 표시
-  .marker-selected {
-    filter: drop-shadow(0 0 8px rgba(255, 126, 20, 0.6));
-  }
-
-  // 현재 위치 마커 펄스 효과
-  .current-location-marker {
+  .markerIcon {
     position: relative;
-    
-    &::after {
-      content: '';
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border: 3px solid #007bff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+
+    .icon {
+      font-size: 18px;
+    }
+
+    .distanceBadge {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 20px;
-      height: 20px;
-      background: rgba(0, 123, 255, 0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      animation: locationPulse 2s ease-in-out infinite;
+      top: -8px;
+      right: -8px;
+      background: #28a745;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+      white-space: nowrap;
     }
   }
 
-  @keyframes locationPulse {
-    0% {
-      transform: translate(-50%, -50%) scale(1);
-      opacity: 1;
-    }
-    100% {
-      transform: translate(-50%, -50%) scale(2.5);
-      opacity: 0;
-    }
-  }
-}
-
-// 마커 유틸리티 클래스들
-.markerUtils {
-  // 마커 컨테이너
-  .markerContainer {
-    position: relative;
-    display: inline-block;
-  }
-
-  // 마커 상태별 스타일
-  .markerAvailable {
-    --marker-color: #28a745;
-  }
-
-  .markerFull {
-    --marker-color: #dc3545;
-  }
-
-  .markerSelected {
-    --marker-color: #fd7e14;
-  }
-
-  .markerCurrent {
-    --marker-color: #007bff;
-  }
-
-  // 마커 라벨
-  .markerLabel {
+  .markerInfo {
     position: absolute;
-    top: -30px;
+    bottom: 50px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e9ecef;
+    padding: 16px;
+    min-width: 280px;
+    max-width: 320px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
     z-index: 1000;
 
+    // 말풍선 꼬리
     &::after {
       content: '';
       position: absolute;
       top: 100%;
       left: 50%;
       transform: translateX(-50%);
-      border: 4px solid transparent;
-      border-top-color: rgba(0, 0, 0, 0.8);
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid white;
+    }
+
+    .infoContent {
+      .title {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.3;
+      }
+
+      .address {
+        margin: 0 0 12px 0;
+        font-size: 13px;
+        color: #666;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .details {
+        margin-bottom: 12px;
+
+        .detailItem {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 4px;
+
+          .detailIcon {
+            font-size: 12px;
+            width: 16px;
+          }
+
+          span:last-child {
+            font-size: 12px;
+            color: #495057;
+          }
+        }
+      }
+
+      .description {
+        margin: 8px 0 12px 0;
+        font-size: 12px;
+        color: #6c757d;
+        font-style: italic;
+        line-height: 1.4;
+      }
+
+      .actions {
+        display: flex;
+        gap: 8px;
+
+        .actionBtn,
+        .reserveBtn {
+          flex: 1;
+          padding: 6px 12px;
+          border: none;
+          border-radius: 4px;
+          font-size: 12px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+
+          &:hover {
+            transform: translateY(-1px);
+          }
+
+          &:active {
+            transform: translateY(0);
+          }
+        }
+
+        .actionBtn {
+          background: #6c757d;
+          color: white;
+
+          &:hover {
+            background: #5a6268;
+          }
+        }
+
+        .reserveBtn {
+          background: #007bff;
+          color: white;
+
+          &:hover {
+            background: #0056b3;
+          }
+        }
+      }
     }
   }
 
-  // 마커 배지 (개수 표시)
-  .markerBadge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #dc3545;
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
-    border: 2px solid white;
-    z-index: 10;
+  // 호버 시 정보창 표시
+  &:hover {
+    .markerIcon {
+      transform: scale(1.1);
+      border-color: #0056b3;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .markerInfo {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+
+  // 선택된 마커 스타일
+  &.selected {
+    z-index: 20;
+
+    .markerIcon {
+      width: 45px;
+      height: 45px;
+      border-color: #dc3545;
+      background: #fff5f5;
+      transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+
+      .icon {
+        font-size: 20px;
+      }
+
+      .distanceBadge {
+        background: #dc3545;
+      }
+    }
+
+    .markerInfo {
+      opacity: 1;
+      visibility: visible;
+      border-color: #dc3545;
+
+      &::after {
+        border-top-color: white;
+      }
+
+      .title {
+        color: #dc3545;
+      }
+    }
   }
 }
 
-// 반응형 마커 (모바일에서 크기 조정)
+// 반응형 디자인
 @media (max-width: 768px) {
-  :global {
-    .marker-mobile {
-      transform: scale(1.2);
+  .studyHallMarker {
+    .markerIcon {
+      width: 35px;
+      height: 35px;
+
+      .icon {
+        font-size: 16px;
+      }
+
+      .distanceBadge {
+        font-size: 9px;
+        padding: 1px 4px;
+      }
     }
 
-    .infowindow {
-      max-width: 250px !important;
-      font-size: 14px !important;
+    .markerInfo {
+      min-width: 240px;
+      max-width: 280px;
+      padding: 12px;
+
+      .infoContent {
+        .title {
+          font-size: 14px;
+        }
+
+        .address {
+          font-size: 12px;
+        }
+
+        .details {
+          .detailItem {
+            span:last-child {
+              font-size: 11px;
+            }
+          }
+        }
+
+        .description {
+          font-size: 11px;
+        }
+
+        .actions {
+          .actionBtn,
+          .reserveBtn {
+            padding: 5px 10px;
+            font-size: 11px;
+          }
+        }
+      }
+    }
+
+    &.selected {
+      .markerIcon {
+        width: 40px;
+        height: 40px;
+
+        .icon {
+          font-size: 18px;
+        }
+      }
     }
   }
 }
 
-// 다크모드 지원
-@media (prefers-color-scheme: dark) {
-  :global {
-    .infowindow {
-      background: #2d3748 !important;
-      color: #e2e8f0 !important;
-      
-      .info {
-        background: #2d3748 !important;
+@media (max-width: 480px) {
+  .studyHallMarker {
+    .markerIcon {
+      width: 30px;
+      height: 30px;
+
+      .icon {
+        font-size: 14px;
+      }
+    }
+
+    .markerInfo {
+      min-width: 200px;
+      max-width: 240px;
+      padding: 10px;
+      bottom: 40px;
+
+      .infoContent {
+        .actions {
+          flex-direction: column;
+          gap: 6px;
+
+          .actionBtn,
+          .reserveBtn {
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    &.selected {
+      .markerIcon {
+        width: 35px;
+        height: 35px;
+
+        .icon {
+          font-size: 16px;
+        }
       }
     }
   }

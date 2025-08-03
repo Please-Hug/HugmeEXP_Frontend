@@ -1,214 +1,229 @@
-import { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./StudyRoomMap.module.scss";
 import MapContainer from "../../components/StudyRoom/MapContainer";
 import LocationSearch from "../../components/StudyRoom/LocationSearch";
 import StudyHallList from "../../components/StudyRoom/StudyHallList";
-import { 
-  getAllStudyHallsForMap, 
-  searchNearbyStudyHalls,
-  getCurrentLocation,
-  checkLocationAccuracy
-} from "../../api/studyRoomService";
+import { getAllStudyHallsForMap, searchNearbyStudyHalls } from "../../api/studyRoomService";
+import useBreadcrumbStore from "../../stores/breadcrumbStore";
 
-const StudyRoomMap = () => {
-  // 상태 관리
+function StudyRoomMap() {
   const [studyHalls, setStudyHalls] = useState([]);
+  const [selectedStudyHall, setSelectedStudyHall] = useState(null);
   const [currentLocation, setCurrentLocation] = useState(null);
-  const [selectedHall, setSelectedHall] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchRadius, setSearchRadius] = useState(10); // 기본 10km
-  const [searchMode, setSearchMode] = useState("all"); // "all" | "nearby"
+  const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.9780 }); // 서울 시청 기본값
+  const { setBreadcrumbItems } = useBreadcrumbStore();
 
-  // 컴포넌트 마운트 시 초기 데이터 로드
   useEffect(() => {
-    initializeMap();
+    setBreadcrumbItems([
+      { label: "홈", path: "/dashboard" },
+      { label: "스터디룸 지도", path: "/studyroom" },
+    ]);
+  }, [setBreadcrumbItems]);
+
+  // 현재 위치 가져오기
+  useEffect(() => {
+    // 먼저 모든 스터디홀을 로드
+    loadAllStudyHalls();
+    
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          };
+          console.log('현재 위치 감지:', location);
+          setCurrentLocation(location);
+          setMapCenter(location);
+          
+          // 현재 위치 기반으로 주변 스터디홀 검색 (선택사항)
+          // handleNearbySearch(location.lat, location.lng);
+        },
+        (error) => {
+          console.warn("현재 위치를 가져올 수 없습니다:", error);
+          // 현재 위치를 가져올 수 없는 경우에도 모든 스터디홀은 이미 로드됨
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 600000, // 10분간 캐시
+        }
+      );
+    } else {
+      console.warn("위치 서비스가 지원되지 않습니다.");
+      // 위치 서비스가 없어도 모든 스터디홀은 이미 로드됨
+    }
   }, []);
 
-  // 지도 초기화
-  const initializeMap = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      // 모든 스터디홀 데이터 먼저 로드
-      await loadAllStudyHalls();
-
-      // 현재 위치 시도 (실패해도 계속 진행)
-      try {
-        await loadCurrentLocation();
-      } catch (locationError) {
-        console.warn("현재 위치 로드 실패:", locationError.message);
-        // 위치 로드 실패는 에러로 처리하지 않음
-      }
-
-    } catch (err) {
-      console.error("지도 초기화 실패:", err);
-      setError("지도를 불러오는 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 모든 스터디홀 데이터 로드
+  // 모든 스터디홀 로드
   const loadAllStudyHalls = async () => {
     try {
+      setLoading(true);
       const response = await getAllStudyHallsForMap();
       setStudyHalls(response.data || []);
-      setSearchMode("all");
-    } catch (err) {
-      throw new Error("스터디홀 데이터를 불러올 수 없습니다.");
-    }
-  };
-
-  // 현재 위치 로드
-  const loadCurrentLocation = async () => {
-    try {
-      const location = await getCurrentLocation();
-      const accuracyInfo = checkLocationAccuracy(location.accuracy);
+    } catch (error) {
+      console.error("스터디홀 데이터 로드 실패:", error);
       
-      setCurrentLocation({
-        ...location,
-        accuracyInfo
-      });
-
-      console.log("현재 위치 로드 완료:", location);
+      // 임시 더미 데이터 사용 (백엔드가 없을 때)
+      const dummyData = [
+        {
+          id: 1,
+          name: "강남 스터디홀",
+          description: "강남역 근처의 깔끔한 스터디홀",
+          simpleAddress: "서울시 강남구",
+          address: "서울시 강남구 테헤란로 123",
+          latitude: 37.4979,
+          longitude: 127.0276,
+          thumbnail: null,
+          openTime: "2024-01-01T09:00:00",
+          closeTime: "2024-01-01T22:00:00",
+          totalRooms: 5,
+          availableRooms: 3
+        },
+        {
+          id: 2,
+          name: "홍대 스터디홀",
+          description: "홍익대학교 근처의 현대적인 스터디홀",
+          simpleAddress: "서울시 마포구",
+          address: "서울시 마포구 홍익로 456",
+          latitude: 37.5563,
+          longitude: 126.9238,
+          thumbnail: null,
+          openTime: "2024-01-01T08:00:00",
+          closeTime: "2024-01-01T23:00:00",
+          totalRooms: 8,
+          availableRooms: 6
+        },
+        {
+          id: 3,
+          name: "신촌 스터디홀",
+          description: "연세대학교 근처의 조용한 스터디홀",
+          simpleAddress: "서울시 서대문구",
+          address: "서울시 서대문구 연세로 789",
+          latitude: 37.5596,
+          longitude: 126.9423,
+          thumbnail: null,
+          openTime: "2024-01-01T10:00:00",
+          closeTime: "2024-01-01T21:00:00",
+          totalRooms: 4,
+          availableRooms: 2
+        }
+      ];
       
-    } catch (err) {
-      throw new Error(err.message);
+      console.log("더미 데이터 사용:", dummyData);
+      setStudyHalls(dummyData);
+      setError("백엔드 API 연결 실패 - 더미 데이터를 사용합니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
   // 주변 스터디홀 검색
-  const searchNearby = async (customLocation = null) => {
-    const location = customLocation || currentLocation;
-    
-    if (!location) {
-      setError("현재 위치를 먼저 설정해주세요.");
-      return;
-    }
-
+  const handleNearbySearch = async (lat, lng, radius = 10.0) => {
     try {
       setLoading(true);
-      setError(null);
-
-      const response = await searchNearbyStudyHalls({
-        latitude: location.latitude,
-        longitude: location.longitude,
-        radius: searchRadius,
-        limit: 50
-      });
-
-      setStudyHalls(response.data || []);
-      setSearchMode("nearby");
+      const response = await searchNearbyStudyHalls(lat, lng, radius);
+      console.log('주변 검색 응답:', response);
       
-    } catch (err) {
-      console.error("주변 검색 실패:", err);
-      setError("주변 스터디홀 검색에 실패했습니다.");
+      // 응답 구조 확인: { message: "...", data: [...] }
+      const studyHallsData = response.data || response || [];
+      console.log('주변 검색 데이터:', studyHallsData);
+      
+      // 데이터 전처리
+      const processedData = studyHallsData.map(hall => ({
+        ...hall,
+        openTime: Array.isArray(hall.openTime) 
+          ? `${hall.openTime[3]}:${String(hall.openTime[4]).padStart(2, '0')}`
+          : hall.openTime,
+        closeTime: Array.isArray(hall.closeTime) 
+          ? `${hall.closeTime[3]}:${String(hall.closeTime[4]).padStart(2, '0')}`
+          : hall.closeTime
+      }));
+      
+      setStudyHalls(processedData);
+      
+      if (processedData.length === 0) {
+        setError(`반경 ${radius}km 내에 스터디홀이 없습니다.`);
+      }
+    } catch (error) {
+      console.error("주변 스터디홀 검색 실패:", error);
+      setError("주변 스터디홀을 검색하는데 실패했습니다: " + error.message);
+      // 실패시 모든 스터디홀 로드
+      loadAllStudyHalls();
     } finally {
       setLoading(false);
     }
   };
 
-  // 현재 위치 버튼 클릭
-  const handleCurrentLocationClick = async () => {
-    try {
-      setLoading(true);
-      await loadCurrentLocation();
-      await searchNearby();
-    } catch (err) {
-      setError(err.message);
-      setLoading(false);
+  // 검색 결과 처리
+  const handleSearchResults = (results, center) => {
+    setStudyHalls(results);
+    if (center) {
+      setMapCenter(center);
     }
   };
 
-  // 검색 반경 변경
-  const handleRadiusChange = (newRadius) => {
-    setSearchRadius(newRadius);
-    if (searchMode === "nearby" && currentLocation) {
-      searchNearby();
-    }
+  // 스터디홀 선택 처리
+  const handleStudyHallSelect = (studyHall) => {
+    setSelectedStudyHall(studyHall);
+    setMapCenter({ lat: studyHall.latitude, lng: studyHall.longitude });
   };
 
-  // 스터디홀 선택
-  const handleHallSelect = (hall) => {
-    setSelectedHall(hall);
+  // 지도 중심 변경 처리
+  const handleMapCenterChange = (center) => {
+    setMapCenter(center);
   };
 
-  // 위치 직접 설정 (지도 클릭 또는 주소 검색)
-  const handleLocationSet = (location) => {
-    setCurrentLocation({
-      latitude: location.latitude,
-      longitude: location.longitude,
-      accuracy: 0, // 직접 설정한 위치는 정확함
-      accuracyInfo: { level: "high", message: "직접 설정한 위치입니다.", color: "blue" }
-    });
-  };
+  if (loading && studyHalls.length === 0) {
+    return (
+      <div className={styles.studyRoomMap}>
+        <div className={styles.loading}>
+          <p>스터디홀 정보를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.studyRoomMap}>
-      {/* 헤더 */}
-      <div className={styles.header}>
-        <h1>스터디룸 찾기</h1>
-        <p>내 주변의 스터디룸을 찾아보세요</p>
+      <div className={styles.mapHeader}>
+        <h2>스터디룸 지도</h2>
+        <p>가까운 스터디홀을 찾아보세요</p>
       </div>
+      
+      <LocationSearch 
+        onSearchResults={handleSearchResults}
+        onNearbySearch={handleNearbySearch}
+        currentLocation={currentLocation}
+        className={styles.locationSearch}
+      />
 
-      {/* 메인 컨텐츠 */}
-      <div className={styles.content}>
-        {/* 왼쪽 사이드바 */}
-        <div className={styles.sidebar}>
-          {/* 검색 컨트롤 */}
-          <LocationSearch
-            currentLocation={currentLocation}
-            searchRadius={searchRadius}
-            onCurrentLocationClick={handleCurrentLocationClick}
-            onRadiusChange={handleRadiusChange}
-            onLocationSet={handleLocationSet}
-            onSearchNearby={searchNearby}
-            onLoadAll={loadAllStudyHalls}
-            loading={loading}
-          />
-
-          {/* 스터디홀 목록 */}
-          <StudyHallList
-            studyHalls={studyHalls}
-            currentLocation={currentLocation}
-            selectedHall={selectedHall}
-            onHallSelect={handleHallSelect}
-            searchMode={searchMode}
-            loading={loading}
-          />
-        </div>
-
-        {/* 오른쪽 지도 영역 */}
-        <div className={styles.mapArea}>
-          {error && (
-            <div className={styles.errorMessage}>
-              <p>⚠️ {error}</p>
-              <button onClick={initializeMap}>다시 시도</button>
-            </div>
-          )}
-          
+      <div className={styles.mapContent}>
+        <div className={styles.mapContainer}>
           <MapContainer
             studyHalls={studyHalls}
+            selectedStudyHall={selectedStudyHall}
             currentLocation={currentLocation}
-            selectedHall={selectedHall}
-            onHallSelect={handleHallSelect}
-            onLocationSet={handleLocationSet}
+            center={mapCenter}
+            onStudyHallSelect={handleStudyHallSelect}
+            onCenterChange={handleMapCenterChange}
+          />
+        </div>
+        
+        <div className={styles.sidePanel}>
+          <StudyHallList
+            studyHalls={studyHalls}
+            selectedStudyHall={selectedStudyHall}
+            onStudyHallSelect={handleStudyHallSelect}
             loading={loading}
+            error={error}
           />
         </div>
       </div>
-
-      {/* 로딩 오버레이 */}
-      {loading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.spinner}></div>
-          <p>지도를 불러오는 중...</p>
-        </div>
-      )}
     </div>
   );
-};
+}
 
 export default StudyRoomMap;
