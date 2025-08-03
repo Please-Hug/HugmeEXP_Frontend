@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Modal from "../common/Modal/Modal";
 import KakaoMapPicker from "./KakaoMapPicker";
 import studyRoomService from "../../api/studyRoomService";
+import imageApi from "../../api/imageService";
 import styles from "./StudyHallModal.module.scss";
 
 function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
@@ -19,6 +20,9 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
   const [showMapPicker, setShowMapPicker] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     if (studyHall) {
@@ -33,6 +37,10 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
         openTime: formatDateTimeLocal(studyHall.openTime),
         closeTime: formatDateTimeLocal(studyHall.closeTime),
       });
+      // 기존 썸네일이 있으면 미리보기로 설정
+      if (studyHall.thumbnail) {
+        setImagePreview(studyHall.thumbnail);
+      }
     } else {
       setFormData({
         name: "",
@@ -45,8 +53,10 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
         openTime: "",
         closeTime: "",
       });
+      setImagePreview(null);
     }
     setError("");
+    setImageFile(null);
   }, [studyHall, isOpen]);
 
   // 날짜 형식 변환 (ISO 8601 -> datetime-local)
@@ -149,8 +159,22 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
     setLoading(true);
 
     try {
+      let thumbnailUrl = formData.thumbnail;
+
+      // 새로운 이미지가 선택되었으면 업로드
+      if (imageFile) {
+        try {
+          thumbnailUrl = await handleImageUpload();
+        } catch (uploadError) {
+          setError(uploadError.message);
+          setLoading(false);
+          return;
+        }
+      }
+
       const submitData = {
         ...formData,
+        thumbnail: thumbnailUrl,
         openTime: formatToISO(formData.openTime),
         closeTime: formatToISO(formData.closeTime),
       };
@@ -180,6 +204,61 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
       simpleAddress: coordinates.simpleAddress || prev.simpleAddress,
     }));
     setShowMapPicker(false);
+  };
+
+  // 이미지 파일 선택 핸들러
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 파일 타입 검증
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError("지원하지 않는 이미지 형식입니다. (JPEG, PNG, GIF, WebP만 가능)");
+      return;
+    }
+
+    // 파일 크기 검증 (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("이미지 파일 크기는 10MB를 초과할 수 없습니다.");
+      return;
+    }
+
+    setImageFile(file);
+    setError("");
+
+    // 미리보기 생성
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // 이미지 업로드 핸들러
+  const handleImageUpload = async () => {
+    if (!imageFile) return null;
+
+    setUploadingImage(true);
+    try {
+      const response = await imageApi.upload(imageFile, 'studyhall-images');
+      return response.data.imageUrl;
+    } catch (error) {
+      console.error("이미지 업로드 오류:", error);
+      throw new Error("이미지 업로드에 실패했습니다.");
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // 이미지 제거 핸들러
+  const handleImageRemove = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setFormData((prev) => ({
+      ...prev,
+      thumbnail: "",
+    }));
   };
 
   return (
@@ -280,15 +359,38 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="thumbnail">썸네일 URL</label>
-            <input
-              id="thumbnail"
-              name="thumbnail"
-              type="url"
-              value={formData.thumbnail}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-            />
+            <label htmlFor="thumbnailUpload">썸네일 이미지</label>
+            <div className={styles.imageUploadSection}>
+              {imagePreview ? (
+                <div className={styles.imagePreviewContainer}>
+                  <img src={imagePreview} alt="썸네일 미리보기" className={styles.imagePreview} />
+                  <button
+                    type="button"
+                    className={styles.removeButton}
+                    onClick={handleImageRemove}
+                    disabled={uploadingImage || loading}
+                  >
+                    이미지 제거
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.imageUploadBox}>
+                  <input
+                    id="thumbnailUpload"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                    onChange={handleImageChange}
+                    className={styles.fileInput}
+                    disabled={uploadingImage || loading}
+                  />
+                  <label htmlFor="thumbnailUpload" className={styles.uploadLabel}>
+                    <span className={styles.uploadIcon}>📷</span>
+                    <span>이미지를 선택하세요</span>
+                    <span className={styles.uploadHint}>JPEG, PNG, GIF, WebP (최대 10MB)</span>
+                  </label>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className={styles.timeGroup}>
@@ -333,7 +435,7 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
               className={styles.submitButton}
               disabled={loading}
             >
-              {loading ? "저장 중..." : studyHall ? "수정" : "생성"}
+              {loading || uploadingImage ? "저장 중..." : studyHall ? "수정" : "생성"}
             </button>
           </div>
         </form>
