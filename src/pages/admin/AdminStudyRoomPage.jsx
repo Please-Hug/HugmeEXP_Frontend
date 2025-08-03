@@ -1,0 +1,311 @@
+import React, { useState, useEffect } from "react";
+import studyRoomService from "../../api/studyRoomService";
+import StudyHallModal from "../../components/admin/StudyHallModal";
+import StudyRoomModal from "../../components/admin/StudyRoomModal";
+import styles from "./AdminStudyRoomPage.module.scss";
+
+function AdminStudyRoomPage() {
+  const [studyHalls, setStudyHalls] = useState([]);
+  const [selectedStudyHall, setSelectedStudyHall] = useState(null);
+  const [studyRooms, setStudyRooms] = useState([]);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [showStudyHallModal, setShowStudyHallModal] = useState(false);
+  const [showStudyRoomModal, setShowStudyRoomModal] = useState(false);
+  const [editingStudyHall, setEditingStudyHall] = useState(null);
+  const [editingStudyRoom, setEditingStudyRoom] = useState(null);
+
+  // 메시지 스타일 클래스 가져오기
+  const getMessageClass = () => {
+    if (message.startsWith("✅")) return `${styles.message} ${styles.success}`;
+    if (message.startsWith("❌")) return `${styles.message} ${styles.error}`;
+    if (message.startsWith("⚠️")) return `${styles.message} ${styles.warning}`;
+    return styles.message;
+  };
+
+  // 스터디홀 목록 조회
+  const fetchStudyHalls = async () => {
+    setLoading(true);
+    try {
+      const response = await studyRoomService.studyHall.getStudyHalls(page, 20);
+      setStudyHalls(response.content);
+      setTotalPages(response.totalPages);
+      setMessage("✅ 스터디홀 목록을 불러왔습니다.");
+    } catch (error) {
+      console.error("스터디홀 조회 오류:", error);
+      setMessage("❌ 스터디홀 목록을 불러오는데 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 스터디룸 목록 조회
+  const fetchStudyRooms = async (studyHallId) => {
+    try {
+      const response = await studyRoomService.studyRoom.getStudyRooms(studyHallId);
+      setStudyRooms(response);
+      setMessage("✅ 스터디룸 목록을 불러왔습니다.");
+    } catch (error) {
+      console.error("스터디룸 조회 오류:", error);
+      setMessage("❌ 스터디룸 목록을 불러오는데 실패했습니다.");
+    }
+  };
+
+  // 스터디홀 선택
+  const handleSelectStudyHall = (studyHall) => {
+    setSelectedStudyHall(studyHall);
+    fetchStudyRooms(studyHall.id);
+  };
+
+  // 스터디홀 삭제
+  const handleDeleteStudyHall = async (studyHallId) => {
+    if (!window.confirm("정말로 이 스터디홀을 삭제하시겠습니까?")) return;
+
+    try {
+      await studyRoomService.studyHall.deleteStudyHall(studyHallId);
+      setMessage("✅ 스터디홀이 삭제되었습니다.");
+      fetchStudyHalls();
+      if (selectedStudyHall?.id === studyHallId) {
+        setSelectedStudyHall(null);
+        setStudyRooms([]);
+      }
+    } catch (error) {
+      console.error("스터디홀 삭제 오류:", error);
+      setMessage("❌ 스터디홀 삭제에 실패했습니다.");
+    }
+  };
+
+  // 스터디룸 삭제
+  const handleDeleteStudyRoom = async (roomId) => {
+    if (!selectedStudyHall) return;
+    if (!window.confirm("정말로 이 스터디룸을 삭제하시겠습니까?")) return;
+
+    try {
+      await studyRoomService.studyRoom.deleteStudyRoom(selectedStudyHall.id, roomId);
+      setMessage("✅ 스터디룸이 삭제되었습니다.");
+      fetchStudyRooms(selectedStudyHall.id);
+    } catch (error) {
+      console.error("스터디룸 삭제 오류:", error);
+      setMessage("❌ 스터디룸 삭제에 실패했습니다.");
+    }
+  };
+
+  // 페이지 변경
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudyHalls();
+  }, [page]);
+
+  return (
+    <div className={styles.AdminStudyRoomPage}>
+      <h2 className={styles.title}>스터디룸 관리</h2>
+      <div className={styles.content}>
+        {/* 스터디홀 섹션 */}
+        <div className={styles.card}>
+          <div className={styles.cardHeader}>
+            <h3>스터디홀 목록</h3>
+            <button
+              className={styles.primaryButton}
+              onClick={() => {
+                setEditingStudyHall(null);
+                setShowStudyHallModal(true);
+              }}
+            >
+              스터디홀 추가
+            </button>
+          </div>
+
+          {loading ? (
+            <div className={styles.loading}>로딩 중...</div>
+          ) : studyHalls.length === 0 ? (
+            <div className={styles.empty}>등록된 스터디홀이 없습니다.</div>
+          ) : (
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>이름</th>
+                    <th>간단 주소</th>
+                    <th>운영 시간</th>
+                    <th>작업</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {studyHalls.map((hall) => (
+                    <tr
+                      key={hall.id}
+                      className={selectedStudyHall?.id === hall.id ? styles.selected : ""}
+                      onClick={() => handleSelectStudyHall(hall)}
+                    >
+                      <td>{hall.id}</td>
+                      <td>{hall.name}</td>
+                      <td>{hall.simpleAddress}</td>
+                      <td>
+                        {new Date(hall.openTime).toLocaleTimeString("ko-KR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        ~
+                        {new Date(hall.closeTime).toLocaleTimeString("ko-KR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </td>
+                      <td>
+                        <div className={styles.actions}>
+                          <button
+                            className={styles.editButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingStudyHall(hall);
+                              setShowStudyHallModal(true);
+                            }}
+                          >
+                            수정
+                          </button>
+                          <button
+                            className={styles.deleteButton}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteStudyHall(hall.id);
+                            }}
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page === 0}
+              >
+                이전
+              </button>
+              <span>
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page === totalPages - 1}
+              >
+                다음
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 스터디룸 섹션 */}
+        {selectedStudyHall && (
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3>{selectedStudyHall.name}의 스터디룸</h3>
+              <button
+                className={styles.primaryButton}
+                onClick={() => {
+                  setEditingStudyRoom(null);
+                  setShowStudyRoomModal(true);
+                }}
+              >
+                스터디룸 추가
+              </button>
+            </div>
+
+            {studyRooms.length === 0 ? (
+              <div className={styles.empty}>등록된 스터디룸이 없습니다.</div>
+            ) : (
+              <div className={styles.tableWrapper}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>이름</th>
+                      <th>최대 인원</th>
+                      <th>작업</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studyRooms.map((room) => (
+                      <tr key={room.id}>
+                        <td>{room.id}</td>
+                        <td>{room.name}</td>
+                        <td>{room.maxNum}명</td>
+                        <td>
+                          <div className={styles.actions}>
+                            <button
+                              className={styles.editButton}
+                              onClick={() => {
+                                setEditingStudyRoom(room);
+                                setShowStudyRoomModal(true);
+                              }}
+                            >
+                              수정
+                            </button>
+                            <button
+                              className={styles.deleteButton}
+                              onClick={() => handleDeleteStudyRoom(room.id)}
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* 메시지 표시 */}
+        {message && <div className={getMessageClass()}>{message}</div>}
+      </div>
+
+      {/* 스터디홀 모달 */}
+      {showStudyHallModal && (
+        <StudyHallModal
+          isOpen={showStudyHallModal}
+          onClose={() => {
+            setShowStudyHallModal(false);
+            setEditingStudyHall(null);
+          }}
+          studyHall={editingStudyHall}
+          onSuccess={fetchStudyHalls}
+        />
+      )}
+
+      {/* 스터디룸 모달 */}
+      {showStudyRoomModal && selectedStudyHall && (
+        <StudyRoomModal
+          isOpen={showStudyRoomModal}
+          onClose={() => {
+            setShowStudyRoomModal(false);
+            setEditingStudyRoom(null);
+          }}
+          studyHallId={selectedStudyHall.id}
+          studyRoom={editingStudyRoom}
+          onSuccess={() => fetchStudyRooms(selectedStudyHall.id)}
+        />
+      )}
+    </div>
+  );
+}
+
+export default AdminStudyRoomPage;
