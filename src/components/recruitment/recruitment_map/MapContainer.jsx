@@ -45,7 +45,7 @@ function MapContainer({
     const newBounds = mapInstance.getBounds();
     const sw = newBounds.getSouthWest();
     const ne = newBounds.getNorthEast();
-    console.log(sw, ne);
+    // console.log(sw, ne);
 
     // 대각선 거리 계산 (Haversine 공식 사용)
     const distanceInMeters = window.kakao.maps.geometry.computeDistanceBetween(sw, ne);
@@ -74,7 +74,7 @@ function MapContainer({
   // 지도 로딩이 완료된 후, 첫 경계를 설정하는 로직
   useEffect(() => {
     if (!map) return;
-    console.log("Map initialized:", map);
+    // console.log("Map initialized:", map);
     setMapInitialized(true);
     handleBoundsChanged(map);
     isInitialLoad.current = false;
@@ -105,7 +105,7 @@ function MapContainer({
         style={{ width: "100%", height: "100%", position: "relative", zIndex: 1 }}
         level={8}
         onCreate={(map) => {
-          console.log("KakaoMap onCreate called", map);
+          // console.log("KakaoMap onCreate called", map);
           setMap(map);
         }}
         onIdle={handleBoundsChanged} // 지도 움직임이 멈췄을 때만 경계를 업데이트합니다.
@@ -120,12 +120,12 @@ function MapContainer({
           // Check if coordinates might be swapped (common error)
           const mightBeSwapped = (lat > 100 || lat < 30) && (lng > 30 && lng < 40);
           if (mightBeSwapped) {
-            console.log(`Coordinates might be swapped for ${job.title || job.companyName}. Swapping them.`);
+            // console.log(`Coordinates might be swapped for ${job.title || job.companyName}. Swapping them.`);
             // Swap lat and lng
             [lat, lng] = [lng, lat];
           }
           
-          console.log(`Rendering marker for ${job.title || job.companyName}:`, lat, lng);
+          // console.log(`Rendering marker for ${job.title || job.companyName}:`, lat, lng);
           
           if (isNaN(lat) || isNaN(lng)) {
             console.warn(`Invalid coordinates for ${job.title || job.companyName}:`, job.latitude, job.longitude);

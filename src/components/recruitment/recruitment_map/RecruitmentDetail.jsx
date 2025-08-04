@@ -46,6 +46,21 @@ const RecruitmentDetail = ({ job, onClose }) => {
     fetchJobDetail();
   }, [job?.id]); // job 전체가 아닌 job.id만 의존성으로 지정
 
+  // 마감일 표시 형식을 결정하는 함수
+  const formatDueDate = (dueDate) => {
+    if (!dueDate) return null;
+    
+    const dueDateObj = new Date(dueDate);
+    const today = new Date();
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(today.getFullYear() + 1);
+    
+    // 마감일이 1년 이상 남았으면 '상시 모집'으로 표시
+    return dueDateObj > oneYearFromNow ? 
+      '상시 모집' : 
+      `마감일: ${dueDateObj.toLocaleDateString('ko-KR')}`;
+  };
+
   if (!job) {
     return null;
   }
@@ -145,17 +160,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
             
             {displayData.dueDate && (
               <div className={styles.dueDateBadge}>
-                {(() => {
-                  const dueDate = new Date(displayData.dueDate);
-                  const today = new Date();
-                  const oneYearFromNow = new Date();
-                  oneYearFromNow.setFullYear(today.getFullYear() + 1);
-                  
-                  // 마감일이 1년 이상 남았으면 '상시 모집'으로 표시
-                  return dueDate > oneYearFromNow ? 
-                    '상시 모집' : 
-                    `마감일: ${dueDate.toLocaleDateString('ko-KR')}`;
-                })()} 
+                {formatDueDate(displayData.dueDate)}
               </div>
             )}
           </div>
@@ -232,19 +237,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
               </section>
             )}
             
-            {/* 마감일 */}
-            {displayData.dueDate && (
-              <section>
-                <h4>마감일</h4>
-                <p>
-                  {new Date(displayData.dueDate).toLocaleDateString('ko-KR', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
-              </section>
-            )}
+           
             
             {/* 기술 스택 */}
             {(displayData.techStacks || displayData.skills) && (
