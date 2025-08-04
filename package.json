@@ -18,15 +18,19 @@
     "event-source-polyfill": "^1.0.31",
     "i": "^0.3.7",
     "jwt-decode": "^4.0.0",
+    "prop-types": "^15.8.1",
+    "rc-slider": "^10.1.1",
     "react": "^19.1.0",
     "react-datepicker": "^8.4.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.6.2",
+    "recharts": "^3.1.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^3.0.1",
     "styled-components": "^6.1.18",
-    "zustand": "^5.0.0"
+    "zustand": "^5.0.0",
+    "react-kakao-maps-sdk": "^1.2.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
