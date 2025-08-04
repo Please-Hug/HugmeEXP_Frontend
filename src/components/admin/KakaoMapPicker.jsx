@@ -17,7 +17,7 @@ function KakaoMapPicker({ onSelect, initialCoordinates, onClose }) {
 
   // 카카오 지도 스크립트 로드
   useEffect(() => {
-    const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+    const KAKAO_API_KEY = import.meta.env.VITE_KAKAO_API_KEY;
     
     // 이미 로드되어 있는지 확인
     if (window.kakao && window.kakao.maps) {
@@ -149,7 +149,7 @@ function KakaoMapPicker({ onSelect, initialCoordinates, onClose }) {
         <div className={styles.error}>
           <p>{loadError}</p>
           <p className={styles.note}>
-            개발자는 .env 파일에 VITE_KAKAO_MAP_API_KEY를 설정해야 합니다.
+            개발자는 .env 파일에 VITE_KAKAO_API_KEY를 설정해야 합니다.
           </p>
           <button onClick={onClose}>닫기</button>
         </div>
