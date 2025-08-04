@@ -34,7 +34,6 @@ function StudyRoomMap() {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
           };
-          console.log('현재 위치 감지:', location);
           setCurrentLocation(location);
           setMapCenter(location);
           
@@ -65,56 +64,6 @@ function StudyRoomMap() {
       setStudyHalls(response.data || []);
     } catch (error) {
       console.error("스터디홀 데이터 로드 실패:", error);
-      
-      // 임시 더미 데이터 사용 (백엔드가 없을 때)
-      const dummyData = [
-        {
-          id: 1,
-          name: "강남 스터디홀",
-          description: "강남역 근처의 깔끔한 스터디홀",
-          simpleAddress: "서울시 강남구",
-          address: "서울시 강남구 테헤란로 123",
-          latitude: 37.4979,
-          longitude: 127.0276,
-          thumbnail: null,
-          openTime: "2024-01-01T09:00:00",
-          closeTime: "2024-01-01T22:00:00",
-          totalRooms: 5,
-          availableRooms: 3
-        },
-        {
-          id: 2,
-          name: "홍대 스터디홀",
-          description: "홍익대학교 근처의 현대적인 스터디홀",
-          simpleAddress: "서울시 마포구",
-          address: "서울시 마포구 홍익로 456",
-          latitude: 37.5563,
-          longitude: 126.9238,
-          thumbnail: null,
-          openTime: "2024-01-01T08:00:00",
-          closeTime: "2024-01-01T23:00:00",
-          totalRooms: 8,
-          availableRooms: 6
-        },
-        {
-          id: 3,
-          name: "신촌 스터디홀",
-          description: "연세대학교 근처의 조용한 스터디홀",
-          simpleAddress: "서울시 서대문구",
-          address: "서울시 서대문구 연세로 789",
-          latitude: 37.5596,
-          longitude: 126.9423,
-          thumbnail: null,
-          openTime: "2024-01-01T10:00:00",
-          closeTime: "2024-01-01T21:00:00",
-          totalRooms: 4,
-          availableRooms: 2
-        }
-      ];
-      
-      console.log("더미 데이터 사용:", dummyData);
-      setStudyHalls(dummyData);
-      setError("백엔드 API 연결 실패 - 더미 데이터를 사용합니다.");
     } finally {
       setLoading(false);
     }

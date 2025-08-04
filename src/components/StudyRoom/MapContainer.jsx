@@ -32,8 +32,6 @@ function MapContainer({
           return;
         }
 
-        console.log('카카오맵 SDK 로드 시작...', KAKAO_API_KEY);
-
         const script = document.createElement('script');
         script.async = true;
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&autoload=false`;
@@ -61,11 +59,10 @@ function MapContainer({
 
     loadKakaoMapScript()
       .then(() => {
-        console.log('✅ 카카오맵 로드 성공');
         setIsKakaoLoaded(true);
       })
       .catch((error) => {
-        console.error('❌ 카카오맵 로드 실패:', error);
+        console.error('카카오맵 로드 실패:', error);
       });
   }, []);
 
@@ -83,7 +80,6 @@ function MapContainer({
 
       const kakaoMap = new window.kakao.maps.Map(mapRef.current, mapOptions);
       setMap(kakaoMap);
-      console.log('✅ 지도 생성 성공!');
 
       // 지도 중심 변경 이벤트
       if (onCenterChange) {
@@ -228,25 +224,6 @@ function MapContainer({
           </div>
         </div>
       )}
-
-      {/* 상태 표시 */}
-      <div className={styles.debugInfo} style={{ 
-        position: 'absolute', 
-        top: '10px', 
-        left: '10px', 
-        background: 'rgba(0,0,0,0.8)', 
-        color: 'white', 
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '12px'
-      }}>
-        <div>카카오: {window.kakao ? '✅' : '❌'}</div>
-        <div>지도: {(window.kakao && window.kakao.maps) ? '✅' : '❌'}</div>
-        <div>로드됨: {isKakaoLoaded ? '✅' : '❌'}</div>
-        <div>지도객체: {map ? '✅' : '❌'}</div>
-        <div>스터디홀: {studyHalls.length}개</div>
-        <div>현재위치: {currentLocation ? '✅' : '❌'}</div>
-      </div>
 
       {studyHalls.length === 0 && (
         <div className={styles.noResults}>
