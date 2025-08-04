@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { validateAndBuildParams } from "../../api/recruitmentService";
 import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/RecruitmentPageHeader";
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
+import RecruitmentDetail from "../../components/recruitment/recruitment_map/RecruitmentDetail";
 import MapContainer from "../../components/recruitment/recruitment_map/MapContainer";
 
 import { RecruitmentFilter } from "../../components/recruitment/recruitment_filter";
@@ -29,6 +30,7 @@ function RecruitmentMapPage() {
   const [error, setError] = useState(null);
 
   const handleSelectJob = (job) => {
+    console.log("job ID", job.id);
     setSelectedJob(job);
   };
 
@@ -155,14 +157,25 @@ function RecruitmentMapPage() {
             {loading && <div>로딩 중...</div>}
             {error && <div>에러가 발생했습니다.</div>}
             {!loading && !error && (
-              <RecruitmentList
-                jobs={recruitments} // API 데이터로 변경
-                selectedJob={selectedJob}
-                onSelectJob={handleSelectJob}
-              />
+              <div className={styles.recruitmentContent}>
+                <RecruitmentList
+                  jobs={recruitments} // API 데이터로 변경
+                  selectedJob={selectedJob}
+                  onSelectJob={handleSelectJob}
+                />
+              </div>
             )}
           </div>
         </div>
+        {selectedJob && (
+        <div className={styles.detailContainer}>
+       
+          <RecruitmentDetail
+            job={selectedJob}
+            onClose={() => setSelectedJob(null)}
+          />
+        </div>)}
+        
         <div className={styles.mapWrapper}>
           <MapBoundsDisplay bounds={mapBounds} />
           <MapContainer
