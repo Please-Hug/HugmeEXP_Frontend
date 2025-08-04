@@ -1,5 +1,7 @@
 import React from 'react';
 import styles from './RecruitmentItem.module.scss';
+import wantedLogo from '../../../assets/logos/wanted_logo.png';
+import jumpitLogo from '../../../assets/logos/jumpit_logo.png';
 
 function RecruitmentItem({ job, isSelected, onSelectJob }) {
   const jobItemClasses = `${styles.jobItem} ${isSelected ? styles.selectedJobItem : ''}`;
@@ -23,7 +25,19 @@ function RecruitmentItem({ job, isSelected, onSelectJob }) {
       onClick={() => onSelectJob(job)}
       className={jobItemClasses}
     >
-      <h4 className={styles.jobTitle}>{job.title}</h4>
+      <div className={styles.titleContainer}>
+        <h4 className={styles.jobTitle}>{job.title}</h4>
+        {job.recruitmentSourceId && (
+          <div className={styles.sourceLogoContainer}>
+            {job.recruitmentSourceId.includes('wanted') && (
+              <img src={wantedLogo} alt="Wanted" className={styles.sourceLogo} />
+            )}
+            {job.recruitmentSourceId.includes('jumpit') && (
+              <img src={jumpitLogo} alt="Jumpit" className={styles.sourceLogo} />
+            )}
+          </div>
+        )}
+      </div>
       <p className={styles.jobCompany}>{job.companyName || job.company}</p>
       <p className={styles.jobAddress}>{job.workLocation || job.address}</p>
       <p className={styles.jobExperience}>경력: {experienceText}</p>
