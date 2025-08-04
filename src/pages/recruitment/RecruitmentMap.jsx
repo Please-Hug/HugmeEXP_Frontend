@@ -1,25 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { validateAndBuildParams } from "../../api/recruitmentService";
 import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/RecruitmentPageHeader";
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
 import MapContainer from "../../components/recruitment/recruitment_map/MapContainer";
 
-import RecruitmentFilter from "../../components/recruitment/recruitment_map/RecruitmentFilter";
+import { RecruitmentFilter } from "../../components/recruitment/recruitment_filter";
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
 import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
-import { jobs } from "../../data/jobs";
+import { getRecruitments } from "../../api/recruitmentService";
 
 function RecruitmentMapPage() {
+  // 기존 상태
   const [selectedJob, setSelectedJob] = useState(null);
   const [filterType, setFilterType] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [salary, setSalary] = useState(0);
-  const [experience, setExperience] = useState(0); // 0: 경력무관, 1: 신입, 2: 1년 ... 11: 10년
+  const [experience, setExperience] = useState([-1, 10]); // Default range: -1 (경력무관) to 10 years
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [education, setEducation] = useState(0);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 }); // 기본 중심: 서울시청
   const [mapBounds, setMapBounds] = useState(null);
   const [isMapSearchActive, setIsMapSearchActive] = useState(false);
+
+  // API 연동 상태
+  const [recruitments, setRecruitments] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleSelectJob = (job) => {
     setSelectedJob(job);
@@ -38,13 +45,62 @@ function RecruitmentMapPage() {
   };
 
   const handleSalaryChange = (value) => setSalary(parseInt(value, 10));
-  const handleExperienceChange = (value) => setExperience(value);
+  const handleExperienceChange = (value) => {
+    setExperience(value);
+  };
   const handleSkillChange = (skill) => {
     setSelectedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
     );
   };
   const handleEducationChange = (value) => setEducation(parseInt(value, 10));
+
+  // 채용 정보 API 호출
+  useEffect(() => {
+    const fetchRecruitments = async () => {
+      const params = validateAndBuildParams({
+        filterType,
+        regionFilter,
+        salary,
+        experience,
+        education,
+        selectedSkills,
+        isMapSearchActive,
+        mapBounds,
+      });
+
+      if (!params) {
+        setRecruitments([]);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await getRecruitments(params);
+
+        setRecruitments(data);
+      } catch (err) {
+        console.error("채용 정보 조회 실패:", err);
+        setError(err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다.");
+        setRecruitments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecruitments();
+  }, [
+    filterType,
+    regionFilter,
+    salary,
+    experience,
+    selectedSkills,
+    education,
+    isMapSearchActive,
+    mapBounds,
+  ]);
 
   const handleBoundsChange = (bounds) => {
     setMapBounds(bounds);
@@ -73,53 +129,6 @@ function RecruitmentMapPage() {
     });
   };
 
-  const filteredJobs = jobs.filter((job) => {
-    const typeMatch = filterType === "all" || job.type === filterType;
-    const regionMatch = regionFilter === "all" || job.region === regionFilter;
-
-    const boundsMatch = !isMapSearchActive || !mapBounds || (
-      job.lat >= mapBounds.southWest.lat &&
-      job.lat <= mapBounds.northEast.lat &&
-      job.lng >= mapBounds.southWest.lng &&
-      job.lng <= mapBounds.northEast.lng
-    );
-
-    const salaryMatch = () => {
-      if (salary === 0) return true; // '전체' 또는 '회사 내규'는 모든 연봉을 포함
-      if (salary === 3000) return job.salary >= 3000 && job.salary < 4000;
-      if (salary === 4000) return job.salary >= 4000 && job.salary < 5000;
-      if (salary === 6000) return job.salary >= 6000;
-      return true;
-    };
-
-    const experienceMatch = () => {
-      // 사용자가 '경력무관' 선택 시 모든 공고 포함
-      if (experience === 0) return true;
-      // 공고가 '경력무관'일 경우 항상 포함
-      if (job.experience === "all") return true;
-
-      // '신입' 처리
-      const jobIsNew = job.experience === "new";
-      const filterIsNew = experience === 1;
-      if (filterIsNew) return jobIsNew;
-
-      // 연차 비교
-      const jobExpYear = parseInt(job.experience, 10);
-      if (isNaN(jobExpYear)) return jobIsNew; // job.experience가 'new' 같은 문자열일 경우
-
-      // 사용자가 설정한 경력(N년 이하)보다 요구 경력이 낮거나 같으면 통과
-      return jobExpYear <= experience - 1;
-    };
-
-    const skillsMatch =
-      selectedSkills.length === 0 ||
-      selectedSkills.every((skill) => job.skills.includes(skill));
-
-    const educationMatch = education === 0 || job.education <= education;
-
-    return typeMatch && regionMatch && salaryMatch() && experienceMatch && skillsMatch && educationMatch && boundsMatch;
-  });
-
   return (
     <div className={styles.pageContainer}>
       <RecruitmentMapHeader />
@@ -143,18 +152,22 @@ function RecruitmentMapPage() {
             />
           </div>
           <div className={styles.listContainer}>
-            <RecruitmentList
-              jobs={filteredJobs}
-              selectedJob={selectedJob}
-              onSelectJob={handleSelectJob}
-            />
+            {loading && <div>로딩 중...</div>}
+            {error && <div>에러가 발생했습니다.</div>}
+            {!loading && !error && (
+              <RecruitmentList
+                jobs={recruitments} // API 데이터로 변경
+                selectedJob={selectedJob}
+                onSelectJob={handleSelectJob}
+              />
+            )}
           </div>
         </div>
         <div className={styles.mapWrapper}>
           <MapBoundsDisplay bounds={mapBounds} />
           <MapContainer
-          onSearchCurrentMap={handleSearchCurrentMap}
-            jobs={filteredJobs}
+            onSearchCurrentMap={handleSearchCurrentMap}
+            jobs={recruitments} // API 데이터로 변경
             selectedJob={selectedJob}
             onSelectJob={handleSelectJob}
             onBoundsChange={handleBoundsChange}

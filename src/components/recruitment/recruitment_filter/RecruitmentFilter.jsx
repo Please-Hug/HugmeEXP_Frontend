@@ -1,35 +1,33 @@
 import React, { useState, useEffect, useRef } from "react";
-import Slider from 'rc-slider';
-import 'rc-slider/assets/index.css';
-import ReactDOM from "react-dom";
 import styles from "./RecruitmentFilter.module.scss";
-import {
-  FaChevronDown,
-  FaPython,
-  FaAws,
-  FaGitAlt,
-  FaHtml5,
-  FaJs,
-  FaLinux,
-  FaAndroid,
-  FaApple,
-} from "react-icons/fa";
-import { SiSpring, SiMysql, SiKotlin } from "react-icons/si";
+import { FaChevronDown } from "react-icons/fa";
+import { DropdownPortal } from "./";
+import { ExperienceRangeSlider } from "./";
+import { SkillSelector } from "./";
 
-// Skills data with icons
-const skillsData = [
-  { name: "Python", icon: <FaPython color="#4B8BBE" /> },
-  { name: "Spring", icon: <SiSpring color="#6DB33F" /> },
-  { name: "AWS", icon: <FaAws color="#FF9900" /> },
-  { name: "git", icon: <FaGitAlt color="#F05032" /> },
-  { name: "iOS", icon: <FaApple color="#A2AAAD" /> },
-  { name: "html", icon: <FaHtml5 color="#E34F26" /> },
-  { name: "javascript", icon: <FaJs color="#F7DF1E" /> },
-  { name: "mysql", icon: <SiMysql color="#4479A1" /> },
-  { name: "Linux", icon: <FaLinux color="#000000" /> },
-  { name: "Android", icon: <FaAndroid color="#3DDC84" /> },
-  { name: "Kotlin", icon: <SiKotlin color="#7F52FF" /> },
-];
+// Constants for filter options
+const jobTypes = {
+  all: "직무",
+  frontend: "프론트엔드",
+  backend: "백엔드",
+  designer: "디자이너",
+  mobile: "모바일",
+};
+
+const regions = {
+  all: "지역",
+  seoul: "서울",
+  bundang: "분당",
+};
+
+const educations = {
+  0: "학력",
+  10: "고졸",
+  20: "초대졸",
+  30: "대졸",
+  40: "석사",
+  50: "박사",
+};
 
 const salaryLevels = {
   0: "회사 내규에 따름",
@@ -42,20 +40,6 @@ const salaryLevels = {
 const salaryKeys = Object.keys(salaryLevels)
   .map(Number)
   .sort((a, b) => a - b);
-
-const DropdownPortal = ({ children, position }) => {
-  const el = document.getElementById("dropdown-root");
-  if (!el) return null;
-
-  const style = {
-    position: "absolute",
-    top: `${position.top}px`,
-    left: `${position.left}px`,
-    zIndex: 1050, // Ensure it's above other elements
-  };
-
-  return ReactDOM.createPortal(<div style={style}>{children}</div>, el);
-};
 
 function RecruitmentFilter({
   onFilterChange,
@@ -116,34 +100,15 @@ function RecruitmentFilter({
     onSalaryChange(salaryValue);
   };
 
-  const experienceLevels = [-1, 1, 2, 4, 6, 8, 10]; // -1 for "무관"
-
-  const handleExperienceSliderChange = (e) => {
-    const sliderValue = parseInt(e.target.value, 10);
-    onExperienceChange(experienceLevels[sliderValue]);
-  };
-
-  const jobTypes = {
-    all: "직무",
-    frontend: "프론트엔드",
-    backend: "백엔드",
-    designer: "디자이너",
-    mobile: "모바일",
-  };
-  const regions = { all: "지역", seoul: "서울", bundang: "분당" };
-  const educations = {
-    0: "학력",
-    10: "고졸",
-    20: "초대졸",
-    30: "대졸",
-    40: "석사",
-    50: "박사",
-  };
-
   const getExperienceButtonText = () => {
-    if (experience === -1 || experience === 0) return "경력";
-    if (experience === 1) return "신입";
-    return `${experience}년 이하`;
+    if (Array.isArray(experience)) {
+      if (experience[0] === -1) return "경력무관";
+      if (experience[0] === experience[1]) {
+        return experience[0] === 0 ? "신입" : `${experience[0]}년`;
+      }
+      return `${experience[0] === 0 ? "신입" : `${experience[0]}년`} ~ ${experience[1]}년`;
+    }
+    return "경력";
   };
 
   const getButtonClass = (isActive) =>
@@ -193,69 +158,10 @@ function RecruitmentFilter({
       case "experience":
         content = (
           <div className={styles.dropdownMenu}>
-            <div className={styles.filterGroup}>
-              <h4>경력</h4>
-              <div className={styles.rangeContainer}>
-                <div className={styles.rangeSliderWrapper}>
-                  {/* Background rail */}
-                  <div className={styles.sliderRail}></div>
-                  
-                  {/* Active track between handles */}
-                  <div 
-                    className={styles.sliderTrack} 
-                    style={{
-                      left: `${(experience[0] / 11) * 100}%`,
-                      width: `${((experience[1] - experience[0]) / 11) * 100}%`
-                    }}
-                  ></div>
-                  
-                  {/* Min handle slider */}
-                  <div className={styles.sliderHandleContainer} style={{ zIndex: 1 }}>
-                    <Slider
-                      min={0}
-                      max={11}
-                      value={experience[0]}
-                      onChange={(value) => {
-                        if (value <= experience[1]) {
-                          onExperienceChange([value, experience[1]]);
-                        }
-                      }}
-                      trackStyle={{ backgroundColor: 'transparent' }}
-                      railStyle={{ backgroundColor: 'transparent' }}
-                      handleStyle={{ borderColor: '#007bff', backgroundColor: '#007bff' }}
-                    />
-                  </div>
-                  
-                  {/* Max handle slider */}
-                  <div className={styles.sliderHandleContainer}>
-                    <Slider
-                      min={0}
-                      max={11}
-                      value={experience[1]}
-                      onChange={(value) => {
-                        if (value >= experience[0]) {
-                          onExperienceChange([experience[0], value]);
-                        }
-                      }}
-                      trackStyle={{ backgroundColor: 'transparent' }}
-                      railStyle={{ backgroundColor: 'transparent' }}
-                      handleStyle={{ borderColor: '#007bff', backgroundColor: '#007bff' }}
-                    />
-                  </div>
-                </div>
-                <div className={styles.experienceRangeLabels}>
-                  <span>{experience[0] === 0 ? '신입' : `${experience[0] - 1}년`}</span>
-                  <span>{experience[1] - 1}년</span>
-                </div>
-                <div className={styles.experienceLabel}>
-                  <span>
-                    {experience[0] === experience[1]
-                      ? (experience[0] === 0 ? "경력무관" : `${experience[0] - 1}년`)
-                      : `${experience[0] === 0 ? '신입' : `${experience[0] - 1}년`} ~ ${experience[1] - 1}년`}
-                  </span>
-                </div>
-              </div>
-            </div>
+            <ExperienceRangeSlider
+              experience={experience}
+              onExperienceChange={onExperienceChange}
+            />
           </div>
         );
         break;
@@ -298,31 +204,10 @@ function RecruitmentFilter({
         break;
       case "skills":
         content = (
-          <div
-            className={styles.dropdownMenu}
-            style={{
-              width: "400px",
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "0.75rem",
-              padding: "1rem",
-            }}
-          >
-            {skillsData.map((skill) => (
-              <div key={skill.name} className={styles.skillTag}>
-                <input
-                  type="checkbox"
-                  id={`skill-${skill.name}`}
-                  checked={selectedSkills.includes(skill.name)}
-                  onChange={() => onSkillChange(skill.name)}
-                />
-                <label htmlFor={`skill-${skill.name}`}>
-                  {skill.icon}
-                  {skill.name}
-                </label>
-              </div>
-            ))}
-          </div>
+          <SkillSelector
+            selectedSkills={selectedSkills}
+            onSkillChange={onSkillChange}
+          />
         );
         break;
       default:
@@ -358,7 +243,10 @@ function RecruitmentFilter({
       {/* 경력 필터 */}
       <div className={styles.filterGroup}>
         <button
-          className={getButtonClass(experience !== -1)}
+          className={getButtonClass(
+            Array.isArray(experience) &&
+              (experience[0] !== -1 || experience[1] !== 10)
+          )}
           onClick={(e) => handleDropdownToggle("experience", e)}
         >
           {getExperienceButtonText()}
