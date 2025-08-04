@@ -24,6 +24,7 @@ function MapContainer({
   });
 
   const [map, setMap] = useState(null);
+  const [mapInitialized, setMapInitialized] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 });
   const [isSearchButtonVisible, setIsSearchButtonVisible] = useState(false);
   const isInitialLoad = useRef(true);
@@ -36,11 +37,15 @@ function MapContainer({
   }, [map, mapCenter]);
 
   // 지도 경계 변경 핸들러
+  // TODO : handleBoundsChanged 동작 안함
   const handleBoundsChanged = (mapInstance) => {
     if (!window.kakao || !window.kakao.maps || !window.kakao.maps.geometry) return;
+
+   
     const newBounds = mapInstance.getBounds();
     const sw = newBounds.getSouthWest();
     const ne = newBounds.getNorthEast();
+    console.log(sw, ne);
 
     // 대각선 거리 계산 (Haversine 공식 사용)
     const distanceInMeters = window.kakao.maps.geometry.computeDistanceBetween(sw, ne);
@@ -69,6 +74,8 @@ function MapContainer({
   // 지도 로딩이 완료된 후, 첫 경계를 설정하는 로직
   useEffect(() => {
     if (!map) return;
+    console.log("Map initialized:", map);
+    setMapInitialized(true);
     handleBoundsChanged(map);
     isInitialLoad.current = false;
   }, [map]);
@@ -95,18 +102,44 @@ function MapContainer({
       )}
       <KakaoMap
         center={mapCenter}
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: "100%", height: "100%", position: "relative", zIndex: 1 }}
         level={8}
-        onCreate={setMap} // onCreate에서는 map 객체만 설정합니다.
+        onCreate={(map) => {
+          console.log("KakaoMap onCreate called", map);
+          setMap(map);
+        }}
         onIdle={handleBoundsChanged} // 지도 움직임이 멈췄을 때만 경계를 업데이트합니다.
       >
-        {Array.isArray(jobs) && jobs.map((job) => (
-          <MapMarker
-            key={job.id || `${job.companyName}-${job.title}-${job.latitude}-${job.longitude}`}
-            position={{ lat: job.latitude, lng: job.longitude }}
-            onClick={() => onSelectJob(job)}
-          />
-        ))}
+        {/* Render job markers */}
+        {Array.isArray(jobs) && jobs.length > 0 && jobs.map((job) => {
+          // Make sure latitude and longitude are numeric values and swap them if needed
+          // NOTE: Kakao Maps expects lat to be around 37.xx and lng to be around 126.xx for Seoul
+          let lat = parseFloat(job.latitude);
+          let lng = parseFloat(job.longitude);
+          
+          // Check if coordinates might be swapped (common error)
+          const mightBeSwapped = (lat > 100 || lat < 30) && (lng > 30 && lng < 40);
+          if (mightBeSwapped) {
+            console.log(`Coordinates might be swapped for ${job.title || job.companyName}. Swapping them.`);
+            // Swap lat and lng
+            [lat, lng] = [lng, lat];
+          }
+          
+          console.log(`Rendering marker for ${job.title || job.companyName}:`, lat, lng);
+          
+          if (isNaN(lat) || isNaN(lng)) {
+            console.warn(`Invalid coordinates for ${job.title || job.companyName}:`, job.latitude, job.longitude);
+            return null;
+          }
+          
+          return (
+            <MapMarker
+              key={job.id || `${job.companyName}-${job.title}-${lat}-${lng}`}
+              position={{ lat, lng }}
+              onClick={() => onSelectJob(job)}
+            />
+          );
+        })}
 
         {selectedJob && (
           <CustomOverlayMap
