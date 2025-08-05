@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import {
   validateAndBuildParams,
   getRecruitments,
@@ -20,12 +20,8 @@ export const FilterDataContext = createContext(null);
 
 function RecruitmentMapPage() {
   const { jobId } = useParams(); // URL 파라미터에서 jobId 추출
-  const [searchParams] = useSearchParams();
-  const paramLatitude = searchParams.get("lat");
-  const paramLongitude = searchParams.get("lng");
-
   // 기존 상태
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(jobId ? { id: jobId } : null); // jobId가 있으면 해당 채용 공고 선택
   const [filterType, setFilterType] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [salary, setSalary] = useState(0);
@@ -49,16 +45,6 @@ function RecruitmentMapPage() {
     experienceOptions: [],
   });
   const [filterDataLoading, setFilterDataLoading] = useState(true);
-
-  useEffect(() => {
-    if (jobId) {
-      setSelectedJob({ id: jobId });
-      setMapCenter({
-        lat: parseFloat(paramLatitude) || 37.5665, // 기본값 서울시청
-        lng: parseFloat(paramLongitude) || 126.978, // 기본값 서울시청
-      });
-    }
-  }, [jobId, paramLatitude, paramLongitude]);
 
   // 기술 스택 ID로 기술 스택 정보 찾기 함수
   const findTechStackById = (id) => {
