@@ -122,3 +122,24 @@ export const deleteReservation = async (reservationId) => {
     throw error;
   }
 };
+
+// 호환성을 위한 별칭
+export const cancelReservation = deleteReservation;
+
+// 기존 코드 호환성을 위한 기본 export
+const studyRoomService = {
+  studyHall: {
+    getStudyHalls: async () => ({ data: [] }),
+    createStudyHall: async (data) => console.log("StudyHall 생성:", data),
+    updateStudyHall: async (id, data) => console.log("StudyHall 업데이트:", id, data),
+    deleteStudyHall: async (id) => console.log("StudyHall 삭제:", id),
+  },
+  studyRoom: {
+    getStudyRooms: async () => ({ data: [] }),
+    createStudyRoom: async (hallId, data) => console.log("StudyRoom 생성:", hallId, data),
+    updateStudyRoom: async (hallId, roomId, data) => console.log("StudyRoom 업데이트:", hallId, roomId, data),
+    deleteStudyRoom: async (hallId, roomId) => console.log("StudyRoom 삭제:", hallId, roomId),
+  },
+};
+
+export default studyRoomService;
