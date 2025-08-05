@@ -133,13 +133,6 @@ function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loadi
                       <span className={styles.icon}>🏠</span>
                       <span>총 {studyHall.totalRooms || 0}개 룸</span>
                     </div>
-
-                    {studyHall.availableRooms !== undefined && (
-                      <div className={styles.detailItem}>
-                        <span className={styles.icon}>✅</span>
-                        <span>이용가능 {studyHall.availableRooms}개</span>
-                      </div>
-                    )}
                   </div>
 
                   <div className={styles.operatingHours}>
