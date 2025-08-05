@@ -42,7 +42,7 @@ function MapContainer({
     }
   }, [map, mapCenter]);
 
-  // selectedJob이 변경될 때 지도 중심 이동
+  // selectedJob이 변경될 때 지도 중심 이동 (필요한 경우에만)
   useEffect(() => {
     if (map && selectedJob && selectedJob.latitude && selectedJob.longitude) {
       // 위도와 경도가 숫자인지 확인
@@ -56,7 +56,31 @@ function MapContainer({
       }
       
       if (!isNaN(lat) && !isNaN(lng)) {
-        setMapCenter({ lat, lng });
+        // 현재 지도 중심 좌표 가져오기
+        const currentCenter = map.getCenter();
+        const currentLat = currentCenter.getLat();
+        const currentLng = currentCenter.getLng();
+        
+        // 현재 지도 영역(bounds) 가져오기
+        const bounds = map.getBounds();
+        
+        // 선택된 위치가 현재 지도 영역 내에 있는지 확인
+        const isWithinBounds = bounds.contain(new window.kakao.maps.LatLng(lat, lng));
+        
+        // 선택된 위치가 지도 중심에서 얼마나 떨어져 있는지 계산
+        const latDiff = Math.abs(currentLat - lat);
+        const lngDiff = Math.abs(currentLng - lng);
+        
+        // 지도 중심에서 일정 거리 이상 떨어져 있거나 지도 영역 밖에 있는 경우에만 중심 이동
+        // 위도 0.02 차이는 약 2.2km, 경도 0.02 차이는 서울 기준 약 1.7km
+        const THRESHOLD = 0.02;
+        
+        if (!isWithinBounds || latDiff > THRESHOLD || lngDiff > THRESHOLD) {
+          console.log("Moving map to new location:", { lat, lng });
+          setMapCenter({ lat, lng });
+        } else {
+          console.log("Location already near center, not moving map");
+        }
       }
     }
   }, [map, selectedJob]);
@@ -145,9 +169,6 @@ function MapContainer({
       lng: parseFloat(boundingBox.northEast.lng.toFixed(8))
     };
     
-    console.log("Calculated topLeft:", topLeft);
-    console.log("Calculated bottomRight:", bottomRight);
-    
     // Update the boundary points state
     setBoundaryPoints({
       topLeft: topLeft,
@@ -173,15 +194,12 @@ function MapContainer({
   // 지도 로딩이 완료된 후, 첫 경계를 설정하는 로직
   useEffect(() => {
     if (!map) return;
-    // console.log("Map initialized:", map);
     setMapInitialized(true);
     handleBoundsChanged(map);
     isInitialLoad.current = false;
   }, [map]);
 
   const handleSearchButtonClick = () => {
-    console.log("topLeft", boundaryPoints.topLeft);
-    console.log("bottomRight", boundaryPoints.bottomRight);
     if (onSearchCurrentMap) {
       onSearchCurrentMap();
     }
@@ -206,7 +224,6 @@ function MapContainer({
         style={{ width: "100%", height: "100%", position: "relative", zIndex: 1 }}
         level={8}
         onCreate={(map) => {
-          // console.log("KakaoMap onCreate called", map);
           setMap(map);
         }}
         onIdle={handleBoundsChanged} // 지도 움직임이 멈췄을 때만 경계를 업데이트합니다.
