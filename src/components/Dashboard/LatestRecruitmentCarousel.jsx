@@ -18,6 +18,7 @@ function LatestRecruitmentCarousel() {
   const [startPos, setStartPos] = useState(0);
   const [currentTranslate, setCurrentTranslate] = useState(0);
   const [prevTranslate, setPrevTranslate] = useState(0);
+  const [isMouseDown, setIsMouseDown] = useState(false);
 
   const itemsPerView = 3;
 
@@ -75,23 +76,38 @@ function LatestRecruitmentCarousel() {
 
   // 드래그 기능
   const handleTouchStart = (e) => {
-    setIsDragging(true);
+    setIsMouseDown(true);
+    setIsDragging(false);
     setStartPos(e.type === "mousedown" ? e.clientX : e.touches[0].clientX);
     setPrevTranslate(currentTranslate);
   };
 
   const handleTouchMove = (e) => {
-    if (!isDragging) return;
+    // 마우스가 눌린 상태가 아니면 드래그 무시 (터치는 예외)
+    if (e.type === "mousemove" && !isMouseDown) return;
 
     const currentPosition =
       e.type === "mousemove" ? e.clientX : e.touches[0].clientX;
-    const diff = currentPosition - startPos;
-    setCurrentTranslate(prevTranslate + diff);
+    const diff = Math.abs(currentPosition - startPos);
+
+    // 일정 거리 이상 움직이면 드래그로 인식
+    if (diff > 5) {
+      setIsDragging(true);
+    }
+
+    if (!isDragging) return;
+
+    const moveDiff = currentPosition - startPos;
+    setCurrentTranslate(prevTranslate + moveDiff);
   };
 
   const handleTouchEnd = () => {
-    if (!isDragging) return;
-    setIsDragging(false);
+    setIsMouseDown(false);
+
+    if (!isDragging) {
+      setIsDragging(false);
+      return;
+    }
 
     const movedBy = currentTranslate - prevTranslate;
     const threshold = 100; // 최소 드래그 거리
@@ -104,12 +120,33 @@ function LatestRecruitmentCarousel() {
 
     setCurrentTranslate(0);
     setPrevTranslate(0);
+
+    // 드래그 상태를 약간의 딜레이 후에 해제하여 클릭 이벤트 차단
+    setTimeout(() => {
+      setIsDragging(false);
+    }, 10);
+  };
+
+  const handleTitleClick = () => {
+    window.open("/recruitment/map", "_blank");
+  };
+
+  const handleCardClick = (recruitmentId, e) => {
+    // 드래그가 발생했으면 클릭 이벤트 차단
+    if (isDragging) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    window.open(`/recruitment/map/${recruitmentId}`, "_blank");
   };
 
   return (
     <div className={styles.latestRecruitmentCarousel}>
       <div className={styles.header}>
-        <h3>최신 채용 공고</h3>
+        <h3 onClick={handleTitleClick} className={styles.clickableTitle}>
+          최신 채용 공고
+        </h3>
         <div className={styles.navigation}>
           <button
             className={styles.navButton}
@@ -152,7 +189,11 @@ function LatestRecruitmentCarousel() {
             onTouchEnd={handleTouchEnd}
           >
             {recruitments.map((recruitment) => (
-              <div key={recruitment.id} className={styles.recruitmentCard}>
+              <div
+                key={recruitment.id}
+                className={styles.recruitmentCard}
+                onClick={(e) => handleCardClick(recruitment.id, e)}
+              >
                 <div className={styles.cardHeader}>
                   <div className={styles.companyInfo}>
                     {recruitment.companyImageUrl ? (
