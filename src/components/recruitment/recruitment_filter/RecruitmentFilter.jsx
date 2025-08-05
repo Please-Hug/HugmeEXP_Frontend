@@ -70,6 +70,7 @@ function RecruitmentFilter({
 
   const getExperienceButtonText = () => {
     if (Array.isArray(experience)) {
+      if (experience[0] === -1 && experience[1] === 10) return "경력";
       if (experience[0] === -1) return "경력무관";
       if (experience[0] === experience[1]) {
         return experience[0] === 0 ? "신입" : `${experience[0]}년`;

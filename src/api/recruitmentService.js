@@ -38,7 +38,11 @@ export const validateAndBuildParams = (filters) => {
     const max = experience[1];
 
     // -1은 신입으로 0으로 변환
-    if (min === -1) {
+    if(min === -1 && max === 10){
+      params.experienceMin = null;
+      params.experienceMax = null;
+    }
+    else if (min === -1) {
       params.experienceMin = 0;
     } else if (min >= 0) {
       params.experienceMin = min;
