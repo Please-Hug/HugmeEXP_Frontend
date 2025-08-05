@@ -9,6 +9,7 @@ const MonthlyRegistrationChart = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
     const fetchData = async () => {
       try {
         const monthlyStats = await getMonthlyRegistrationStats();
@@ -20,23 +21,40 @@ const MonthlyRegistrationChart = () => {
           displayMonth: formatMonth(stat.month)
         }));
         
-        setData(chartData);
-      } catch (err) {
-        setError('월별 가입자 데이터를 불러오는데 실패했습니다.');
+        if (isMounted) {
+          setData(chartData);
+        }
+      } catch (error) {
+        if (isMounted) {
+          console.error('월별 가입자 데이터 로드 실패:', error);
+          setError('월별 가입자 데이터를 불러오는데 실패했습니다.');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const formatMonth = (monthStr) => {
-    const [year, month] = monthStr.split('-');
+    if (!monthStr || typeof monthStr !== 'string') {
+      return '알 수 없음';
+    }
+    const [, month] = monthStr.split('-');
+    if (!month) {
+      return monthStr;
+    }
     return `${parseInt(month)}월`;
   };
 
-  const CustomTooltip = ({ active, payload, label }) => {
+  const CustomTooltip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
@@ -117,13 +135,13 @@ const MonthlyRegistrationChart = () => {
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>월 평균</span>
           <span className={styles.summaryValue}>
-            {Math.round(data.reduce((sum, item) => sum + item.count, 0) / data.length)}명
+            {data.length > 0 ? Math.round(data.reduce((sum, item) => sum + item.count, 0) / data.length) : 0}명
           </span>
         </div>
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>최고 기록</span>
           <span className={styles.summaryValue}>
-            {Math.max(...data.map(item => item.count))}명
+            {data.length > 0 ? Math.max(...data.map(item => item.count)) : 0}명
           </span>
         </div>
       </div>
