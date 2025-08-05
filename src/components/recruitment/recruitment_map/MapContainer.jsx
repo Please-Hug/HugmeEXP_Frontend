@@ -90,11 +90,28 @@ function MapContainer({
       }
     }
     
+    // 지도 영역을 실제 보이는 영역에 맞게 조정하기 위한 축소 계수 (0.1 = 10% 축소)
+    const zoomFactor = 0.15;
+    
+    // 중심점 계산
+    const centerLat = (ne.getLat() + sw.getLat()) / 2;
+    const centerLng = (ne.getLng() + sw.getLng()) / 2;
+    
+    // 위도와 경도 범위 계산
+    const latRange = ne.getLat() - sw.getLat();
+    const lngRange = ne.getLng() - sw.getLng();
+    
+    // 축소된 범위 계산
+    const adjustedNorthLat = centerLat + (latRange / 2) * (1 - zoomFactor);
+    const adjustedSouthLat = centerLat - (latRange / 2) * (1 - zoomFactor);
+    const adjustedEastLng = centerLng + (lngRange / 2) * (1 - zoomFactor);
+    const adjustedWestLng = centerLng - (lngRange / 2) * (1 - zoomFactor);
+    
     const boundingBox = {
-      northEast: { lat: ne.getLat(), lng: ne.getLng() },
-      southWest: { lat: sw.getLat(), lng: sw.getLng() },
-      northWest: { lat: ne.getLat(), lng: sw.getLng() },
-      southEast: { lat: sw.getLat(), lng: ne.getLng() },
+      northEast: { lat: adjustedNorthLat, lng: adjustedEastLng },
+      southWest: { lat: adjustedSouthLat, lng: adjustedWestLng },
+      northWest: { lat: adjustedNorthLat, lng: adjustedWestLng },
+      southEast: { lat: adjustedSouthLat, lng: adjustedEastLng },
       diagonalDistance: displayDistance,
     };
     

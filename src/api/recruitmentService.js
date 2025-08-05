@@ -88,7 +88,7 @@ export const validateAndBuildParams = (filters) => {
 
 export const getRecruitments = async (params) => {
   try {
-    const response = await api.get("/api/v1/recruitments");
+    const response = await api.get("/api/v1/recruitments", { params });
     if (response.status === 204) {
       return []; // 데이터가 없는 경우 빈 배열 반환
     }
