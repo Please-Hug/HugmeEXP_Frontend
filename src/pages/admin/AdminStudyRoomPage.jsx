@@ -25,6 +25,75 @@ function AdminStudyRoomPage() {
     return styles.message;
   };
 
+  // 운영시간 포맷팅 함수
+  const formatOperatingHours = (openTime, closeTime) => {
+    const formatTime = (timeValue) => {
+      if (!timeValue) return "정보 없음";
+      
+      // 숫자나 문자열을 시간 형태로 변환
+      const timeString = timeValue.toString().trim();
+      
+      // 정규식으로 시간과 분 추출 (다양한 형태 지원)
+      // 11:,4, 11:04, 11.04, 1104, 11,04 등 모든 형태 지원
+      const timePattern = /(\d{1,2})[\s:.,]*(\d{1,2})?/;
+      const match = timeString.match(timePattern);
+      
+      if (match) {
+        const hours = parseInt(match[1]) || 0;
+        const minutes = parseInt(match[2]) || 0;
+        
+        // 시간과 분이 유효한 범위인지 확인
+        if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+      }
+      
+      // 긴 숫자 형태 (예: 9010483000000, 22010483000000)에서 시간 추출
+      if (timeString.length > 10) {
+        const hourMatch = timeString.match(/^(\d{1,2})/);
+        if (hourMatch) {
+          const hour = parseInt(hourMatch[1]);
+          if (hour >= 0 && hour <= 23) {
+            return `${hour.toString().padStart(2, '0')}:00`;
+          }
+        }
+      }
+      
+      // 4자리 숫자 형태 (예: 0900, 2200, 1104)
+      if (timeString.length === 4 && /^\d{4}$/.test(timeString)) {
+        const hours = parseInt(timeString.substring(0, 2));
+        const minutes = parseInt(timeString.substring(2, 4));
+        if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+      }
+      
+      // 3자리 숫자 형태 (예: 900, 104)
+      if (timeString.length === 3 && /^\d{3}$/.test(timeString)) {
+        const hours = parseInt(timeString.substring(0, 1));
+        const minutes = parseInt(timeString.substring(1, 3));
+        if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        }
+      }
+      
+      // 1-2자리 숫자 형태 (시간만)
+      if (/^\d{1,2}$/.test(timeString)) {
+        const hour = parseInt(timeString);
+        if (hour >= 0 && hour <= 23) {
+          return `${hour.toString().padStart(2, '0')}:00`;
+        }
+      }
+      
+      return "시간 오류";
+    };
+
+    const formattedOpen = formatTime(openTime);
+    const formattedClose = formatTime(closeTime);
+    
+    return `${formattedOpen} ~ ${formattedClose}`;
+  };
+
   // 스터디홀 목록 조회
   const fetchStudyHalls = async () => {
     setLoading(true);
@@ -35,7 +104,11 @@ function AdminStudyRoomPage() {
       setMessage("✅ 스터디홀 목록을 불러왔습니다.");
     } catch (error) {
       console.error("스터디홀 조회 오류:", error);
-      setMessage("❌ 스터디홀 목록을 불러오는데 실패했습니다.");
+      if (error.response?.status === 403) {
+        setMessage("❌ 관리자 권한이 필요합니다.");
+      } else {
+        setMessage("❌ 스터디홀 목록을 불러오는데 실패했습니다.");
+      }
     } finally {
       setLoading(false);
     }
@@ -49,7 +122,13 @@ function AdminStudyRoomPage() {
       setMessage("✅ 스터디룸 목록을 불러왔습니다.");
     } catch (error) {
       console.error("스터디룸 조회 오류:", error);
-      setMessage("❌ 스터디룸 목록을 불러오는데 실패했습니다.");
+      if (error.response?.status === 404) {
+        setMessage("❌ 스터디홀을 찾을 수 없습니다.");
+      } else if (error.response?.status === 403) {
+        setMessage("❌ 관리자 권한이 필요합니다.");
+      } else {
+        setMessage("❌ 스터디룸 목록을 불러오는데 실패했습니다.");
+      }
     }
   };
 
@@ -73,7 +152,13 @@ function AdminStudyRoomPage() {
       }
     } catch (error) {
       console.error("스터디홀 삭제 오류:", error);
-      setMessage("❌ 스터디홀 삭제에 실패했습니다.");
+      if (error.response?.status === 404) {
+        setMessage("❌ 스터디홀을 찾을 수 없습니다.");
+      } else if (error.response?.status === 403) {
+        setMessage("❌ 관리자 권한이 필요합니다.");
+      } else {
+        setMessage("❌ 스터디홀 삭제에 실패했습니다.");
+      }
     }
   };
 
@@ -88,7 +173,13 @@ function AdminStudyRoomPage() {
       fetchStudyRooms(selectedStudyHall.id);
     } catch (error) {
       console.error("스터디룸 삭제 오류:", error);
-      setMessage("❌ 스터디룸 삭제에 실패했습니다.");
+      if (error.response?.status === 404) {
+        setMessage("❌ 스터디홀 또는 스터디룸을 찾을 수 없습니다.");
+      } else if (error.response?.status === 403) {
+        setMessage("❌ 관리자 권한이 필요합니다.");
+      } else {
+        setMessage("❌ 스터디룸 삭제에 실패했습니다.");
+      }
     }
   };
 
@@ -149,15 +240,7 @@ function AdminStudyRoomPage() {
                       <td>{hall.name}</td>
                       <td>{hall.simpleAddress}</td>
                       <td>
-                        {new Date(hall.openTime).toLocaleTimeString("ko-KR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                        ~
-                        {new Date(hall.closeTime).toLocaleTimeString("ko-KR", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatOperatingHours(hall.openTime, hall.closeTime)}
                       </td>
                       <td>
                         <div className={styles.actions}>

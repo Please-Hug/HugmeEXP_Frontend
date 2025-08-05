@@ -1,0 +1,162 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e9ecef;
+  
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #dc3545;
+  background-color: #f8d7da;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.detailContent {
+  .basicInfo {
+    margin-bottom: 30px;
+    
+    h3 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+  }
+  
+  .infoRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    
+    .icon {
+      font-size: 1.1rem;
+      margin-right: 10px;
+      width: 20px;
+    }
+    
+    span:last-child {
+      color: #555;
+      line-height: 1.4;
+    }
+  }
+}
+
+.thumbnailSection {
+  border-top: 1px solid #e9ecef;
+  padding-top: 24px;
+  text-align: center;
+  
+  .thumbnail {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.roomsSection {
+  border-top: 1px solid #e9ecef;
+  padding-top: 24px;
+  
+  h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+  }
+}
+
+.roomsList {
+  display: grid;
+  gap: 12px;
+}
+
+.roomCard {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e9ecef;
+  
+  .roomName {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+  }
+  
+  .roomInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+  }
+  
+  .available {
+    color: #28a745;
+    font-weight: 500;
+  }
+  
+  .unavailable {
+    color: #dc3545;
+    font-weight: 500;
+  }
+}

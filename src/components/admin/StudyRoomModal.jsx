@@ -140,7 +140,15 @@ function StudyRoomModal({ isOpen, onClose, studyHallId, studyRoom, onSuccess }) 
       onClose();
     } catch (error) {
       console.error("스터디룸 저장 오류:", error);
-      setError(error.response?.data?.message || "저장에 실패했습니다.");
+      if (error.response?.status === 400) {
+        setError("입력 데이터에 오류가 있습니다. 모든 필드를 올바르게 입력했는지 확인해주세요.");
+      } else if (error.response?.status === 403) {
+        setError("관리자 권한이 필요합니다.");
+      } else if (error.response?.status === 404) {
+        setError("스터디홀 또는 스터디룸을 찾을 수 없습니다.");
+      } else {
+        setError(error.response?.data?.message || "저장에 실패했습니다.");
+      }
     } finally {
       setLoading(false);
     }

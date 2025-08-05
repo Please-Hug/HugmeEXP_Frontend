@@ -31,7 +31,7 @@ export const searchNearbyStudyHalls = async (latitude, longitude, radius = 10.0,
 export const getStudyHallDetail = async (studyHallId) => {
   try {
     const response = await api.get(`/api/v1/studyroom/halls/${studyHallId}`);
-    return response.data;
+    return response.data; // { message, data } 형식
   } catch (error) {
     console.error("스터디홀 상세 정보 가져오기 실패:", error);
     throw error;
@@ -126,8 +126,33 @@ export const deleteReservation = async (reservationId) => {
 // 호환성을 위한 별칭
 export const cancelReservation = deleteReservation;
 
+// 전체 스터디룸 조회 (사용자용) - API 명세서에 없는 엔드포인트, 스터디홀별 조회 사용 권장
+export const getAllStudyRooms = async () => {
+  try {
+    const response = await api.get("/api/v1/studyroom/rooms");
+    return response.data; // { message, data } 형식
+  } catch (error) {
+    console.error("전체 스터디룸 조회 실패:", error);
+    throw error;
+  }
+};
+
+// 특정 스터디홀의 스터디룸 목록 조회 (사용자용)
+export const getStudyRoomsByHall = async (studyHallId) => {
+  try {
+    const response = await api.get(`/api/v1/studyroom/halls/${studyHallId}/rooms`);
+    return response.data; // { message, data } 형식
+  } catch (error) {
+    console.error("스터디홀별 스터디룸 조회 실패:", error);
+    throw error;
+  }
+};
+
 // 관리자 스터디홀 및 스터디룸 관리를 위한 기본 export
 const studyRoomService = {
+  // 사용자용 API 추가
+  getAllStudyRooms,
+  getStudyRoomsByHall,
   studyHall: {
     // 전체 스터디홀 조회 (관리자용)
     getStudyHalls: async (page = 0, size = 20) => {

@@ -34,8 +34,8 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
         latitude: studyHall.latitude || 0,
         longitude: studyHall.longitude || 0,
         thumbnail: studyHall.thumbnail || "",
-        openTime: formatDateTimeLocal(studyHall.openTime),
-        closeTime: formatDateTimeLocal(studyHall.closeTime),
+        openTime: formatTimeLocal(studyHall.openTime),
+        closeTime: formatTimeLocal(studyHall.closeTime),
       });
       // 기존 썸네일이 있으면 미리보기로 설정
       if (studyHall.thumbnail) {
@@ -59,22 +59,13 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
     setImageFile(null);
   }, [studyHall, isOpen]);
 
-  // 날짜 형식 변환 (ISO 8601 -> datetime-local)
-  const formatDateTimeLocal = (isoString) => {
+  // 시간 형식 변환 (ISO 8601 -> HH:mm)
+  const formatTimeLocal = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
     const hours = String(date.getHours()).padStart(2, "0");
     const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
-
-  // 날짜 형식 변환 (datetime-local -> ISO 8601)
-  const formatToISO = (dateTimeLocal) => {
-    if (!dateTimeLocal) return "";
-    return new Date(dateTimeLocal).toISOString();
+    return `${hours}:${minutes}`;
   };
 
   const handleChange = (e) => {
@@ -175,8 +166,8 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
       const submitData = {
         ...formData,
         thumbnail: thumbnailUrl,
-        openTime: formatToISO(formData.openTime),
-        closeTime: formatToISO(formData.closeTime),
+        openTime: formData.openTime,
+        closeTime: formData.closeTime,
       };
 
       if (studyHall) {
@@ -189,7 +180,15 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
       onClose();
     } catch (error) {
       console.error("스터디홀 저장 오류:", error);
-      setError(error.response?.data?.message || "저장에 실패했습니다.");
+      if (error.response?.status === 400) {
+        setError("입력 데이터에 오류가 있습니다. 모든 필드를 올바르게 입력했는지 확인해주세요.");
+      } else if (error.response?.status === 403) {
+        setError("관리자 권한이 필요합니다.");
+      } else if (error.response?.status === 404) {
+        setError("스터디홀을 찾을 수 없습니다.");
+      } else {
+        setError(error.response?.data?.message || "저장에 실패했습니다.");
+      }
     } finally {
       setLoading(false);
     }
@@ -399,10 +398,11 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
               <input
                 id="openTime"
                 name="openTime"
-                type="datetime-local"
+                type="time"
                 value={formData.openTime}
                 onChange={handleChange}
                 required
+                placeholder="HH:MM"
               />
             </div>
 
@@ -411,10 +411,11 @@ function StudyHallModal({ isOpen, onClose, studyHall, onSuccess }) {
               <input
                 id="closeTime"
                 name="closeTime"
-                type="datetime-local"
+                type="time"
                 value={formData.closeTime}
                 onChange={handleChange}
                 required
+                placeholder="HH:MM"
               />
             </div>
           </div>

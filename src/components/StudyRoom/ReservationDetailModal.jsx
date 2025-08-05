@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../common/Modal/Modal";
-import { getReservationDetail } from "../../api/studyRoomService";
+import studyRoomReservationService from "../../api/studyRoomReservationService";
 import styles from "./ReservationDetailModal.module.scss";
 
 const ReservationDetailModal = ({ isOpen, onClose, reservationId }) => {
@@ -12,8 +12,11 @@ const ReservationDetailModal = ({ isOpen, onClose, reservationId }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getReservationDetail(reservationId);
-      setReservation(response.data);
+      const response = await studyRoomReservationService.user.getReservation(reservationId);
+      // API 응답 구조: { message, data: { id, reservationStart, ... } }
+      if (response && response.data) {
+        setReservation(response.data);
+      }
     } catch (error) {
       setError("예약 상세 정보를 불러오는데 실패했습니다.");
       console.error("예약 상세 조회 실패:", error);

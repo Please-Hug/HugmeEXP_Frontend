@@ -24,6 +24,8 @@ function AdminStudyRoomReservationPage() {
     setLoading(true);
     try {
       const response = await studyRoomReservationService.admin.getAllReservations(page, 20);
+      console.log("API 응답:", response); // 디버깅용
+      console.log("예약 데이터:", response.data.content); // 디버깅용
       setReservations(response.data.content);
       setTotalPages(response.data.totalPages);
       setTotalElements(response.data.totalElements);
@@ -60,7 +62,24 @@ function AdminStudyRoomReservationPage() {
 
   // 날짜 포맷팅
   const formatDateTime = (dateTimeString) => {
-    const date = new Date(dateTimeString);
+    if (!dateTimeString) return "날짜 없음";
+    
+    let date;
+    if (typeof dateTimeString === 'string') {
+      // ISO 문자열인 경우 그대로 사용
+      date = new Date(dateTimeString);
+    } else if (Array.isArray(dateTimeString) && dateTimeString.length >= 5) {
+      // [year, month, day, hour, minute, second] 형태인 경우
+      const [year, month, day, hour, minute, second = 0] = dateTimeString;
+      date = new Date(year, month - 1, day, hour, minute, second); // month는 0부터 시작
+    } else {
+      date = new Date(dateTimeString);
+    }
+    
+    if (isNaN(date.getTime())) {
+      return "잘못된 날짜";
+    }
+    
     return date.toLocaleString("ko-KR", {
       year: "numeric",
       month: "2-digit",
@@ -72,9 +91,32 @@ function AdminStudyRoomReservationPage() {
 
   // 예약 시간 계산
   const calculateDuration = (start, end) => {
-    const startTime = new Date(start);
-    const endTime = new Date(end);
+    if (!start || !end) return "시간 미상";
+    
+    let startTime, endTime;
+    
+    // 배열 형태 날짜 처리
+    if (Array.isArray(start) && start.length >= 5) {
+      const [year, month, day, hour, minute, second = 0] = start;
+      startTime = new Date(year, month - 1, day, hour, minute, second);
+    } else {
+      startTime = new Date(start);
+    }
+    
+    if (Array.isArray(end) && end.length >= 5) {
+      const [year, month, day, hour, minute, second = 0] = end;
+      endTime = new Date(year, month - 1, day, hour, minute, second);
+    } else {
+      endTime = new Date(end);
+    }
+    
+    if (isNaN(startTime.getTime()) || isNaN(endTime.getTime())) {
+      return "시간 오류";
+    }
+    
     const duration = endTime - startTime;
+    if (duration < 0) return "시간 오류";
+    
     const hours = Math.floor(duration / (1000 * 60 * 60));
     const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}시간 ${minutes}분`;
@@ -83,8 +125,26 @@ function AdminStudyRoomReservationPage() {
   // 예약 상태 확인
   const getReservationStatus = (reservation) => {
     const now = new Date();
-    const start = new Date(reservation.reservationStart);
-    const end = new Date(reservation.reservationEnd);
+    let start, end;
+    
+    // 배열 형태 날짜 처리
+    if (Array.isArray(reservation.reservationStart) && reservation.reservationStart.length >= 5) {
+      const [year, month, day, hour, minute, second = 0] = reservation.reservationStart;
+      start = new Date(year, month - 1, day, hour, minute, second);
+    } else {
+      start = new Date(reservation.reservationStart);
+    }
+    
+    if (Array.isArray(reservation.reservationEnd) && reservation.reservationEnd.length >= 5) {
+      const [year, month, day, hour, minute, second = 0] = reservation.reservationEnd;
+      end = new Date(year, month - 1, day, hour, minute, second);
+    } else {
+      end = new Date(reservation.reservationEnd);
+    }
+
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return { status: "상태 오류", className: styles.error };
+    }
 
     if (now < start) {
       return { status: "예정", className: styles.scheduled };

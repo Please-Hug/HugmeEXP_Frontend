@@ -9,7 +9,7 @@ const StudyRoomPage = () => {
   useEffect(() => {
     setBreadcrumbItems([
       { label: "홈", path: "/dashboard" },
-      { label: "스터디룸 예약", path: "/studyroom/reservation" }
+      { label: "내 예약 목록", path: "/studyroom/reservation" }
     ]);
   }, [setBreadcrumbItems]);
 

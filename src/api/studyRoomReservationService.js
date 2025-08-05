@@ -22,13 +22,13 @@ export const userReservationApi = {
   // 예약 생성
   createReservation: async (reservationData) => {
     const response = await apiInstance.post('/api/v1/studyroom/reservations', reservationData);
-    return response.data;
+    return response.data; // { message, data: { reservationId } }
   },
 
   // 예약 상세 조회
   getReservation: async (reservationId) => {
     const response = await apiInstance.get(`/api/v1/studyroom/reservations/${reservationId}`);
-    return response.data;
+    return response.data; // { message, data: { id, reservationStart, ... } }
   },
 
   // 사용자 예약 목록 조회
@@ -36,13 +36,13 @@ export const userReservationApi = {
     const response = await apiInstance.get('/api/v1/studyroom/reservations', {
       params: { page, size, sort }
     });
-    return response.data;
+    return response.data; // { message, data: { content, pageable, ... } }
   },
 
   // 예약 취소
   cancelReservation: async (reservationId) => {
     const response = await apiInstance.delete(`/api/v1/studyroom/reservations/${reservationId}`);
-    return response.data;
+    return response.data; // { message, data: null }
   },
 };
 

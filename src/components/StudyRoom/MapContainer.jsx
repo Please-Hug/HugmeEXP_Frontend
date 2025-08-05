@@ -124,6 +124,43 @@ function MapContainer({
     };
   }, [map, currentLocation]);
 
+  // 시간 포맷팅 함수
+  const formatTime = (time) => {
+    if (!time) return "정보 없음";
+    
+    // LocalTime은 배열 형태 [hour, minute, second, nanosecond] 또는 문자열로 올 수 있음
+    if (Array.isArray(time)) {
+      // LocalTime이 배열로 온 경우: [hour, minute, second, nanosecond]
+      const [hour, minute] = time;
+      if (typeof hour === 'number' && typeof minute === 'number') {
+        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    // 문자열 형태로 온 경우
+    if (typeof time === 'string') {
+      // 이미 "HH:mm" 형식이면 그대로 반환
+      if (/^\d{1,2}:\d{2}$/.test(time)) {
+        const [hour, minute] = time.split(':');
+        return `${hour.padStart(2, '0')}:${minute}`;
+      }
+      // "HH:mm:ss" 형식이면 초 제거
+      if (/^\d{1,2}:\d{2}:\d{2}$/.test(time)) {
+        const [hour, minute] = time.split(':');
+        return `${hour.padStart(2, '0')}:${minute}`;
+      }
+    }
+    
+    // 객체 형태로 온 경우 (LocalTime 객체의 직렬화)
+    if (typeof time === 'object' && time !== null) {
+      if (time.hour !== undefined && time.minute !== undefined) {
+        return `${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    return "정보 없음";
+  };
+
   // 스터디홀 마커들
   useEffect(() => {
     if (!map || !studyHalls.length) return;
@@ -153,6 +190,9 @@ function MapContainer({
             <p style="margin:5px 0 0 0; font-size:12px;">
               총 ${hall.totalRooms || 0}개 룸 
               ${hall.availableRooms !== undefined ? `(이용가능: ${hall.availableRooms}개)` : ''}
+            </p>
+            <p style="margin:5px 0 0 0; font-size:12px;">
+              🕐 ${formatTime(hall.openTime)} - ${formatTime(hall.closeTime)}
             </p>
           </div>
         `

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getReservations, cancelReservation } from "../../api/studyRoomService";
+import studyRoomReservationService from "../../api/studyRoomReservationService";
 import ReservationDetailModal from "./ReservationDetailModal";
 import styles from "./StudyRoomList.module.scss";
 
@@ -21,13 +21,16 @@ const StudyRoomList = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getReservations(pagination.page, pagination.size);
-      setReservations(response.data.content);
-      setPagination(prev => ({
-        ...prev,
-        totalPages: response.data.totalPages,
-        totalElements: response.data.totalElements
-      }));
+      const response = await studyRoomReservationService.user.getUserReservations(pagination.page, pagination.size);
+      // API 응답 구조: { message, data: { content, pageable, ... } }
+      if (response && response.data) {
+        setReservations(response.data.content || []);
+        setPagination(prev => ({
+          ...prev,
+          totalPages: response.data.totalPages || 0,
+          totalElements: response.data.totalElements || 0
+        }));
+      }
     } catch (error) {
       setError("예약 목록을 불러오는데 실패했습니다.");
       console.error("예약 목록 조회 실패:", error);
@@ -46,7 +49,7 @@ const StudyRoomList = () => {
     }
 
     try {
-      await cancelReservation(reservationId);
+      await studyRoomReservationService.user.cancelReservation(reservationId);
       alert("예약이 성공적으로 취소되었습니다.");
       fetchReservations();
     } catch (error) {
