@@ -103,3 +103,22 @@ export const getRecruitments = async (params) => {
     throw error; // 에러를 다시 던져서 호출하는 쪽에서 처리할 수 있도록 함
   }
 };
+
+// 채용 공고 상세 정보 조회
+export const getRecruitmentDetail = async (id) => {
+  try {
+    const response = await api.get(`/api/v1/recruitments/${id}`);
+    if (response.status === 204) {
+      return null; // 데이터가 없는 경우 null 반환
+    }
+    // 백엔드 응답 구조: { message: string, data: RecruitmentDetailResponseDTO }
+    if (response.data && response.data.data) {
+      return response.data.data; // data 필드에서 채용 공고 상세 정보 추출
+    }
+    console.warn("Unexpected response format:", response.data);
+    return null;
+  } catch (error) {
+    console.error(`Error fetching recruitment detail for ID ${id}:`, error);
+    throw error; // 에러를 다시 던져서 호출하는 쪽에서 처리할 수 있도록 함
+  }
+};
