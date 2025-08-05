@@ -103,3 +103,20 @@ export const getRecruitments = async (params) => {
     throw error; // 에러를 다시 던져서 호출하는 쪽에서 처리할 수 있도록 함
   }
 };
+
+export const getLatestRecruitments = async () => {
+  try {
+    const response = await api.get("/api/v1/recruitments/home");
+    if (response.status === 204) {
+      return [];
+    }
+    if (response.data && response.data.data) {
+      return response.data.data;
+    }
+    console.warn("Unexpected response format:", response.data);
+    return [];
+  } catch (error) {
+    console.error("Error fetching latest recruitments:", error);
+    throw error;
+  }
+};
