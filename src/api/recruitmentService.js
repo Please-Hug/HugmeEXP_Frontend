@@ -38,7 +38,11 @@ export const validateAndBuildParams = (filters) => {
     const max = experience[1];
 
     // -1은 신입으로 0으로 변환
-    if (min === -1) {
+    if(min === -1 && max === 10){
+      params.experienceMin = null;
+      params.experienceMax = null;
+    }
+    else if (min === -1) {
       params.experienceMin = 0;
     } else if (min >= 0) {
       params.experienceMin = min;
@@ -60,12 +64,13 @@ export const validateAndBuildParams = (filters) => {
 
   // Education
   if (education > 0) {
-    params.education = education * 10; // 1: 고졸 -> 10, 2: 전문대졸 -> 20
+    params.education = education // 1: 고졸 -> 10, 2: 전문대졸 -> 20
   }
 
-  // Tech Stacks
+  // Tech Stacks - ID 목록으로 전송
   if (selectedSkills && selectedSkills.length > 0) {
-    params.techStacks = selectedSkills;
+    // 배열 형식으로 전송하는 대신 쉼표로 구분된 문자열로 변환
+    params.techStacks = selectedSkills.join(',');
   }
 
   // Work Location
@@ -88,7 +93,8 @@ export const validateAndBuildParams = (filters) => {
 
 export const getRecruitments = async (params) => {
   try {
-    const response = await api.get("/api/v1/recruitments");
+    console.log("API params:", params);
+    const response = await api.get("/api/v1/recruitments", { params });
     if (response.status === 204) {
       return []; // 데이터가 없는 경우 빈 배열 반환
     }
@@ -104,6 +110,16 @@ export const getRecruitments = async (params) => {
   }
 };
 
+// 채용 공고 필터 옵션 조회 (기술 스택, 교육, 경력 등)
+export const getRecruitmentFilters = async () => {
+  try {
+    const response = await api.get("/api/v1/recruitments/filters");
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching recruitment filters:", error);
+    throw error;
+  }
+};
 
 export const getLatestRecruitments = async () => {
   try {
