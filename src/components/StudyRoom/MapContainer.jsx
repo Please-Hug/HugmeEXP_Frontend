@@ -66,9 +66,9 @@ function MapContainer({
       });
   }, []);
 
-  // 지도 초기화
+  // 지도 초기화 (최초 1회만)
   useEffect(() => {
-    if (!isKakaoLoaded || !mapRef.current) return;
+    if (!isKakaoLoaded || !mapRef.current || map) return;
 
     try {
       console.log('지도 초기화 시작...');
@@ -81,21 +81,43 @@ function MapContainer({
       const kakaoMap = new window.kakao.maps.Map(mapRef.current, mapOptions);
       setMap(kakaoMap);
 
-      // 지도 중심 변경 이벤트
+      // 지도 중심 변경 이벤트 (사용자가 직접 드래그할 때만)
       if (onCenterChange) {
+        let isUserDrag = false;
+        
+        window.kakao.maps.event.addListener(kakaoMap, 'dragstart', () => {
+          isUserDrag = true;
+        });
+        
         window.kakao.maps.event.addListener(kakaoMap, 'center_changed', () => {
-          const centerPosition = kakaoMap.getCenter();
-          onCenterChange({
-            lat: centerPosition.getLat(),
-            lng: centerPosition.getLng()
-          });
+          if (isUserDrag) {
+            const centerPosition = kakaoMap.getCenter();
+            onCenterChange({
+              lat: centerPosition.getLat(),
+              lng: centerPosition.getLng()
+            });
+            isUserDrag = false;
+          }
         });
       }
 
     } catch (error) {
       console.error('지도 생성 실패:', error);
     }
-  }, [isKakaoLoaded, center, onCenterChange]);
+  }, [isKakaoLoaded]); // center 의존성 제거
+
+  // 지도 중심 이동 (지도 재생성 없이)
+  useEffect(() => {
+    if (!map || !center) return;
+    
+    const moveLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    map.setCenter(moveLatLng);
+    
+    // 선택된 StudyHall이 있으면 줌 레벨 조정
+    if (selectedStudyHall) {
+      map.setLevel(5); // 선택 시 더 가까이 줌인
+    }
+  }, [map, center, selectedStudyHall]);
 
   // 현재 위치 마커
   useEffect(() => {
