@@ -23,6 +23,7 @@ function RecruitmentMapPage() {
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 }); // 기본 중심: 서울시청
   const [mapBounds, setMapBounds] = useState(null);
   const [isMapSearchActive, setIsMapSearchActive] = useState(false);
+  const [shouldUseMapBounds, setShouldUseMapBounds] = useState(false);
 
   // API 연동 상태
   const [recruitments, setRecruitments] = useState([]);
@@ -38,12 +39,14 @@ function RecruitmentMapPage() {
     setFilterType(type);
     setSelectedJob(null);
     setIsMapSearchActive(false);
+    setShouldUseMapBounds(false); // Don't use map bounds when filter changes
   };
 
   const handleRegionFilterChange = (region) => {
     setRegionFilter(region);
     setSelectedJob(null);
     setIsMapSearchActive(false);
+    setShouldUseMapBounds(false); // Don't use map bounds when region filter changes
   };
 
   const handleSalaryChange = (value) => setSalary(parseInt(value, 10));
@@ -68,7 +71,7 @@ function RecruitmentMapPage() {
         education,
         selectedSkills,
         isMapSearchActive,
-        mapBounds,
+        mapBounds: shouldUseMapBounds ? mapBounds : null,
       });
 
       if (!params) {
@@ -105,11 +108,14 @@ function RecruitmentMapPage() {
   ]);
 
   const handleBoundsChange = (bounds) => {
+    // Just update the bounds state but don't trigger API call
     setMapBounds(bounds);
   };
 
   const handleSearchCurrentMap = () => {
+    // When user clicks "Search Current Map", enable map bounds for API call
     setIsMapSearchActive(true);
+    setShouldUseMapBounds(true);
   };
 
   const handleSearch = (keyword) => {
