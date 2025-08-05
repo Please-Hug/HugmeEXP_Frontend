@@ -39,6 +39,15 @@
   z-index: 0; /* 다른 요소들보다 낮은 z-index 설정 */
 }
 
+.recruitmentContent {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  gap: 0;
+}
+
 .mapWrapper {
   position: relative;
   flex-grow: 1; // 너비 비율
@@ -46,4 +55,14 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden; // 지도가 모서리를 벗어나지 않도록
+}
+
+.detailContainer {
+  flex-shrink: 0;
+  display: flex;
+
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: auto;
 }
