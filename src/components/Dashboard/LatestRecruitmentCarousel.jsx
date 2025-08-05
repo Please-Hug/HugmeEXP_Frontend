@@ -8,6 +8,15 @@ import {
   FaCalendarAlt,
 } from "react-icons/fa";
 
+// 상수 정의
+const ITEMS_PER_VIEW = 3;
+const DRAG_THRESHOLD_PX = 5;
+const SLIDE_THRESHOLD_PX = 100;
+const DRAG_STATE_RESET_DELAY_MS = 10;
+const YEAR_FOR_PERMANENT_HIRING = 9999;
+const MAX_EXPERIENCE_YEARS = 100;
+const D_DAY_THRESHOLD_DAYS = 7;
+
 function LatestRecruitmentCarousel() {
   const [recruitments, setRecruitments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +29,7 @@ function LatestRecruitmentCarousel() {
   const [prevTranslate, setPrevTranslate] = useState(0);
   const [isMouseDown, setIsMouseDown] = useState(false);
 
-  const itemsPerView = 3;
+  const itemsPerView = ITEMS_PER_VIEW;
 
   useEffect(() => {
     const fetchRecruitments = async () => {
@@ -49,9 +58,9 @@ function LatestRecruitmentCarousel() {
   };
 
   const formatExperience = (min, max) => {
-    if (min === 0 && max === 100) return "신입·경력";
+    if (min === 0 && max === MAX_EXPERIENCE_YEARS) return "신입·경력";
     if (min === 0) return "신입";
-    if (max === 100) return `${min}년 이상`;
+    if (max === MAX_EXPERIENCE_YEARS) return `${min}년 이상`;
     return `${min}~${max}년`;
   };
 
@@ -60,7 +69,7 @@ function LatestRecruitmentCarousel() {
     const now = new Date();
 
     // 9999년은 상시채용으로 처리
-    if (date.getFullYear() === 9999) {
+    if (date.getFullYear() === YEAR_FOR_PERMANENT_HIRING) {
       return "상시채용";
     }
 
@@ -69,7 +78,7 @@ function LatestRecruitmentCarousel() {
 
     if (diffDays < 0) return "마감";
     if (diffDays === 0) return "오늘 마감";
-    if (diffDays <= 7) return `D-${diffDays}`;
+    if (diffDays <= D_DAY_THRESHOLD_DAYS) return `D-${diffDays}`;
 
     return `${date.getMonth() + 1}.${date.getDate()}(${["일", "월", "화", "수", "목", "금", "토"][date.getDay()]})`;
   };
@@ -91,7 +100,7 @@ function LatestRecruitmentCarousel() {
     const diff = Math.abs(currentPosition - startPos);
 
     // 일정 거리 이상 움직이면 드래그로 인식
-    if (diff > 5) {
+    if (diff > DRAG_THRESHOLD_PX) {
       setIsDragging(true);
     }
 
@@ -110,7 +119,7 @@ function LatestRecruitmentCarousel() {
     }
 
     const movedBy = currentTranslate - prevTranslate;
-    const threshold = 100; // 최소 드래그 거리
+    const threshold = SLIDE_THRESHOLD_PX; // 최소 드래그 거리
 
     if (movedBy < -threshold && currentIndex < maxIndex) {
       setCurrentIndex((prev) => prev + 1);
@@ -124,7 +133,7 @@ function LatestRecruitmentCarousel() {
     // 드래그 상태를 약간의 딜레이 후에 해제하여 클릭 이벤트 차단
     setTimeout(() => {
       setIsDragging(false);
-    }, 10);
+    }, DRAG_STATE_RESET_DELAY_MS);
   };
 
   const handleTitleClick = () => {
