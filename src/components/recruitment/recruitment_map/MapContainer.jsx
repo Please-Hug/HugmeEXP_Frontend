@@ -42,6 +42,25 @@ function MapContainer({
     }
   }, [map, mapCenter]);
 
+  // selectedJob이 변경될 때 지도 중심 이동
+  useEffect(() => {
+    if (map && selectedJob && selectedJob.latitude && selectedJob.longitude) {
+      // 위도와 경도가 숫자인지 확인
+      let lat = parseFloat(selectedJob.latitude);
+      let lng = parseFloat(selectedJob.longitude);
+      
+      // 좌표가 뒤바뀌었는지 확인 (카카오맵은 서울 기준 lat이 약 37, lng이 약 126)
+      const mightBeSwapped = (lat > 100 || lat < 30) && (lng > 30 && lng < 40);
+      if (mightBeSwapped) {
+        [lat, lng] = [lng, lat]; // 좌표 교환
+      }
+      
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setMapCenter({ lat, lng });
+      }
+    }
+  }, [map, selectedJob]);
+
   // 지도 경계 변경 핸들러
   const handleBoundsChanged = (mapInstance) => {
     if (!mapInstance) return;

@@ -86,6 +86,8 @@ function RecruitmentMapPage() {
         const data = await getRecruitments(params);
 
         setRecruitments(data);
+        setIsMapSearchActive(false);
+        setShouldUseMapBounds(false);
       } catch (err) {
         console.error("채용 정보 조회 실패:", err);
         setError(err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다.");
@@ -104,7 +106,6 @@ function RecruitmentMapPage() {
     selectedSkills,
     education,
     isMapSearchActive,
-    mapBounds,
   ]);
 
   const handleBoundsChange = (bounds) => {
