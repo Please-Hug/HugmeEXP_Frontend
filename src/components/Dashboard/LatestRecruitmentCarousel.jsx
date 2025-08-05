@@ -140,14 +140,17 @@ function LatestRecruitmentCarousel() {
     window.open("/recruitment/map", "_blank");
   };
 
-  const handleCardClick = (recruitmentId, e) => {
+  const handleCardClick = (recruitment, e) => {
     // 드래그가 발생했으면 클릭 이벤트 차단
     if (isDragging) {
       e.preventDefault();
       e.stopPropagation();
       return;
     }
-    window.open(`/recruitment/map/${recruitmentId}`, "_blank");
+    window.open(
+      `/recruitment/map/${recruitment.id}?lat=${recruitment.latitude}&lng=${recruitment.longitude}`,
+      "_blank"
+    );
   };
 
   return (
@@ -201,7 +204,7 @@ function LatestRecruitmentCarousel() {
               <div
                 key={recruitment.id}
                 className={styles.recruitmentCard}
-                onClick={(e) => handleCardClick(recruitment.id, e)}
+                onClick={(e) => handleCardClick(recruitment, e)}
               >
                 <div className={styles.cardHeader}>
                   <div className={styles.companyInfo}>
