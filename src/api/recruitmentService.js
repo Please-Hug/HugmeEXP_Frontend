@@ -104,6 +104,24 @@ export const getRecruitments = async (params) => {
   }
 };
 
+
+export const getLatestRecruitments = async () => {
+  try {
+    const response = await api.get("/api/v1/recruitments/home");
+    if (response.status === 204) {
+      return [];
+    }
+    if (response.data && response.data.data) {
+      return response.data.data;
+    }
+    console.warn("Unexpected response format:", response.data);
+    return [];
+  } catch (error) {
+    console.error("Error fetching latest recruitments:", error);
+    throw error;
+  }
+};
+
 // 채용 공고 상세 정보 조회
 export const getRecruitmentDetail = async (id) => {
   try {
