@@ -4,42 +4,10 @@ import { FaChevronDown } from "react-icons/fa";
 import { DropdownPortal } from "./";
 import { ExperienceRangeSlider } from "./";
 import { SkillSelector } from "./";
+import { jobTypes, regions, educations, salaryLevels, getSalaryKeys } from "../../../constants/recruitmentConstants";
 
-// Constants for filter options
-const jobTypes = {
-  all: "직무",
-  frontend: "프론트엔드",
-  backend: "백엔드",
-  designer: "디자이너",
-  mobile: "모바일",
-};
-
-const regions = {
-  all: "지역",
-  seoul: "서울",
-  bundang: "분당",
-};
-
-const educations = {
-  0: "학력",
-  10: "고졸",
-  20: "초대졸",
-  30: "대졸",
-  40: "석사",
-  50: "박사",
-};
-
-const salaryLevels = {
-  0: "회사 내규에 따름",
-  3000: "3000 ~ 4000",
-  4000: "4000 ~ 5000",
-  5000: "5000 ~ 6000",
-  6000: "6000 이상",
-};
-
-const salaryKeys = Object.keys(salaryLevels)
-  .map(Number)
-  .sort((a, b) => a - b);
+// 필터 옵션 상수들은 공유 상수 파일에서 가져옴
+const salaryKeys = getSalaryKeys();
 
 function RecruitmentFilter({
   onFilterChange,
