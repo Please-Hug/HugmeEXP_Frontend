@@ -70,14 +70,11 @@ export const changeUserRole = async (username, role) => {
 export const getUserStats = async () => {
   try {
     // 1. 사용자 목록 조회
-    const usersResponse = await api.get('/api/v1/admin/users', {
-      params: { 
-        page: 0, 
-        size: 200
-      }
+    const response = await api.get('/api/v1/admin/users', {
+      params: { page: 0, size: 10000 } // 전체 데이터를 위해 큰 size 설정
     });
     
-    const users = usersResponse.data.data.content;
+    const users = response.data.data.content;
     
     // 2. 활성 사용자 통계 조회 (새로운 API 사용)
     const activeStatsResponse = await api.get('/api/v1/admin/attendance/active-stats');
@@ -183,8 +180,32 @@ export const getUserAttendanceStats = async (username) => {
  */
 export const getMonthlyRegistrationStats = async () => {
   try {
-    const response = await api.get('/api/v1/admin/users/monthly-stats');
-    return response.data.data;
+    // 실제 API가 구현되면 아래 주석을 해제하고 사용
+    // const response = await api.get('/api/v1/admin/users/monthly-stats');
+    // return response.data.data;
+    
+    // 임시 데이터 생성 (실제 API 구현 전까지)
+    const monthlyData = [];
+    const currentDate = new Date();
+    
+    // 최근 12개월 데이터 생성
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const monthStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const count = Math.floor(Math.random() * 30) + 10; // 10-40명 랜덤
+      
+      // 전월 대비 증가율 계산 (첫 달은 null)
+      const prevCount = i === 11 ? null : monthlyData[monthlyData.length - 1]?.count;
+      const growthRate = prevCount ? Math.round(((count - prevCount) / prevCount) * 100) : null;
+      
+      monthlyData.push({
+        month: monthStr,
+        count: count,
+        growthRate: growthRate
+      });
+    }
+    
+    return monthlyData;
   } catch (error) {
     console.error('월별 가입자 통계 조회 실패:', error);
     throw error;

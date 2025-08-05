@@ -1,5 +1,5 @@
 .jobItem {
-  padding: 16px;
+  padding: 8px 16px;
   margin-bottom: 12px;
   border: 1px solid #e9ecef;
   border-radius: 8px;
@@ -18,10 +18,29 @@
   font-weight: 500;
 }
 
+.titleContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
 .jobTitle {
-  margin: 0 0 4px 0;
+  margin: 0;
   font-size: 16px;
   font-weight: bold;
+  flex: 1;
+}
+
+.sourceLogoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.sourceLogo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
 }
 
 .jobCompany {

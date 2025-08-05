@@ -15,7 +15,7 @@ import {
   FaCartShopping,
   FaRankingStar,
   FaAnglesLeft,
-  FaDoorOpen,
+  FaMapLocationDot,
 } from "react-icons/fa6";
 import logo from "../../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
@@ -33,6 +33,7 @@ function getQuickMenuItems() {
     // { icon: <FaLightbulb />, label: "AI 안아줘요" },
     // { icon: <FaBolt />, label: "빠른 검색" },
     { icon: <FaBell />, label: "알림" },
+    { icon: <FaMapLocationDot />, label: "스터디룸 예약", link: "/studyroom" }, // 새로 추가
   ];
 }
 
@@ -43,10 +44,8 @@ function getMenuItems() {
     { icon: <FaThumbsUp />, label: "칭찬", link: "/praises" },
     { icon: <FaGraduationCap />, label: "미션", link: "/mission" },
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
-    { icon: <FaDoorOpen />, label: "스터디룸", link: "/studyroom" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
     { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
-    { icon: <FaDoorOpen />, label: "스터디룸 예약", link: "/studyroom-reservation" },
   ];
 }
 
@@ -58,10 +57,8 @@ function getLecturerMenuItems() {
     { icon: <FaGraduationCap />, label: "미션", link: "/mission" },
     { icon: <FaBook />, label: "미션 제출 현황", link: "/challenge" },
     { icon: <FaChessBoard />, label: "퀘스트", link: "/quest" },
-    { icon: <FaDoorOpen />, label: "스터디룸", link: "/studyroom" },
     { icon: <FaCartShopping />, label: "상점", link: "/shop" },
     { icon: <FaRankingStar />, label: "랭킹", link: "/ranking" },
-    { icon: <FaDoorOpen />, label: "스터디룸 예약", link: "/studyroom-reservation" },
   ];
 }
 
@@ -158,6 +155,9 @@ function Sidebar() {
                   onClick={() => {
                     if (item.label === "알림") {
                       setIsNotificationOpen(!isNotificationOpen); // 알림 모달 열기
+                    } else if (item.link) {
+                      // 스터디룸 예약 등 링크가 있는 경우 해당 페이지로 이동
+                      navigate(item.link);
                     }
                   }}
                 >
