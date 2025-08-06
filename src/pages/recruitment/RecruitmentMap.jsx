@@ -204,13 +204,47 @@ function RecruitmentMapPage() {
 
   const handleSearchCurrentMap = async () => {
     // When user clicks "Search Current Map", enable map bounds for API call
-    // Set both flags to ensure we use the latest map bounds
-    setShouldUseMapBounds(true);
-    setIsMapSearchActive(true);
+    // 상태 업데이트를 기다리지 않고 직접 파라미터를 구성하여 API 호출
+    setLoading(true);
+    setError(null);
     
-    // fetchRecruitments를 직접 호출하면 shouldUseMapBounds가 true로 설정되어 있으므로
-    // 자동으로 mapBounds를 사용하게 됨
-    await fetchRecruitments();
+    try {
+      // 현재 필터 상태와 지도 경계를 직접 파라미터로 전달
+      const params = validateAndBuildParams({
+        filterType,
+        regionFilter,
+        salary,
+        experience,
+        education,
+        selectedSkills,
+        isMapSearchActive: true, // 직접 true로 전달
+        mapBounds: mapBounds, // 현재 지도 경계 직접 전달
+      });
+      
+      if (!params) {
+        setRecruitments([]);
+        setIsLastPage(true);
+        return;
+      }
+      
+      // API 호출
+      const result = await getRecruitments(params, 0);
+      
+      // 결과 처리
+      setRecruitments(result.content);
+      setIsLastPage(result.isLastPage);
+      setPage(0); // 페이지 초기화
+      
+      // 상태 업데이트 (다음 검색을 위해)
+      setShouldUseMapBounds(false);
+      setIsMapSearchActive(false);
+    } catch (err) {
+      console.error("지도 내 검색 실패:", err);
+      setError(err.response?.data?.message || "지도 내 검색에 실패했습니다.");
+      setRecruitments([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSearch = (keyword) => {
