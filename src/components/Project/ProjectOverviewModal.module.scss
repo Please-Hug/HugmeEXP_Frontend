@@ -1,44 +1,46 @@
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modalContent {
-  background-color: white;
-  padding: 30px;
-  border-radius: 12px;
-  width: 600px;
-  max-width: 90%;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-
-  h2 {
-    margin-top: 0;
-  }
-
-  h4 {
-    margin-top: 10px;
+.projectOverviewModal {
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
   }
   
-  p, ul {
-    line-height: 1.6;
-    margin-bottom: 24px; 
+  .modalContent {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 600px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  
+    h2 {
+      margin-top: 0;
+    }
+    
+    h4 {
+      margin-top: 24px;
+    }
+  
+    p, ul {
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+  
+    ul {
+      padding-left: 20px;
+    }
   }
-
-  ul {
-    padding-left: 20px;
+  
+  .closeButton {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
   }
-}
-
-.closeButton {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
 }

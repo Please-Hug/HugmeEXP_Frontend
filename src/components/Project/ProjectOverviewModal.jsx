@@ -4,6 +4,7 @@ import CommonButton from '../common/btn/CommonButton';
 
 const ProjectOverviewModal = ({ onClose }) => {
   return (
+  <div className={styles.projectOverviewModal}> 
     <div className={styles.modalOverlay}>
       <div className={styles.modalContent}>
         <h2>Goorm EXP 클론 프로젝트: Please-Hug</h2>
@@ -33,6 +34,7 @@ const ProjectOverviewModal = ({ onClose }) => {
             </CommonButton>
         </div>
       </div>
+    </div>
     </div>
   );
 };
