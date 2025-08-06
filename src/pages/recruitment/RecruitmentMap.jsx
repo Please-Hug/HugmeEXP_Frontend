@@ -220,20 +220,34 @@ function RecruitmentMapPage() {
     setError(null);
     
     try {
-      const data = await getSearchSuggestions(keyword);
+      // 키워드 검색을 위한 파라미터 생성
+      const params = validateAndBuildParams({
+        filterType,
+        regionFilter,
+        salary,
+        experience,
+        education,
+        selectedSkills,
+        isMapSearchActive: false,
+        mapBounds: null,
+        keyword: keyword.trim() // 키워드 추가
+      });
+      
+      // getRecruitments API 호출하여 키워드로 채용 정보 검색
+      const data = await getRecruitments(params);
       setRecruitments(data);
       setIsMapSearchActive(false);
       setShouldUseMapBounds(false);
       
-      // If there are results and the first result has coordinates, center the map on it
+      // 검색 결과가 있고 첫 번째 결과에 좌표가 있으면 지도 중심 이동
       if (data.length > 0 && data[0].latitude && data[0].longitude) {
         let lat = parseFloat(data[0].latitude);
         let lng = parseFloat(data[0].longitude);
         
-        // Check if coordinates might be swapped
+        // 좌표가 뒤바뀌었을 가능성 체크
         const mightBeSwapped = (lat > 100 || lat < 30) && (lng > 30 && lng < 40);
         if (mightBeSwapped) {
-          [lat, lng] = [lng, lat]; // Swap coordinates
+          [lat, lng] = [lng, lat]; // 좌표 교환
         }
         
         if (!isNaN(lat) && !isNaN(lng)) {

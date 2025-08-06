@@ -17,6 +17,7 @@ export const validateAndBuildParams = (filters) => {
     regionFilter,
     isMapSearchActive,
     mapBounds,
+    keyword,
   } = filters;
   const params = {};
 
@@ -88,6 +89,11 @@ export const validateAndBuildParams = (filters) => {
       params.bottomRightLat = mapBounds.southWest.lat.toFixed(8);
       params.bottomRightLng = mapBounds.northEast.lng.toFixed(8);
     }
+  }
+
+  // Keyword search
+  if (keyword && keyword.trim() !== '') {
+    params.keyword = keyword.trim();
   }
 
   return params;
