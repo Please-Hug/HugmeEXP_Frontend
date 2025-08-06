@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import styles from "./RecruitmentDetail.module.scss";
 import { getRecruitmentDetail } from "../../../api/recruitmentService";
 import { iconDefinitions } from "../../../constants/recruitmentConstants";
+import { FilterDataContext } from "../../../pages/recruitment/RecruitmentMap";
 
 // 기술 스택 아이콘은 공유 상수 파일에서 가져옴
 
@@ -9,6 +10,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
   const [detailData, setDetailData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { filterData, loading: filterDataLoading, findTechStackById } = useContext(FilterDataContext);
 
   // 이전에 불러온 작업 상세 데이터를 캐싱하기 위한 ref
   const jobDetailsCache = React.useRef({});
@@ -21,7 +23,6 @@ const RecruitmentDetail = ({ job, onClose }) => {
 
     // 이미 해당 ID에 대한 상세 정보를 불러왔는지 확인
     if (jobDetailsCache.current[job.id]) {
-      console.log(`Job detail for ID ${job.id} already fetched, using cached data`);
       setDetailData(jobDetailsCache.current[job.id]);
       return;
     }
@@ -47,25 +48,77 @@ const RecruitmentDetail = ({ job, onClose }) => {
   }, [job?.id]); // job 전체가 아닌 job.id만 의존성으로 지정
 
   // 기술 스택 렌더링 헬퍼 함수
-  const renderSkillTag = (skillName, index) => {
-    const normalizedName = skillName.toLowerCase();
+  const renderSkillTag = (skill, index) => {
+    // 스킬이 ID인 경우 (새로운 형식)
+    if (typeof skill === 'number') {
+      const techStack = findTechStackById(skill);
+      if (!techStack) return null;
+      
+      // 대소문자 구분 없이 아이콘 찾기
+      const iconKey = Object.keys(iconDefinitions).find(
+        key => key.toLowerCase() === techStack.labelEn.toLowerCase() || 
+              key.toLowerCase() === techStack.labelKo.toLowerCase()
+      );
+      const iconInfo = iconKey ? iconDefinitions[iconKey] : null;
+      
+      return (
+        <span key={index} className={styles.skillTag}>
+          {iconInfo && (
+            <span className={styles.skillIcon}>
+              {React.createElement(iconInfo.component, { color: iconInfo.color })}
+            </span>
+          )}
+          {techStack.labelKo}
+        </span>
+      );
+    } 
+    // 스킬이 객체인 경우 (이전 형식 - 서버에서 이미 객체로 반환)
+    else if (typeof skill === 'object' && skill !== null) {
+      const label = skill.labelKo || skill.labelEn || skill.name;
+      if (!label) return null;
+      
+      // 대소문자 구분 없이 아이콘 찾기
+      const iconKey = Object.keys(iconDefinitions).find(
+        key => key.toLowerCase() === (skill.labelEn || '').toLowerCase() || 
+              key.toLowerCase() === (skill.labelKo || '').toLowerCase() ||
+              key.toLowerCase() === (skill.name || '').toLowerCase()
+      );
+      const iconInfo = iconKey ? iconDefinitions[iconKey] : null;
+      
+      return (
+        <span key={index} className={styles.skillTag}>
+          {iconInfo && (
+            <span className={styles.skillIcon}>
+              {React.createElement(iconInfo.component, { color: iconInfo.color })}
+            </span>
+          )}
+          {label}
+        </span>
+      );
+    }
+    // 스킬이 문자열인 경우 (이전 형식 - 단순 이름)
+    else if (typeof skill === 'string') {
+      const normalizedName = skill.toLowerCase();
+      
+      // 대소문자 구분 없이 아이콘 찾기
+      const iconKey = Object.keys(iconDefinitions).find(
+        key => key.toLowerCase() === normalizedName
+      );
+      const iconInfo = iconKey ? iconDefinitions[iconKey] : null;
+      
+      return (
+        <span key={index} className={styles.skillTag}>
+          {iconInfo && (
+            <span className={styles.skillIcon}>
+              {React.createElement(iconInfo.component, { color: iconInfo.color })}
+            </span>
+          )}
+          {skill}
+        </span>
+      );
+    }
     
-    // 대소문자 구분 없이 아이콘 찾기
-    const iconKey = Object.keys(iconDefinitions).find(
-      key => key.toLowerCase() === normalizedName
-    );
-    const iconInfo = iconKey ? iconDefinitions[iconKey] : null;
-    
-    return (
-      <span key={index} className={styles.skillTag}>
-        {iconInfo && (
-          <span className={styles.skillIcon}>
-            {React.createElement(iconInfo.component, { color: iconInfo.color })}
-          </span>
-        )}
-        {skillName}
-      </span>
-    );
+    return null;
   };
 
   // 마감일 표시 형식을 결정하는 함수
@@ -268,7 +321,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
                 <div className={styles.skills}>
                   {displayData.techStacks
                     ? displayData.techStacks.map((tech, index) => 
-                        renderSkillTag(tech.labelKo || tech.labelEn || tech.name, index)
+                        renderSkillTag(tech, index)
                       )
                     : displayData.skills.map((skill, index) => 
                         renderSkillTag(skill, index)

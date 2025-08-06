@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { validateAndBuildParams } from "../../api/recruitmentService";
+import React, { useState, useEffect, createContext } from "react";
+import { useParams } from "react-router-dom";
+import {
+  validateAndBuildParams,
+  getRecruitments,
+  getRecruitmentFilters,
+} from "../../api/recruitmentService";
 import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/RecruitmentPageHeader";
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
 import RecruitmentDetail from "../../components/recruitment/recruitment_map/RecruitmentDetail";
@@ -9,11 +14,14 @@ import { RecruitmentFilter } from "../../components/recruitment/recruitment_filt
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
 import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
-import { getRecruitments } from "../../api/recruitmentService";
+
+// 기술 스택 데이터를 위한 Context 생성
+export const FilterDataContext = createContext(null);
 
 function RecruitmentMapPage() {
+  const { jobId } = useParams(); // URL 파라미터에서 jobId 추출
   // 기존 상태
-  const [selectedJob, setSelectedJob] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(jobId ? { id: jobId } : null); // jobId가 있으면 해당 채용 공고 선택
   const [filterType, setFilterType] = useState("all");
   const [regionFilter, setRegionFilter] = useState("all");
   const [salary, setSalary] = useState(0);
@@ -23,14 +31,28 @@ function RecruitmentMapPage() {
   const [mapCenter, setMapCenter] = useState({ lat: 37.5665, lng: 126.978 }); // 기본 중심: 서울시청
   const [mapBounds, setMapBounds] = useState(null);
   const [isMapSearchActive, setIsMapSearchActive] = useState(false);
+  const [shouldUseMapBounds, setShouldUseMapBounds] = useState(false);
 
   // API 연동 상태
   const [recruitments, setRecruitments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // 필터 데이터 상태
+  const [filterData, setFilterData] = useState({
+    techStacks: [],
+    educationOptions: [],
+    experienceOptions: [],
+  });
+  const [filterDataLoading, setFilterDataLoading] = useState(true);
+
+  // 기술 스택 ID로 기술 스택 정보 찾기 함수
+  const findTechStackById = (id) => {
+    if (filterDataLoading || !filterData.techStacks) return null;
+    return filterData.techStacks.find((stack) => stack.id === id) || null;
+  };
+
   const handleSelectJob = (job) => {
-    console.log("job ID", job.id);
     setSelectedJob(job);
   };
 
@@ -38,12 +60,14 @@ function RecruitmentMapPage() {
     setFilterType(type);
     setSelectedJob(null);
     setIsMapSearchActive(false);
+    setShouldUseMapBounds(false); // Don't use map bounds when filter changes
   };
 
   const handleRegionFilterChange = (region) => {
     setRegionFilter(region);
     setSelectedJob(null);
     setIsMapSearchActive(false);
+    setShouldUseMapBounds(false); // Don't use map bounds when region filter changes
   };
 
   const handleSalaryChange = (value) => setSalary(parseInt(value, 10));
@@ -57,6 +81,24 @@ function RecruitmentMapPage() {
   };
   const handleEducationChange = (value) => setEducation(parseInt(value, 10));
 
+  // 필터 데이터 가져오기 (기술 스택, 교육, 경력 등)
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      try {
+        setFilterDataLoading(true);
+        const data = await getRecruitmentFilters();
+        setFilterData(data);
+        console.log("Filter data loaded:", data);
+      } catch (err) {
+        console.error("Error fetching filter data:", err);
+      } finally {
+        setFilterDataLoading(false);
+      }
+    };
+
+    fetchFilterData();
+  }, []); // 페이지 로드 시 한 번만 실행
+
   // 채용 정보 API 호출
   useEffect(() => {
     const fetchRecruitments = async () => {
@@ -68,7 +110,7 @@ function RecruitmentMapPage() {
         education,
         selectedSkills,
         isMapSearchActive,
-        mapBounds,
+        mapBounds: shouldUseMapBounds ? mapBounds : null,
       });
 
       if (!params) {
@@ -83,9 +125,13 @@ function RecruitmentMapPage() {
         const data = await getRecruitments(params);
 
         setRecruitments(data);
+        setIsMapSearchActive(false);
+        setShouldUseMapBounds(false);
       } catch (err) {
         console.error("채용 정보 조회 실패:", err);
-        setError(err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다.");
+        setError(
+          err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다."
+        );
         setRecruitments([]);
       } finally {
         setLoading(false);
@@ -101,15 +147,17 @@ function RecruitmentMapPage() {
     selectedSkills,
     education,
     isMapSearchActive,
-    mapBounds,
   ]);
 
   const handleBoundsChange = (bounds) => {
+    // Just update the bounds state but don't trigger API call
     setMapBounds(bounds);
   };
 
   const handleSearchCurrentMap = () => {
+    // When user clicks "Search Current Map", enable map bounds for API call
     setIsMapSearchActive(true);
+    setShouldUseMapBounds(true);
   };
 
   const handleSearch = (keyword) => {
@@ -132,62 +180,70 @@ function RecruitmentMapPage() {
   };
 
   return (
-    <div className={styles.pageContainer}>
-      <RecruitmentMapHeader />
-      <main className={styles.mainContent}>
-        <div className={styles.listWrapper}>
-          <RecruitmentSearch onSearch={handleSearch} />
-          <div className={styles.filterWrapper}>
-            <RecruitmentFilter
-              onFilterChange={handleFilterChange}
-              filterType={filterType}
-              onRegionFilterChange={handleRegionFilterChange}
-              regionFilter={regionFilter}
-              salary={salary}
-              onSalaryChange={handleSalaryChange}
-              experience={experience}
-              onExperienceChange={handleExperienceChange}
-              selectedSkills={selectedSkills}
-              onSkillChange={handleSkillChange}
-              education={education}
-              onEducationChange={handleEducationChange}
+    <FilterDataContext.Provider
+      value={{ filterData, loading: filterDataLoading, findTechStackById }}
+    >
+      <div className={styles.pageContainer}>
+        <RecruitmentMapHeader />
+        <main className={styles.mainContent}>
+          <div className={styles.listWrapper}>
+            <RecruitmentSearch onSearch={handleSearch} />
+            <div className={styles.filterWrapper}>
+              {filterDataLoading ? (
+                <div>필터 데이터 로딩 중...</div>
+              ) : (
+                <RecruitmentFilter
+                  onFilterChange={handleFilterChange}
+                  filterType={filterType}
+                  onRegionFilterChange={handleRegionFilterChange}
+                  regionFilter={regionFilter}
+                  salary={salary}
+                  onSalaryChange={handleSalaryChange}
+                  experience={experience}
+                  onExperienceChange={handleExperienceChange}
+                  selectedSkills={selectedSkills}
+                  onSkillChange={handleSkillChange}
+                  education={education}
+                  onEducationChange={handleEducationChange}
+                />
+              )}
+            </div>
+            <div className={styles.listContainer}>
+              {loading && <div>로딩 중...</div>}
+              {error && <div>에러가 발생했습니다.</div>}
+              {!loading && !error && (
+                <div className={styles.recruitmentContent}>
+                  <RecruitmentList
+                    jobs={recruitments} // API 데이터로 변경
+                    selectedJob={selectedJob}
+                    onSelectJob={handleSelectJob}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+          {selectedJob && (
+            <div className={styles.detailContainer}>
+              <RecruitmentDetail
+                job={selectedJob}
+                onClose={() => setSelectedJob(null)}
+              />
+            </div>
+          )}
+
+          <div className={styles.mapWrapper}>
+            <MapBoundsDisplay bounds={mapBounds} />
+            <MapContainer
+              onSearchCurrentMap={handleSearchCurrentMap}
+              jobs={recruitments} // API 데이터로 변경
+              selectedJob={selectedJob}
+              onSelectJob={handleSelectJob}
+              onBoundsChange={handleBoundsChange}
             />
           </div>
-          <div className={styles.listContainer}>
-            {loading && <div>로딩 중...</div>}
-            {error && <div>에러가 발생했습니다.</div>}
-            {!loading && !error && (
-              <div className={styles.recruitmentContent}>
-                <RecruitmentList
-                  jobs={recruitments} // API 데이터로 변경
-                  selectedJob={selectedJob}
-                  onSelectJob={handleSelectJob}
-                />
-              </div>
-            )}
-          </div>
-        </div>
-        {selectedJob && (
-        <div className={styles.detailContainer}>
-       
-          <RecruitmentDetail
-            job={selectedJob}
-            onClose={() => setSelectedJob(null)}
-          />
-        </div>)}
-        
-        <div className={styles.mapWrapper}>
-          <MapBoundsDisplay bounds={mapBounds} />
-          <MapContainer
-            onSearchCurrentMap={handleSearchCurrentMap}
-            jobs={recruitments} // API 데이터로 변경
-            selectedJob={selectedJob}
-            onSelectJob={handleSelectJob}
-            onBoundsChange={handleBoundsChange}
-          />
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </FilterDataContext.Provider>
   );
 }
 

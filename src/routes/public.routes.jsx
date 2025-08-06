@@ -8,6 +8,7 @@ export default [
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/recruitment/map", element: <RecruitmentMapPage /> },
+      { path: "/recruitment/map/:jobId", element: <RecruitmentMapPage /> },
     ],
   },
 ];

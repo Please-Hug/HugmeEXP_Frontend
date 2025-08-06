@@ -4,16 +4,12 @@ import { FaChevronDown } from "react-icons/fa";
 import { DropdownPortal } from "./";
 import { ExperienceRangeSlider } from "./";
 import { SkillSelector } from "./";
-import { jobTypes, regions, educations, salaryLevels, getSalaryKeys } from "../../../constants/recruitmentConstants";
+import { educations, salaryLevels, getSalaryKeys } from "../../../constants/recruitmentConstants";
 
 // 필터 옵션 상수들은 공유 상수 파일에서 가져옴
 const salaryKeys = getSalaryKeys();
 
 function RecruitmentFilter({
-  onFilterChange,
-  filterType,
-  onRegionFilterChange,
-  regionFilter,
   salary,
   onSalaryChange,
   experience,
@@ -70,6 +66,7 @@ function RecruitmentFilter({
 
   const getExperienceButtonText = () => {
     if (Array.isArray(experience)) {
+      if (experience[0] === -1 && experience[1] === 10) return "경력";
       if (experience[0] === -1) return "경력무관";
       if (experience[0] === experience[1]) {
         return experience[0] === 0 ? "신입" : `${experience[0]}년`;
@@ -87,42 +84,6 @@ function RecruitmentFilter({
 
     let content;
     switch (activeDropdown) {
-      case "jobType":
-        content = (
-          <div className={styles.dropdownMenu}>
-            {Object.entries(jobTypes).map(([key, value]) => (
-              <div
-                key={key}
-                className={styles.dropdownItem}
-                onClick={() => {
-                  onFilterChange(key);
-                  closeDropdown();
-                }}
-              >
-                {value}
-              </div>
-            ))}
-          </div>
-        );
-        break;
-      case "region":
-        content = (
-          <div className={styles.dropdownMenu}>
-            {Object.entries(regions).map(([key, value]) => (
-              <div
-                key={key}
-                className={styles.dropdownItem}
-                onClick={() => {
-                  onRegionFilterChange(key);
-                  closeDropdown();
-                }}
-              >
-                {value}
-              </div>
-            ))}
-          </div>
-        );
-        break;
       case "experience":
         content = (
           <div className={styles.dropdownMenu}>
@@ -188,25 +149,6 @@ function RecruitmentFilter({
 
   return (
     <div className={styles.filterContainer} ref={filterContainerRef}>
-      {/* 직무 필터 */}
-      <div className={styles.filterGroup}>
-        <button
-          className={getButtonClass(filterType !== "all")}
-          onClick={(e) => handleDropdownToggle("jobType", e)}
-        >
-          {jobTypes[filterType] || "직무"}
-        </button>
-      </div>
-
-      {/* 지역 필터 */}
-      <div className={styles.filterGroup}>
-        <button
-          className={getButtonClass(regionFilter !== "all")}
-          onClick={(e) => handleDropdownToggle("region", e)}
-        >
-          {regions[regionFilter] || "지역"}
-        </button>
-      </div>
 
       {/* 경력 필터 */}
       <div className={styles.filterGroup}>
