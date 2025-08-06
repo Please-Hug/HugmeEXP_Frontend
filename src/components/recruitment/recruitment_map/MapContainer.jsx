@@ -215,25 +215,24 @@ function MapContainer({
     isInitialLoad.current = false;
   }, [map]);
 
-  const handleSearchButtonClick = () => {
-    // Get the latest bounds before calling onSearchCurrentMap
+  const handleSearchButtonClick = async () => {
+    // Get the latest bounds before calling 
     if (map) {
       handleBoundsChanged(map);
       
       // Wait a short time to ensure bounds are updated before calling onSearchCurrentMap
-      setTimeout(() => {
-        if (onSearchCurrentMap) {
-          onSearchCurrentMap();
-        }
-        setIsSearchButtonVisible(false);
-      }, 100);
+      // Promise 기반 접근 방식으로 변경하여 경쟁 조건 방지
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (onSearchCurrentMap) {
+        onSearchCurrentMap();
+      }
     } else {
       // Fallback if map is not available
       if (onSearchCurrentMap) {
         onSearchCurrentMap();
       }
-      setIsSearchButtonVisible(false);
     }
+    setIsSearchButtonVisible(false);
   };
 
   if (loading) return <div>로딩 중...</div>;

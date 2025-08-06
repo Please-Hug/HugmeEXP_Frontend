@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext } from "react";
+import React, { useState, useEffect, createContext, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { validateAndBuildParams, getRecruitments, getRecruitmentFilters, getSearchSuggestions } from "../../api/recruitmentService";
 import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/RecruitmentPageHeader";
@@ -151,44 +151,15 @@ function RecruitmentMapPage() {
     setMapBounds(bounds);
   };
 
-  const handleSearchCurrentMap = () => {
+  const handleSearchCurrentMap = async () => {
     // When user clicks "Search Current Map", enable map bounds for API call
     // Set both flags to ensure we use the latest map bounds
     setShouldUseMapBounds(true);
     setIsMapSearchActive(true);
     
-    // Call fetchRecruitments directly with the latest map bounds
-    // We need to use the current mapBounds state which should have been updated by MapContainer
-    const params = validateAndBuildParams({
-      filterType,
-      regionFilter,
-      salary,
-      experience,
-      education,
-      selectedSkills,
-      isMapSearchActive: true,
-      mapBounds: mapBounds, // Use the latest mapBounds directly
-    });
-    
-    if (params) {
-      setLoading(true);
-      setError(null);
-      
-      getRecruitments(params)
-        .then(data => {
-          setRecruitments(data);
-          setIsMapSearchActive(false);
-          setShouldUseMapBounds(false);
-        })
-        .catch(err => {
-          console.error("채용 정보 조회 실패:", err);
-          setError(err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다.");
-          setRecruitments([]);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
+    // fetchRecruitments를 직접 호출하면 shouldUseMapBounds가 true로 설정되어 있으므로
+    // 자동으로 mapBounds를 사용하게 됨
+    await fetchRecruitments();
   };
 
   const handleSearch = (keyword) => {
@@ -244,10 +215,19 @@ function RecruitmentMapPage() {
         let lat = parseFloat(data[0].latitude);
         let lng = parseFloat(data[0].longitude);
         
+        // 좌표가 올바른 범위에 있는지 확인
+        const isValidKoreaLat = lat >= KOREA_BOUNDS.LAT_MIN && lat <= KOREA_BOUNDS.LAT_MAX;
+        const isValidKoreaLng = lng >= KOREA_BOUNDS.LNG_MIN && lng <= KOREA_BOUNDS.LNG_MAX;
+        
         // 좌표가 뒤바뀌었을 가능성 체크
-        const mightBeSwapped = (lat > 100 || lat < 30) && (lng > 30 && lng < 40);
-        if (mightBeSwapped) {
-          [lat, lng] = [lng, lat]; // 좌표 교환
+        if (!isValidKoreaLat && !isValidKoreaLng) {
+          // 좌표를 바꿔서 재검증
+          const swappedLat = lng;
+          const swappedLng = lat;
+          if (swappedLat >= KOREA_BOUNDS.LAT_MIN && swappedLat <= KOREA_BOUNDS.LAT_MAX &&
+              swappedLng >= KOREA_BOUNDS.LNG_MIN && swappedLng <= KOREA_BOUNDS.LNG_MAX) {
+            [lat, lng] = [swappedLat, swappedLng];
+          }
         }
         
         if (!isNaN(lat) && !isNaN(lng)) {
