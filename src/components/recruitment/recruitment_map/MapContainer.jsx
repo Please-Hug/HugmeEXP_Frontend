@@ -18,6 +18,7 @@ function MapContainer({
   selectedJob,
   onSelectJob,
   onBoundsChange,
+  mapCenter: propMapCenter,
 }) {
   const [loading, error] = useKakaoLoader({
     appkey: import.meta.env.VITE_KAKAO_API_KEY, // .env 파일의 API 키
@@ -32,6 +33,21 @@ function MapContainer({
     topLeft: null,
     bottomRight: null
   });
+  
+  // Update mapCenter when propMapCenter changes
+  useEffect(() => {
+    if (propMapCenter && propMapCenter.lat && propMapCenter.lng) {
+      setMapCenter(propMapCenter);
+      
+      // Trigger bounds update after the map has moved
+      if (map) {
+        // Use setTimeout to ensure this runs after the map center has been updated
+        setTimeout(() => {
+          handleBoundsChanged(map);
+        }, 300);
+      }
+    }
+  }, [propMapCenter, map]);
   const [currentDistance, setCurrentDistance] = useState(0);
   const isInitialLoad = useRef(true);
 
@@ -199,9 +215,22 @@ function MapContainer({
     isInitialLoad.current = false;
   }, [map]);
 
-  const handleSearchButtonClick = () => {
-    if (onSearchCurrentMap) {
-      onSearchCurrentMap();
+  const handleSearchButtonClick = async () => {
+    // Get the latest bounds before calling 
+    if (map) {
+      handleBoundsChanged(map);
+      
+      // Wait a short time to ensure bounds are updated before calling onSearchCurrentMap
+      // Promise 기반 접근 방식으로 변경하여 경쟁 조건 방지
+      await new Promise(resolve => setTimeout(resolve, 100));
+      if (onSearchCurrentMap) {
+        onSearchCurrentMap();
+      }
+    } else {
+      // Fallback if map is not available
+      if (onSearchCurrentMap) {
+        onSearchCurrentMap();
+      }
     }
     setIsSearchButtonVisible(false);
   };
@@ -242,10 +271,10 @@ function MapContainer({
             [lat, lng] = [lng, lat];
           }
           
-          if (isNaN(lat) || isNaN(lng)) {
-            console.warn(`Invalid coordinates for ${job.title || job.companyName}:`, job.latitude, job.longitude);
-            return null;
-          }
+          // if (isNaN(lat) || isNaN(lng)) {
+          //   console.warn(`Invalid coordinates for ${job.title || job.companyName}:`, job.latitude, job.longitude);
+          //   return null;
+          // }
           
           // Check if this job is the selected job
           const isSelected = selectedJob && selectedJob.id === job.id;

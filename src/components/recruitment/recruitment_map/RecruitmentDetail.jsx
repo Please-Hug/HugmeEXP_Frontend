@@ -32,7 +32,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
       setError(null);
 
       try {
-        const data = await getRecruitmentDetail(job.id);
+        const data = await getRecruitmentDetail(job.id );
         setDetailData(data);
         // 성공적으로 불러온 데이터를 캐시에 저장
         jobDetailsCache.current[job.id] = data;
