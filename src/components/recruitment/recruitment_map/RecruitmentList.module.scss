@@ -4,4 +4,71 @@
   overflow-y: auto;
   background-color: #ffffff;
   border-right: 1px solid #e0e0e0;
+  
+  // 스크롤 스타일 개선
+  scrollbar-width: thin;
+  scrollbar-color: #c0c0c0 #f5f5f5;
+  
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: #c0c0c0;
+    border-radius: 4px;
+  }
+}
+
+// 로딩 컨테이너 스타일
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 0;
+  width: 100%;
+}
+
+// 로딩 스피너 스타일
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #666;
+  font-size: 14px;
+  
+  &::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    border: 2px solid #ddd;
+    border-top-color: #666;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+// 마지막 페이지 메시지 스타일
+.endMessage {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px;
+}
+
+// 결과 없음 메시지 스타일
+.noResults {
+  color: #666;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

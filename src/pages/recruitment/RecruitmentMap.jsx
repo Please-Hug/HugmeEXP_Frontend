@@ -33,6 +33,9 @@ function RecruitmentMapPage() {
   const [recruitments, setRecruitments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(0); // 현재 페이지 번호
+  const [isLastPage, setIsLastPage] = useState(false); // 마지막 페이지 여부
+  const [loadingMore, setLoadingMore] = useState(false); // 추가 데이터 로딩 상태
 
   // 필터 데이터 상태
   const [filterData, setFilterData] = useState({
@@ -95,8 +98,13 @@ function RecruitmentMapPage() {
     fetchFilterData();
   }, []); // 페이지 로드 시 한 번만 실행
 
-  // Define fetchRecruitments outside of useEffect so it can be called directly
-  const fetchRecruitments = async () => {
+  // 초기 데이터 로드 함수
+  const fetchRecruitments = async (resetPage = true) => {
+      // 페이지 초기화 여부
+      if (resetPage) {
+        setPage(0);
+      }
+      
       const params = validateAndBuildParams({
         filterType,
         regionFilter,
@@ -110,16 +118,35 @@ function RecruitmentMapPage() {
 
       if (!params) {
         setRecruitments([]);
+        setIsLastPage(true);
         return;
       }
 
-      setLoading(true);
+      // 초기 로드인 경우 전체 로딩 상태 표시
+      if (resetPage) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
       setError(null);
 
       try {
-        const data = await getRecruitments(params);
+        // 현재 페이지 번호 전달
+        const currentPage = resetPage ? 0 : page;
+        const result = await getRecruitments(params, currentPage);
 
-        setRecruitments(data);
+        // 데이터 설정
+        if (resetPage) {
+          setRecruitments(result.content);
+        } else {
+          // 기존 데이터에 새 데이터 추가 (중복 방지를 위해 ID 기준으로 필터링)
+          const existingIds = new Set(recruitments.map(item => item.id));
+          const newItems = result.content.filter(item => !existingIds.has(item.id));
+          setRecruitments(prev => [...prev, ...newItems]);
+        }
+        
+        // 마지막 페이지 여부 설정
+        setIsLastPage(result.isLastPage);
         setIsMapSearchActive(false);
         setShouldUseMapBounds(false);
       } catch (err) {
@@ -127,11 +154,27 @@ function RecruitmentMapPage() {
         setError(
           err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다."
         );
-        setRecruitments([]);
+        if (resetPage) {
+          setRecruitments([]);
+        }
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     };
+    
+  // 추가 데이터 로드 함수
+  const loadMoreRecruitments = async () => {
+    // 이미 로딩 중이거나 마지막 페이지인 경우 무시
+    if (loadingMore || isLastPage) return;
+    
+    // 다음 페이지로 설정
+    const nextPage = page + 1;
+    setPage(nextPage);
+    
+    // 추가 데이터 로드 (페이지 초기화 없이)
+    await fetchRecruitments(false);
+  };
 
   // 채용 정보 API 호출 - 필터 변경시에만 자동으로 호출
   useEffect(() => {
@@ -273,27 +316,31 @@ function RecruitmentMapPage() {
               )}
             </div>
             <div className={styles.listContainer}>
-              {loading && <div>로딩 중...</div>}
-              {error && <div>에러가 발생했습니다.</div>}
+              {loading && !loadingMore && <div>로딩 중...</div>}
+              {error && <div>에러가 발생했습니다: {error}</div>}
               {!loading && !error && (
                 <div className={styles.recruitmentContent}>
                   <RecruitmentList
-                    jobs={recruitments} // API 데이터로 변경
+                    jobs={recruitments}
                     selectedJob={selectedJob}
                     onSelectJob={handleSelectJob}
+                    onLoadMore={loadMoreRecruitments}
+                    isLoading={loadingMore}
+                    isLastPage={isLastPage}
                   />
                 </div>
               )}
             </div>
           </div>
-        {selectedJob && (
-        <div className={styles.detailContainer}>
-       
-          <RecruitmentDetail
-            job={selectedJob}
-            onClose={() => setSelectedJob(null)}
-          />
-        </div>)}
+          
+          {selectedJob && (
+            <div className={styles.detailContainer}>
+              <RecruitmentDetail
+                job={selectedJob}
+                onClose={() => setSelectedJob(null)}
+              />
+            </div>
+          )}
         
         <div className={styles.mapWrapper}>
           <MapBoundsDisplay bounds={mapBounds} />

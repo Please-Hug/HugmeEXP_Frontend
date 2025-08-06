@@ -99,24 +99,34 @@ export const validateAndBuildParams = (filters) => {
   return params;
 };
 
-export const getRecruitments = async (params) => {
+export const getRecruitments = async (params, page = 0) => {
   try {
-    console.log("API params:", params);
-    const response = await api.get("/api/v1/recruitments", { params });
+    // 페이지 파라미터 추가
+    const requestParams = { ...params, page };
+    console.log("API params:", requestParams);
+    
+    const response = await api.get("/api/v1/recruitments", { params: requestParams });
     if (response.status === 204) {
-      return []; // 데이터가 없는 경우 빈 배열 반환
+      return { content: [], isLastPage: true }; // 데이터가 없는 경우 빈 배열 반환 및 마지막 페이지 표시
     }
+    
     // 백엔드 응답 구조: { message: string, data: RecruitmentResponseDTO[] }
     if (response.data && response.data.data) {
-      return response.data.data; // data 필드에서 채용 공고 목록 추출
+      // 페이지 정보 확인 (데이터가 80개 미만이면 마지막 페이지로 간주)
+      const isLastPage = response.data.data.length < 80;
+      return { 
+        content: response.data.data, // data 필드에서 채용 공고 목록 추출
+        isLastPage // 마지막 페이지 여부
+      };
     }
+    
     console.warn("Unexpected response format:", response.data);
-    return [];
-  } catch (error) {
-    console.error("Error fetching recruitments:", error);
-    throw error; // 에러를 다시 던져서 호출하는 쪽에서 처리할 수 있도록 함
+    return { content: [], isLastPage: true };
+  } catch (err) {
+    console.error("Error fetching recruitments:", err);
+    throw err;
   }
-};
+}; 
 
 // 채용 공고 필터 옵션 조회 (기술 스택, 교육, 경력 등)
 export const getRecruitmentFilters = async () => {
