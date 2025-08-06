@@ -3,7 +3,9 @@ import styles from "./RecruitmentFilter.module.scss";
 import { FaChevronDown } from "react-icons/fa";
 import { DropdownPortal } from "./";
 import { ExperienceRangeSlider } from "./";
-import { SkillSelector } from "./";
+import SalaryFilter from "./SalaryFilter";
+import EducationFilter from "./EducationFilter";
+import EnhancedSkillSelector from "./EnhancedSkillSelector";
 import { educations, salaryLevels, getSalaryKeys } from "../../../constants/recruitmentConstants";
 
 // 필터 옵션 상수들은 공유 상수 파일에서 가져옴
@@ -58,11 +60,7 @@ function RecruitmentFilter({
     setActiveDropdown(null);
   };
 
-  const handleSalarySliderChange = (e) => {
-    const value = parseInt(e.target.value, 10);
-    const salaryValue = salaryKeys[value];
-    onSalaryChange(salaryValue);
-  };
+  // Salary slider is now handled in SalaryFilter component
 
   const getExperienceButtonText = () => {
     if (Array.isArray(experience)) {
@@ -86,54 +84,31 @@ function RecruitmentFilter({
     switch (activeDropdown) {
       case "experience":
         content = (
-          <div className={styles.dropdownMenu}>
-            <ExperienceRangeSlider
-              experience={experience}
-              onExperienceChange={onExperienceChange}
-            />
-          </div>
+          <ExperienceRangeSlider
+            experience={experience}
+            onExperienceChange={onExperienceChange}
+          />
         );
         break;
       case "education":
         content = (
-          <div className={styles.dropdownMenu}>
-            {Object.entries(educations).map(([key, value]) => (
-              <div
-                key={key}
-                className={styles.dropdownItem}
-                onClick={() => {
-                  onEducationChange(Number(key));
-                  closeDropdown();
-                }}
-              >
-                {value}
-              </div>
-            ))}
-          </div>
+          <EducationFilter
+            education={education}
+            onEducationChange={onEducationChange}
+          />
         );
         break;
       case "salary":
         content = (
-          <div
-            className={styles.dropdownMenu}
-            style={{ padding: "1rem", width: "250px" }}
-          >
-            <input
-              type="range"
-              min="0"
-              max={salaryKeys.length - 1}
-              step="1"
-              value={Math.max(0, salaryKeys.indexOf(salary))}
-              onChange={handleSalarySliderChange}
-              className={styles.slider}
-            />
-            <div className={styles.salaryValue}>{salaryLevels[salary]}</div>
-          </div>
+          <SalaryFilter
+            salary={salary}
+            onSalaryChange={onSalaryChange}
+          />
         );
         break;
       case "skills":
         content = (
-          <SkillSelector
+          <EnhancedSkillSelector
             selectedSkills={selectedSkills}
             onSkillChange={onSkillChange}
           />
