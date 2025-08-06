@@ -1,8 +1,10 @@
 .searchContainer {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 1rem 1rem;
   background-color: #f8f9fa;
+  gap: 0.75rem;
 }
 
 .searchWrapper {
@@ -54,4 +56,121 @@
   &:hover {
     background-color: #3b5bdb;
   }
+}
+
+.toggleWrapper {
+  display: flex;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 25px;
+  overflow: hidden;
+  border: 1px solid #dee2e6;
+  margin-bottom: 0.5rem;
+}
+
+.toggleButton {
+  flex: 1;
+  padding: 0.5rem 0;
+  border: none;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s, color 0.2s;
+  
+  &:hover {
+    background-color: #e9ecef;
+  }
+  
+  &.active {
+    background-color: #4c6ef5;
+    color: white;
+  }
+}
+
+.suggestionsContainer {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.suggestionItem {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover, &:focus {
+    background-color: #f8f9fa;
+    outline: none;
+  }
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid #f1f3f5;
+  }
+}
+
+.suggestionIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.suggestionContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.companyName {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #343a40;
+  margin-bottom: 2px;
+}
+
+.jobTitle {
+  font-size: 0.85rem;
+  color: #6c757d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.noInfo {
+  font-size: 0.9rem;
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.loadingText, .noResults {
+  padding: 16px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.9rem;
 }

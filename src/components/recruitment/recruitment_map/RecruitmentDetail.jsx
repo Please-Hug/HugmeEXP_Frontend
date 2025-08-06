@@ -32,7 +32,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
       setError(null);
 
       try {
-        const data = await getRecruitmentDetail(job.id);
+        const data = await getRecruitmentDetail(job.id || job.recruitmentId);
         setDetailData(data);
         // 성공적으로 불러온 데이터를 캐시에 저장
         jobDetailsCache.current[job.id] = data;
@@ -45,7 +45,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
     };
 
     fetchJobDetail();
-  }, [job?.id]); // job 전체가 아닌 job.id만 의존성으로 지정
+  }, [job?.id || job?.recruitmentId]); // job 전체가 아닌 job.id만 의존성으로 지정
 
   // 기술 스택 렌더링 헬퍼 함수
   const renderSkillTag = (skill, index) => {
