@@ -11,6 +11,14 @@ import RecruitmentSearch from "../../components/recruitment/recruitment_map/Recr
 import styles from "./RecruitmentMap.module.scss";
 import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
 
+// 한국 좌표 범위 상수 정의
+const KOREA_BOUNDS = {
+  LAT_MIN: 33.0, // 제주도 남쪽 위도
+  LAT_MAX: 38.6, // 최북단 위도
+  LNG_MIN: 124.5, // 최서단 경도
+  LNG_MAX: 132.0  // 독도 동쪽 경도
+};
+
 // 기술 스택 데이터를 위한 Context 생성
 export const FilterDataContext = createContext(null);
 
