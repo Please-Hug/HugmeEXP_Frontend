@@ -25,22 +25,20 @@
       margin-left: auto;
       margin-right: 20px;
     }
-    &:last-child {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
+  }
+}
 
-      a {
-        padding: 10px;
-        background-color: #559cff;
-        border-radius: 8px;
-        color: white;
-        font-size: 14px;
-        transition: background-color 0.3s;
-        &:hover {
-          background-color: #3a7bbf;
-        }
-      }
-    }
+.learningButton {
+  padding: 10px;
+  background-color: #559cff;
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #3a7bbf;
   }
 }

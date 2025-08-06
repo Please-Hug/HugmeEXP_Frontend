@@ -1,0 +1,16 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1.5rem; // 페이지 전체 padding과 통일
+  height: 64px;
+  background-color: #007BFF; // 대표 색상 적용
+  color: white; // 내부 텍스트 색상
+  z-index: 10;
+}
+
+.title {
+  font-size: 22px; // 폰트 크기 살짝 조정
+  font-weight: 600;
+  margin: 0;
+}

@@ -15,6 +15,9 @@ import {
   FaCartShopping,
   FaRankingStar,
   FaAnglesLeft,
+  FaMapLocationDot,
+  FaMap,
+  FaCalendarCheck
 } from "react-icons/fa6";
 import logo from "../../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
@@ -32,6 +35,8 @@ function getQuickMenuItems() {
     // { icon: <FaLightbulb />, label: "AI 안아줘요" },
     // { icon: <FaBolt />, label: "빠른 검색" },
     { icon: <FaBell />, label: "알림" },
+    { icon: <FaMapLocationDot />, label: "스터디룸 예약", link: "/studyroom" }, // 새로 추가
+    { icon: <FaMap />, label: "채용 공고 지도", link: "/recruitment/map" },
   ];
 }
 
@@ -153,11 +158,21 @@ function Sidebar() {
                   onClick={() => {
                     if (item.label === "알림") {
                       setIsNotificationOpen(!isNotificationOpen); // 알림 모달 열기
+                    } else if (item.link) {
+                      // 스터디룸 예약 등 링크가 있는 경우 해당 페이지로 이동
+                      navigate(item.link);
                     }
                   }}
                 >
                   {item.icon}
                   <span>{item.label}</span>
+
+                  {item.label === "알림" && notifications.filter((n) => !n.read).length > 0 && (
+                    <span className={styles.notificationBadge}>
+                      {notifications.filter((n) => !n.read).length}
+                    </span>
+                  )}
+                  
                 </li>
               ))}
             </ul>

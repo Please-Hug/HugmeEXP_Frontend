@@ -16,10 +16,14 @@ import MyInfoPage from "../pages/user/MyInfoPage";
 import RankingPage from "../pages/user/RankingPage";
 import ShopPage from "../pages/Shop/ShopPage";
 import ShopHistoryPage from "../pages/Shop/ShopHistoryPage";
+import StudyRoomPage from "../pages/StudyRoom/StudyRoomPage";
+import StudyRoomReservationPage from "../pages/user/StudyRoomReservationPage";
 
 import MissionGroupPage from "../pages/mission/MissionGroupPage";
 import MissionDetailPage from "../pages/mission/MissionDetailPage";
 import ChallengeListPage from "../pages/mission/ChallengeListPage";
+
+import StudyRoomMap from "../pages/studyRoom/StudyRoomMap";
 
 export default [
   {
@@ -87,6 +91,14 @@ export default [
         element: <ShopHistoryPage />,
       },
       {
+        path: "/studyroom/reservation",
+        element: <StudyRoomPage />,
+      },
+      {
+        path: "/studyroom/reservation/:studyHallId",
+        element: <StudyRoomReservationPage />,
+      },
+      {
         path: "/mission-group/:missionGroupId",
         children: [
           {
@@ -120,6 +132,11 @@ export default [
       {
         path: "/my-activity",
         element: <MyStudyDiaryActivity />,
+      },
+      // 스터디룸 관련 라우트
+      {
+        path: "/studyroom",
+        element: <StudyRoomMap />,
       },
       // { path: "/settings", element: <SettingsPage /> },
       // ... 추가 사용자 경로

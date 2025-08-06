@@ -40,7 +40,16 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
         };
     }, [setNotifications]);
 
-    
+    useEffect(() => {
+        fetchNotifications()
+            .then((data) => {
+                setNotifications(data);
+            })
+            .catch((error) => {
+                console.error("초기 알림 불러오기 실패:", error);
+            });
+    }, []);
+
 
 
     // 외부 클릭 시 닫기
@@ -97,6 +106,18 @@ function Notification({ onClose, onOpenModal, isOpen, notifications, setNotifica
             onClose();
         }
 
+        // 배움일기 상세 페이지 이동
+        if(noti.type === "DIARY_COMMENT" || noti.type === "DIARY_LIKE"){
+            navigate(`/study-diary/${noti.targetId}`);
+            onClose();
+            return
+        }
+
+        if(noti.type === "MISSION_FEEDBACK") {
+            navigate(`/mission/${noti.targetId}`);
+            onClose();
+            return;
+        }
         // TODO: 나중에 다른 타입 분기 추가
     }
     
@@ -166,7 +187,7 @@ function formatTimeAgo(dateStr) {
 }
 
 function mapTypeToCategory(type) {
-    if (["PRAISE_RECEIVED", "DIARY_COMMENT", "DIARY_LIKE"].includes(type)) return "ACTIVITY";
+    if (["PRAISE_RECEIVED", "DIARY_COMMENT", "DIARY_LIKE", "MISSION_FEEDBACK"].includes(type)) return "ACTIVITY";
     if (["LEVEL_UP", "MISSION_REWARD"].includes(type)) return "REWARD";
     return "ACTIVITY";
 }

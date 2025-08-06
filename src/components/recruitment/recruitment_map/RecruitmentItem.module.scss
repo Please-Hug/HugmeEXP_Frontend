@@ -1,0 +1,73 @@
+.jobItem {
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: white;
+  transition: background-color 0.2s, border-color 0.2s;
+
+  &:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.selectedJobItem {
+  background-color: #e7f3ff; // 강조 색상
+  border-color: #007bff; // 대표 색상
+  font-weight: 500;
+}
+
+.titleContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.jobTitle {
+  margin: 0;
+  font-size: 16px;
+  font-weight: bold;
+  flex: 1;
+}
+
+.sourceLogoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.sourceLogo {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.jobCompany {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #868e96;
+}
+
+.jobAddress,
+.jobExperience {
+  font-size: 13px;
+  color: #888;
+  margin: 4px 0;
+}
+
+.skillsContainer {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skillTag {
+  background-color: #e9ecef;
+  color: #495057;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}

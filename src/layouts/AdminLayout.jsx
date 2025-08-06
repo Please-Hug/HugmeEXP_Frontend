@@ -5,7 +5,7 @@ import useTokenPayload from '../stores/tokenPayloadStore';
 import { getCurrentUser } from '../api/userService';
 import { jwtDecode } from 'jwt-decode';
 import styles from './AdminLayout.module.scss';
-import { FaUsers, FaHouse, FaListCheck, FaStore } from 'react-icons/fa6'; // 아이콘 import 추가
+import { FaUsers, FaHouse, FaListCheck, FaStore, FaDoorOpen, FaCalendarCheck, FaChartBar } from 'react-icons/fa6'; // 아이콘 import 추가
 
 export default function AdminLayout() {
   const userInfo = useUserStore((state) => state.userInfo);
@@ -104,6 +104,18 @@ export default function AdminLayout() {
             </span>
             회원 관리
           </NavLink>
+
+          <NavLink
+            to="/admin/stats"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon}>
+              <FaChartBar />
+            </span>
+            사용자 통계
+          </NavLink>
           
           <NavLink
             to="/admin/quest" 
@@ -127,6 +139,30 @@ export default function AdminLayout() {
               <FaStore/>
             </span>
             상점 관리
+          </NavLink>
+
+          <NavLink
+            to="/admin/studyroom"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon}>
+              <FaDoorOpen />
+            </span>
+            스터디룸 관리
+          </NavLink>
+
+          <NavLink
+            to="/admin/studyroom-reservation"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+          >
+            <span className={styles.navIcon}>
+              <FaCalendarCheck />
+            </span>
+            예약 관리
           </NavLink>
         </nav>
       </div>
