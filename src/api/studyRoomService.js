@@ -31,7 +31,7 @@ export const searchNearbyStudyHalls = async (latitude, longitude, radius = 10.0,
 export const getStudyHallDetail = async (studyHallId) => {
   try {
     const response = await api.get(`/api/v1/studyroom/halls/${studyHallId}`);
-    return response.data;
+    return response.data; // { message, data } 형식
   } catch (error) {
     console.error("스터디홀 상세 정보 가져오기 실패:", error);
     throw error;
@@ -122,3 +122,129 @@ export const deleteReservation = async (reservationId) => {
     throw error;
   }
 };
+
+// 호환성을 위한 별칭
+export const cancelReservation = deleteReservation;
+
+// 전체 스터디룸 조회 (사용자용) - API 명세서에 없는 엔드포인트, 스터디홀별 조회 사용 권장
+export const getAllStudyRooms = async () => {
+  try {
+    const response = await api.get("/api/v1/studyroom/rooms");
+    return response.data; // { message, data } 형식
+  } catch (error) {
+    console.error("전체 스터디룸 조회 실패:", error);
+    throw error;
+  }
+};
+
+// 특정 스터디홀의 스터디룸 목록 조회 (사용자용)
+export const getStudyRoomsByHall = async (studyHallId) => {
+  try {
+    const response = await api.get(`/api/v1/studyroom/halls/${studyHallId}/rooms`);
+    return response.data; // { message, data } 형식
+  } catch (error) {
+    console.error("스터디홀별 스터디룸 조회 실패:", error);
+    throw error;
+  }
+};
+
+// 관리자 스터디홀 및 스터디룸 관리를 위한 기본 export
+const studyRoomService = {
+  // 사용자용 API 추가
+  getAllStudyRooms,
+  getStudyRoomsByHall,
+  studyHall: {
+    // 전체 스터디홀 조회 (관리자용)
+    getStudyHalls: async (page = 0, size = 20) => {
+      try {
+        const response = await api.get("/api/v1/admin/studyhalls", {
+          params: { page, size, sort: "id" }
+        });
+        return response.data;
+      } catch (error) {
+        console.error("관리자 스터디홀 목록 조회 실패:", error);
+        throw error;
+      }
+    },
+    
+    // 스터디홀 생성
+    createStudyHall: async (data) => {
+      try {
+        const response = await api.post("/api/v1/admin/studyhalls", data);
+        return response.data;
+      } catch (error) {
+        console.error("스터디홀 생성 실패:", error);
+        throw error;
+      }
+    },
+    
+    // 스터디홀 수정
+    updateStudyHall: async (id, data) => {
+      try {
+        const response = await api.put(`/api/v1/admin/studyhalls/${id}`, data);
+        return response.data;
+      } catch (error) {
+        console.error("스터디홀 수정 실패:", error);
+        throw error;
+      }
+    },
+    
+    // 스터디홀 삭제
+    deleteStudyHall: async (id) => {
+      try {
+        const response = await api.delete(`/api/v1/admin/studyhalls/${id}`);
+        return response.data;
+      } catch (error) {
+        console.error("스터디홀 삭제 실패:", error);
+        throw error;
+      }
+    },
+  },
+  studyRoom: {
+    // 특정 스터디홀의 모든 스터디룸 조회
+    getStudyRooms: async (studyHallId) => {
+      try {
+        const response = await api.get(`/api/v1/admin/studyhalls/${studyHallId}/rooms`);
+        return response.data;
+      } catch (error) {
+        console.error("스터디룸 목록 조회 실패:", error);
+        throw error;
+      }
+    },
+    
+    // 스터디룸 생성
+    createStudyRoom: async (hallId, data) => {
+      try {
+        const response = await api.post(`/api/v1/admin/studyhalls/${hallId}/rooms`, data);
+        return response.data;
+      } catch (error) {
+        console.error("스터디룸 생성 실패:", error);
+        throw error;
+      }
+    },
+    
+    // 스터디룸 수정
+    updateStudyRoom: async (hallId, roomId, data) => {
+      try {
+        const response = await api.put(`/api/v1/admin/studyhalls/${hallId}/rooms/${roomId}`, data);
+        return response.data;
+      } catch (error) {
+        console.error("스터디룸 수정 실패:", error);
+        throw error;
+      }
+    },
+    
+    // 스터디룸 삭제
+    deleteStudyRoom: async (hallId, roomId) => {
+      try {
+        const response = await api.delete(`/api/v1/admin/studyhalls/${hallId}/rooms/${roomId}`);
+        return response.data;
+      } catch (error) {
+        console.error("스터디룸 삭제 실패:", error);
+        throw error;
+      }
+    },
+  },
+};
+
+export default studyRoomService;

@@ -1,7 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import StudyHallDetailModal from "./StudyHallDetailModal";
 import styles from "./StudyHallList.module.scss";
 
 function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loading, error }) {
+  const navigate = useNavigate();
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedStudyHallId, setSelectedStudyHallId] = useState(null);
   
   const formatDistance = (distance) => {
     if (distance === null || distance === undefined) return null;
@@ -10,12 +15,44 @@ function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loadi
 
   const formatTime = (time) => {
     if (!time) return "정보 없음";
-    const date = new Date(time);
-    return date.toLocaleTimeString('ko-KR', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: false 
-    });
+    
+    // 이미 HH:mm 형식인 경우
+    if (typeof time === 'string' && time.includes(':')) {
+      return time;
+    }
+    
+    // 콤마로 구분된 형식인 경우 (11,4 -> 11:04)
+    if (typeof time === 'string' && time.includes(',')) {
+      const [hour, minute] = time.split(',').map(num => parseInt(num.trim()));
+      return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    }
+    
+    // LocalTime은 배열 형태 [hour, minute, second, nanosecond] 또는 문자열로 올 수 있음
+    if (Array.isArray(time)) {
+      // LocalTime이 배열로 온 경우: [hour, minute, second, nanosecond]
+      const [hour, minute] = time;
+      if (typeof hour === 'number' && typeof minute === 'number') {
+        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    // 문자열 형태로 온 경우
+    if (typeof time === 'string') {
+      // "HH:mm:ss" 형식이면 초 제거
+      if (/^\d{1,2}:\d{2}:\d{2}$/.test(time)) {
+        const [hour, minute] = time.split(':');
+        return `${hour.padStart(2, '0')}:${minute}`;
+      }
+    }
+    
+    // 객체 형태로 온 경우 (LocalTime 객체의 직렬화)
+    if (typeof time === 'object' && time !== null) {
+      if (time.hour !== undefined && time.minute !== undefined) {
+        return `${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    return "정보 없음";
   };
 
   if (loading) {
@@ -96,13 +133,6 @@ function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loadi
                       <span className={styles.icon}>🏠</span>
                       <span>총 {studyHall.totalRooms || 0}개 룸</span>
                     </div>
-
-                    {studyHall.availableRooms !== undefined && (
-                      <div className={styles.detailItem}>
-                        <span className={styles.icon}>✅</span>
-                        <span>이용가능 {studyHall.availableRooms}개</span>
-                      </div>
-                    )}
                   </div>
 
                   <div className={styles.operatingHours}>
@@ -118,8 +148,8 @@ function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loadi
                     className={styles.detailBtn}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // 상세보기 기능 추가 가능
-                      onStudyHallSelect && onStudyHallSelect(studyHall);
+                      setSelectedStudyHallId(studyHall.id);
+                      setIsDetailModalOpen(true);
                     }}
                   >
                     상세보기
@@ -129,8 +159,7 @@ function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loadi
                     className={styles.reserveBtn}
                     onClick={(e) => {
                       e.stopPropagation();
-                      // 예약하기 기능 추가 가능
-                      alert(`${studyHall.name} 예약 기능은 준비 중입니다.`);
+                      navigate(`/studyroom/reservation/${studyHall.id}`);
                     }}
                   >
                     예약하기
@@ -141,6 +170,15 @@ function StudyHallList({ studyHalls, selectedStudyHall, onStudyHallSelect, loadi
           </div>
         )}
       </div>
+
+      <StudyHallDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedStudyHallId(null);
+        }}
+        studyHallId={selectedStudyHallId}
+      />
     </div>
   );
 }

@@ -66,9 +66,9 @@ function MapContainer({
       });
   }, []);
 
-  // 지도 초기화
+  // 지도 초기화 (최초 1회만)
   useEffect(() => {
-    if (!isKakaoLoaded || !mapRef.current) return;
+    if (!isKakaoLoaded || !mapRef.current || map) return;
 
     try {
       console.log('지도 초기화 시작...');
@@ -81,21 +81,43 @@ function MapContainer({
       const kakaoMap = new window.kakao.maps.Map(mapRef.current, mapOptions);
       setMap(kakaoMap);
 
-      // 지도 중심 변경 이벤트
+      // 지도 중심 변경 이벤트 (사용자가 직접 드래그할 때만)
       if (onCenterChange) {
+        let isUserDrag = false;
+        
+        window.kakao.maps.event.addListener(kakaoMap, 'dragstart', () => {
+          isUserDrag = true;
+        });
+        
         window.kakao.maps.event.addListener(kakaoMap, 'center_changed', () => {
-          const centerPosition = kakaoMap.getCenter();
-          onCenterChange({
-            lat: centerPosition.getLat(),
-            lng: centerPosition.getLng()
-          });
+          if (isUserDrag) {
+            const centerPosition = kakaoMap.getCenter();
+            onCenterChange({
+              lat: centerPosition.getLat(),
+              lng: centerPosition.getLng()
+            });
+            isUserDrag = false;
+          }
         });
       }
 
     } catch (error) {
       console.error('지도 생성 실패:', error);
     }
-  }, [isKakaoLoaded, center, onCenterChange]);
+  }, [isKakaoLoaded]); // center 의존성 제거
+
+  // 지도 중심 이동 (지도 재생성 없이)
+  useEffect(() => {
+    if (!map || !center) return;
+    
+    const moveLatLng = new window.kakao.maps.LatLng(center.lat, center.lng);
+    map.setCenter(moveLatLng);
+    
+    // 선택된 StudyHall이 있으면 줌 레벨 조정
+    if (selectedStudyHall) {
+      map.setLevel(5); // 선택 시 더 가까이 줌인
+    }
+  }, [map, center, selectedStudyHall]);
 
   // 현재 위치 마커
   useEffect(() => {
@@ -123,6 +145,43 @@ function MapContainer({
       currentMarker.setMap(null);
     };
   }, [map, currentLocation]);
+
+  // 시간 포맷팅 함수
+  const formatTime = (time) => {
+    if (!time) return "정보 없음";
+    
+    // LocalTime은 배열 형태 [hour, minute, second, nanosecond] 또는 문자열로 올 수 있음
+    if (Array.isArray(time)) {
+      // LocalTime이 배열로 온 경우: [hour, minute, second, nanosecond]
+      const [hour, minute] = time;
+      if (typeof hour === 'number' && typeof minute === 'number') {
+        return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    // 문자열 형태로 온 경우
+    if (typeof time === 'string') {
+      // 이미 "HH:mm" 형식이면 그대로 반환
+      if (/^\d{1,2}:\d{2}$/.test(time)) {
+        const [hour, minute] = time.split(':');
+        return `${hour.padStart(2, '0')}:${minute}`;
+      }
+      // "HH:mm:ss" 형식이면 초 제거
+      if (/^\d{1,2}:\d{2}:\d{2}$/.test(time)) {
+        const [hour, minute] = time.split(':');
+        return `${hour.padStart(2, '0')}:${minute}`;
+      }
+    }
+    
+    // 객체 형태로 온 경우 (LocalTime 객체의 직렬화)
+    if (typeof time === 'object' && time !== null) {
+      if (time.hour !== undefined && time.minute !== undefined) {
+        return `${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}`;
+      }
+    }
+    
+    return "정보 없음";
+  };
 
   // 스터디홀 마커들
   useEffect(() => {
@@ -153,6 +212,9 @@ function MapContainer({
             <p style="margin:5px 0 0 0; font-size:12px;">
               총 ${hall.totalRooms || 0}개 룸 
               ${hall.availableRooms !== undefined ? `(이용가능: ${hall.availableRooms}개)` : ''}
+            </p>
+            <p style="margin:5px 0 0 0; font-size:12px;">
+              🕐 ${formatTime(hall.openTime)} - ${formatTime(hall.closeTime)}
             </p>
           </div>
         `
