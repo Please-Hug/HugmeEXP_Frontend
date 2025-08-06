@@ -296,15 +296,20 @@ function RecruitmentMapPage() {
       });
       
       // getRecruitments API 호출하여 키워드로 채용 정보 검색
-      const data = await getRecruitments(params);
-      setRecruitments(data);
+      const result = await getRecruitments(params);
+      
+      // 결과에서 content 배열만 추출하여 설정
+      setRecruitments(result.content);
+      setIsLastPage(result.isLastPage);
+      setPage(0); // 페이지 초기화
       setIsMapSearchActive(false);
       setShouldUseMapBounds(false);
       
       // 검색 결과가 있고 첫 번째 결과에 좌표가 있으면 지도 중심 이동
-      if (data.length > 0 && data[0].latitude && data[0].longitude) {
-        let lat = parseFloat(data[0].latitude);
-        let lng = parseFloat(data[0].longitude);
+      const recruitmentResults = result.content;
+      if (recruitmentResults.length > 0 && recruitmentResults[0].latitude && recruitmentResults[0].longitude) {
+        let lat = parseFloat(recruitmentResults[0].latitude);
+        let lng = parseFloat(recruitmentResults[0].longitude);
         
         // 좌표가 올바른 범위에 있는지 확인
         const isValidKoreaLat = lat >= KOREA_BOUNDS.LAT_MIN && lat <= KOREA_BOUNDS.LAT_MAX;
@@ -315,9 +320,12 @@ function RecruitmentMapPage() {
           // 좌표를 바꿔서 재검증
           const swappedLat = lng;
           const swappedLng = lat;
+          
           if (swappedLat >= KOREA_BOUNDS.LAT_MIN && swappedLat <= KOREA_BOUNDS.LAT_MAX &&
               swappedLng >= KOREA_BOUNDS.LNG_MIN && swappedLng <= KOREA_BOUNDS.LNG_MAX) {
-            [lat, lng] = [swappedLat, swappedLng];
+            // 바꿈 좌표가 유효하면 사용
+            lat = swappedLat;
+            lng = swappedLng;
           }
         }
         

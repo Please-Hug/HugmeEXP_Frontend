@@ -66,18 +66,43 @@ function RecruitmentSearch({ onSearch, onKeywordSearch }) {
     };
   }, []);
   
+  // Debounce search to prevent duplicate API calls
+  const searchTimeoutRef = useRef(null);
+  
+  const debouncedSearch = (searchFunc, term) => {
+    // Clear any pending search
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Set a new timeout to execute the search
+    searchTimeoutRef.current = setTimeout(() => {
+      searchFunc(term);
+      searchTimeoutRef.current = null;
+    }, 100); // Short delay to prevent duplicate calls
+  };
+  
+  // Search button click handler - only executed when user clicks the button
   const handleSearchClick = () => {
     if (searchType === "location") {
-      onSearch(keyword);
+      debouncedSearch(onSearch, keyword);
     } else {
-      onKeywordSearch(keyword);
+      debouncedSearch(onKeywordSearch, keyword);
     }
     setShowSuggestions(false);
   };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
-      handleSearchClick();
+      e.preventDefault(); // Prevent default form submission
+      
+      // Use debounced search to prevent duplicate API calls
+      if (searchType === "location") {
+        debouncedSearch(onSearch, keyword);
+      } else {
+        debouncedSearch(onKeywordSearch, keyword);
+      }
+      setShowSuggestions(false);
     } else if (e.key === "ArrowDown" && showSuggestions && suggestions.length > 0) {
       // Focus on the first suggestion
       const firstSuggestion = document.querySelector(`.${styles.suggestionItem}`);
@@ -164,7 +189,7 @@ function RecruitmentSearch({ onSearch, onKeywordSearch }) {
             {isLoading ? (
               <div className={styles.loadingText}>검색 중...</div>
             ) : suggestions.length > 0 ? (
-              suggestions.slice(0, 6).map((suggestion, index) => (
+              suggestions.slice(0, 8).map((suggestion, index) => (
                 <div
                   key={suggestion.id || suggestion.recruitmentId || index}
                   className={styles.suggestionItem}
