@@ -47,7 +47,7 @@ function MapContainer({
         }, 300);
       }
     }
-  }, [propMapCenter]);
+  }, [propMapCenter, map]);
   const [currentDistance, setCurrentDistance] = useState(0);
   const isInitialLoad = useRef(true);
 
