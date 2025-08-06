@@ -47,7 +47,7 @@ function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading
     <div className={styles.listContainer}>
       {Array.isArray(jobs) && jobs.map((job, index) => (
         <RecruitmentItem
-          key={job.id || index} // ID가 있으면 ID 사용, 없으면 인덱스 사용
+          key={`${job.id}-${index}`} // ID와 인덱스를 조합하여 고유한 키 생성
           job={job}
           isSelected={selectedJob === job}
           onSelectJob={onSelectJob}

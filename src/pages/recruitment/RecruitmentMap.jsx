@@ -145,12 +145,18 @@ function RecruitmentMapPage() {
 
         // 데이터 설정
         if (resetPage) {
-          setRecruitments(result.content);
+          // 페이지 리셋 시 중복 제거된 새 데이터로 설정
+          const uniqueItems = Array.from(new Map(result.content.map(item => [item.id, item])).values());
+          setRecruitments(uniqueItems);
         } else {
           // 기존 데이터에 새 데이터 추가 (중복 방지를 위해 ID 기준으로 필터링)
           const existingIds = new Set(recruitments.map(item => item.id));
           const newItems = result.content.filter(item => !existingIds.has(item.id));
-          setRecruitments(prev => [...prev, ...newItems]);
+          
+          // 중복 제거 로직 강화 - Map을 사용하여 ID 기준으로 중복 제거
+          const allItems = [...recruitments, ...newItems];
+          const uniqueItems = Array.from(new Map(allItems.map(item => [item.id, item])).values());
+          setRecruitments(uniqueItems);
         }
         
         // 마지막 페이지 여부 설정
