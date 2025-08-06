@@ -1,10 +1,6 @@
 import React, { useState, useEffect, createContext } from "react";
 import { useParams } from "react-router-dom";
-import {
-  validateAndBuildParams,
-  getRecruitments,
-  getRecruitmentFilters,
-} from "../../api/recruitmentService";
+import { validateAndBuildParams, getRecruitments, getRecruitmentFilters, getSearchSuggestions } from "../../api/recruitmentService";
 import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/RecruitmentPageHeader";
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
 import RecruitmentDetail from "../../components/recruitment/recruitment_map/RecruitmentDetail";
@@ -99,9 +95,8 @@ function RecruitmentMapPage() {
     fetchFilterData();
   }, []); // 페이지 로드 시 한 번만 실행
 
-  // 채용 정보 API 호출
-  useEffect(() => {
-    const fetchRecruitments = async () => {
+  // Define fetchRecruitments outside of useEffect so it can be called directly
+  const fetchRecruitments = async () => {
       const params = validateAndBuildParams({
         filterType,
         regionFilter,
@@ -138,6 +133,8 @@ function RecruitmentMapPage() {
       }
     };
 
+  // 채용 정보 API 호출 - 필터 변경시에만 자동으로 호출
+  useEffect(() => {
     fetchRecruitments();
   }, [
     filterType,
@@ -146,7 +143,7 @@ function RecruitmentMapPage() {
     experience,
     selectedSkills,
     education,
-    isMapSearchActive,
+    // isMapSearchActive 의존성 제거 - 이제 직접 호출하므로 필요 없음
   ]);
 
   const handleBoundsChange = (bounds) => {
@@ -156,8 +153,42 @@ function RecruitmentMapPage() {
 
   const handleSearchCurrentMap = () => {
     // When user clicks "Search Current Map", enable map bounds for API call
-    setIsMapSearchActive(true);
+    // Set both flags to ensure we use the latest map bounds
     setShouldUseMapBounds(true);
+    setIsMapSearchActive(true);
+    
+    // Call fetchRecruitments directly with the latest map bounds
+    // We need to use the current mapBounds state which should have been updated by MapContainer
+    const params = validateAndBuildParams({
+      filterType,
+      regionFilter,
+      salary,
+      experience,
+      education,
+      selectedSkills,
+      isMapSearchActive: true,
+      mapBounds: mapBounds, // Use the latest mapBounds directly
+    });
+    
+    if (params) {
+      setLoading(true);
+      setError(null);
+      
+      getRecruitments(params)
+        .then(data => {
+          setRecruitments(data);
+          setIsMapSearchActive(false);
+          setShouldUseMapBounds(false);
+        })
+        .catch(err => {
+          console.error("채용 정보 조회 실패:", err);
+          setError(err.response?.data?.message || "채용 정보를 불러오는데 실패했습니다.");
+          setRecruitments([]);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
 
   const handleSearch = (keyword) => {
@@ -178,6 +209,45 @@ function RecruitmentMapPage() {
       }
     });
   };
+  
+  const handleKeywordSearch = async (keyword) => {
+    if (!keyword.trim()) {
+      alert("검색어를 입력해주세요.");
+      return;
+    }
+    
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await getSearchSuggestions(keyword);
+      setRecruitments(data);
+      setIsMapSearchActive(false);
+      setShouldUseMapBounds(false);
+      
+      // If there are results and the first result has coordinates, center the map on it
+      if (data.length > 0 && data[0].latitude && data[0].longitude) {
+        let lat = parseFloat(data[0].latitude);
+        let lng = parseFloat(data[0].longitude);
+        
+        // Check if coordinates might be swapped
+        const mightBeSwapped = (lat > 100 || lat < 30) && (lng > 30 && lng < 40);
+        if (mightBeSwapped) {
+          [lat, lng] = [lng, lat]; // Swap coordinates
+        }
+        
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setMapCenter({ lat, lng });
+        }
+      }
+    } catch (err) {
+      console.error("키워드 검색 실패:", err);
+      setError(err.response?.data?.message || "키워드 검색에 실패했습니다.");
+      setRecruitments([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <FilterDataContext.Provider
@@ -187,7 +257,7 @@ function RecruitmentMapPage() {
         <RecruitmentMapHeader />
         <main className={styles.mainContent}>
           <div className={styles.listWrapper}>
-            <RecruitmentSearch onSearch={handleSearch} />
+            <RecruitmentSearch onSearch={handleSearch} onKeywordSearch={handleKeywordSearch} />
             <div className={styles.filterWrapper}>
               {filterDataLoading ? (
                 <div>필터 데이터 로딩 중...</div>
@@ -222,27 +292,28 @@ function RecruitmentMapPage() {
               )}
             </div>
           </div>
-          {selectedJob && (
-            <div className={styles.detailContainer}>
-              <RecruitmentDetail
-                job={selectedJob}
-                onClose={() => setSelectedJob(null)}
-              />
-            </div>
-          )}
-
-          <div className={styles.mapWrapper}>
-            <MapBoundsDisplay bounds={mapBounds} />
-            <MapContainer
-              onSearchCurrentMap={handleSearchCurrentMap}
-              jobs={recruitments} // API 데이터로 변경
-              selectedJob={selectedJob}
-              onSelectJob={handleSelectJob}
-              onBoundsChange={handleBoundsChange}
-            />
-          </div>
-        </main>
-      </div>
+        {selectedJob && (
+        <div className={styles.detailContainer}>
+       
+          <RecruitmentDetail
+            job={selectedJob}
+            onClose={() => setSelectedJob(null)}
+          />
+        </div>)}
+        
+        <div className={styles.mapWrapper}>
+          <MapBoundsDisplay bounds={mapBounds} />
+          <MapContainer
+            onSearchCurrentMap={handleSearchCurrentMap}
+            jobs={recruitments} // API 데이터로 변경
+            selectedJob={selectedJob}
+            onSelectJob={handleSelectJob}
+            onBoundsChange={handleBoundsChange}
+            mapCenter={mapCenter}
+          />
+        </div>
+      </main>
+    </div>
     </FilterDataContext.Provider>
   );
 }
