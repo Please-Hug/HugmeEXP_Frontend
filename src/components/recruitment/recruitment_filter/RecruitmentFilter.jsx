@@ -152,7 +152,7 @@ function RecruitmentFilter({
         </button>
       </div>
 
-      {/* 연봉 필터 */}
+      {/* 연봉 필터
       <div className={styles.filterGroup}>
         <button
           className={getButtonClass(salary > 0)}
@@ -160,7 +160,7 @@ function RecruitmentFilter({
         >
           {salary > 0 ? `연봉: ${salaryLevels[salary]}` : "연봉"}
         </button>
-      </div>
+      </div> */}
 
       {/* 기술 스택 필터 */}
       <div className={styles.filterGroup}>
