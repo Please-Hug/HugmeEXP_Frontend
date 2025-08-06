@@ -1,8 +1,7 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import styles from "./RecentLearning.module.scss";
 
-function RecentLearning() {
+function RecentLearning({ onStartLearningClick }) {
   const learningData = {
     title: "(3회차) Spring 기반 백엔드 개발자 성장 과정",
     lastLearning: "출결 QR 코드",
@@ -10,7 +9,6 @@ function RecentLearning() {
       current: 68,
       total: 107,
     },
-    lastLearningLink: "#",
   };
   return (
     <div className={styles.learningHeader}>
@@ -29,7 +27,9 @@ function RecentLearning() {
         />
       </div>
       <div>
-        <Link to={learningData.lastLearningLink}>학습하기</Link>
+        <button className={styles.learningButton} onClick={onStartLearningClick}>
+          학습하기
+        </button>
       </div>
     </div>
   );

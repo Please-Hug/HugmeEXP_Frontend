@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react"; 
 import { Link } from "react-router-dom";
 import styles from "./DashboardPage.module.scss";
 import emptyUserProfile from "../../assets/images/user/empty-user-profile.svg";
@@ -15,10 +15,16 @@ import api from "../../api/axiosInstance";
 import useBreadcrumbStore from "../../stores/breadcrumbStore";
 import BookmarkSection from "../../components/Dashboard/BookmarkSection";
 import AdminButton from "../../components/Admin/AdminButton";
+import ProjectOverviewModal from "../../components/Project/ProjectOverviewModal"; 
 
 function DashboardPage() {
   const userInfo = useUserStore((state) => state.userInfo);
   const { setBreadcrumbItems } = useBreadcrumbStore();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   useEffect(() => {
     if (userInfo) {
@@ -52,7 +58,7 @@ function DashboardPage() {
       </div>
       <div className={styles.dashboardContent}>
         <div className={styles.dashboardLeft}>
-          <RecentLearning />
+          <RecentLearning onStartLearningClick={openModal} />
           <LearningPlans />
           <RecentDiary />
           <LatestRecruitmentCarousel />
@@ -75,6 +81,8 @@ function DashboardPage() {
           <DailyQuest />
         </div>
       </div>
+
+      {isModalOpen && <ProjectOverviewModal onClose={closeModal} />}
     </div>
   );
 }
