@@ -3,7 +3,7 @@ import styles from "./RecruitmentFilter.module.scss";
 import { iconDefinitions } from "../../../constants/recruitmentConstants";
 import { FilterDataContext } from "../../../pages/recruitment/RecruitmentMap";
 
-const EnhancedSkillSelector = ({ selectedSkills, onSkillChange }) => {
+const EnhancedSkillSelector = ({ selectedSkills, onSkillChange, closeDropdown }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [tempSelectedSkills, setTempSelectedSkills] = useState(selectedSkills);
   const { filterData, loading } = useContext(FilterDataContext);
@@ -49,6 +49,9 @@ const EnhancedSkillSelector = ({ selectedSkills, onSkillChange }) => {
     
     // Then add newly selected skills
     skillsToAdd.forEach(id => onSkillChange(id));
+    
+    // Close dropdown after applying changes
+    closeDropdown();
   };
   
   // Reset to default value

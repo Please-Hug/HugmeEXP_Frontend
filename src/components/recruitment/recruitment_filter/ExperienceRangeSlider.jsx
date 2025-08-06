@@ -6,7 +6,7 @@ import styles from "./RecruitmentFilter.module.scss";
 // Define experience levels array
 const experienceLevels = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10];
 
-const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
+const ExperienceRangeSlider = ({ experience, onExperienceChange, closeDropdown }) => {
   // State for temporary experience values (only update parent on apply)
   const [tempExperience, setTempExperience] = useState(experience);
   
@@ -28,6 +28,7 @@ const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
   // Apply changes to parent component
   const handleApply = () => {
     onExperienceChange(tempExperience);
+    closeDropdown(); // Close dropdown after applying changes
   };
   
   // Reset to original values

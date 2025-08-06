@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./RecruitmentFilter.module.scss";
 import { educations } from "../../../constants/recruitmentConstants";
 
-const EducationFilter = ({ education, onEducationChange }) => {
+const EducationFilter = ({ education, onEducationChange, closeDropdown }) => {
   // State for temporary education value (only update parent on apply)
   const [tempEducation, setTempEducation] = useState(education);
   
@@ -14,6 +14,7 @@ const EducationFilter = ({ education, onEducationChange }) => {
   // Apply changes to parent component
   const handleApply = () => {
     onEducationChange(tempEducation);
+    closeDropdown(); // Close dropdown after applying changes
   };
   
   // Reset to default value

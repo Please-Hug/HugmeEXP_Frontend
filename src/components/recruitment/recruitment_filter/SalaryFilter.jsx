@@ -4,7 +4,7 @@ import { salaryLevels, getSalaryKeys } from "../../../constants/recruitmentConst
 
 const salaryKeys = getSalaryKeys();
 
-const SalaryFilter = ({ salary, onSalaryChange }) => {
+const SalaryFilter = ({ salary, onSalaryChange, closeDropdown }) => {
   // State for temporary salary value (only update parent on apply)
   const [tempSalary, setTempSalary] = useState(salary);
   
@@ -22,6 +22,7 @@ const SalaryFilter = ({ salary, onSalaryChange }) => {
   // Apply changes to parent component
   const handleApply = () => {
     onSalaryChange(tempSalary);
+    closeDropdown(); // Close dropdown after applying changes
   };
   
   // Reset to default value

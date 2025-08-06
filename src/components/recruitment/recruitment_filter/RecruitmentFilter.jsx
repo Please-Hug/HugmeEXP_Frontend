@@ -87,6 +87,7 @@ function RecruitmentFilter({
           <ExperienceRangeSlider
             experience={experience}
             onExperienceChange={onExperienceChange}
+            closeDropdown={closeDropdown}
           />
         );
         break;
@@ -95,6 +96,7 @@ function RecruitmentFilter({
           <EducationFilter
             education={education}
             onEducationChange={onEducationChange}
+            closeDropdown={closeDropdown}
           />
         );
         break;
@@ -103,6 +105,7 @@ function RecruitmentFilter({
           <SalaryFilter
             salary={salary}
             onSalaryChange={onSalaryChange}
+            closeDropdown={closeDropdown}
           />
         );
         break;
@@ -111,6 +114,7 @@ function RecruitmentFilter({
           <EnhancedSkillSelector
             selectedSkills={selectedSkills}
             onSkillChange={onSkillChange}
+            closeDropdown={closeDropdown}
           />
         );
         break;
