@@ -34,13 +34,15 @@ export const validateAndBuildParams = (filters) => {
   // Experience - 백엔드에서는 experienceMin, experienceMax 파라미터 필요
   if (Array.isArray(experience) && experience.length >= 2) {
     // 배열 [min, max] 형태로 전달
-    const min = experience[0];
-    const max = experience[1];
+    let min = experience[0];
+    let max = experience[1];
 
     // -1은 신입으로 0으로 변환
     if(min === -1 && max === 10){
       params.experienceMin = null;
       params.experienceMax = null;
+      min = null;
+      max = null;
     }
     else if (min === -1) {
       params.experienceMin = 0;
@@ -81,10 +83,10 @@ export const validateAndBuildParams = (filters) => {
   // Map Bounds
   if (isMapSearchActive && mapBounds) {
     if (mapBounds.northEast && mapBounds.southWest) {
-      params.topLeftLat = mapBounds.northEast.lat;
-      params.topLeftLng = mapBounds.southWest.lng;
-      params.bottomRightLat = mapBounds.southWest.lat;
-      params.bottomRightLng = mapBounds.northEast.lng;
+      params.topLeftLat = mapBounds.northEast.lat.toFixed(8);
+      params.topLeftLng = mapBounds.southWest.lng.toFixed(8);
+      params.bottomRightLat = mapBounds.southWest.lat.toFixed(8);
+      params.bottomRightLng = mapBounds.northEast.lng.toFixed(8);
     }
   }
 
@@ -140,6 +142,7 @@ export const getLatestRecruitments = async () => {
 
 // 채용 공고 상세 정보 조회
 export const getRecruitmentDetail = async (id) => {
+  console.log("Fetching recruitment detail for ID:", id);
   try {
     const response = await api.get(`/api/v1/recruitments/${id}`);
     if (response.status === 204) {
@@ -154,5 +157,34 @@ export const getRecruitmentDetail = async (id) => {
   } catch (error) {
     console.error(`Error fetching recruitment detail for ID ${id}:`, error);
     throw error; // 에러를 다시 던져서 호출하는 쪽에서 처리할 수 있도록 함
+  }
+};
+
+// 검색창 연관 검색어 제공
+export const getSearchSuggestions = async (keyword) => {
+  try {
+    if (!keyword || keyword.trim() === "") {
+      return [];
+    }
+    
+    console.log("Searching companies with keyword:", keyword);
+    const response = await api.get("/api/v1/recruitments/companies", { 
+      params: { keyword: keyword.trim() } 
+    });
+    
+    if (response.status === 204) {
+      return []; // 데이터가 없는 경우 빈 배열 반환
+    }
+    
+    if (response.data && response.data.data) {
+      return response.data.data; // data 필드에서 회사 검색 결과 추출
+    
+    }
+    
+    console.warn("Unexpected response format:", response.data);
+    return [];
+  } catch (error) {
+    console.error(`Error searching companies with keyword ${keyword}:`, error);
+    throw error;
   }
 };
