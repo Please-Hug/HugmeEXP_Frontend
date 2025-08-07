@@ -9,8 +9,9 @@ import {
 import styles from "./MapContainer.module.scss";
 import CommonButton from "../../common/btn/CommonButton";
 import { VscDebugRestart } from "react-icons/vsc";
-// Import the marker image
 import selectedMarkerImage from "../../../assets/images/marker/select.png";
+import MapBoundaryMarkers from "../develop/MapBoundaryMarkers";
+import { useDevMode } from "../../../utils/devModeUtils";
 
 function MapContainer({
   onSearchCurrentMap,
@@ -33,6 +34,9 @@ function MapContainer({
     topLeft: null,
     bottomRight: null
   });
+  
+  // Check if development mode is enabled using the utility hook
+  const isDevMode = useDevMode();
   
   // Update mapCenter when propMapCenter changes
   useEffect(() => {
@@ -318,55 +322,8 @@ function MapContainer({
             </React.Fragment>
           );
         })}
-
-        {/* {selectedJob && (
-          <CustomOverlayMap
-            position={{ lat: selectedJob.latitude, lng: selectedJob.longitude }}
-          >
-            <div className={styles.overlay}>{selectedJob.companyName}</div>
-          </CustomOverlayMap>
-        )}
-         */}
-        {/* Display yellow markers for boundary points */}
-        {/* Top Left Marker */}
-        {boundaryPoints.topLeft && (
-          <MapMarker
-            key="topLeftMarker"
-            position={{
-              lat: boundaryPoints.topLeft.lat,
-              lng: boundaryPoints.topLeft.lng
-            }}
-            image={{
-              src: "https://t1.daumcdn.net/localimg/localimages/07/2012/img/marker_p.png", 
-              size: {
-                width: 24,
-                height: 35
-              },
-            }}
-          >
-            <div style={{ color: '#000', padding: '5px' }}>Top Left</div>
-          </MapMarker>
-        )}
-        
-        {/* Bottom Right Marker */}
-        {boundaryPoints.bottomRight && (
-          <MapMarker
-            key="bottomRightMarker"
-            position={{
-              lat: boundaryPoints.bottomRight.lat,
-              lng: boundaryPoints.bottomRight.lng
-            }}
-            image={{
-              src: "https://t1.daumcdn.net/localimg/localimages/07/2012/img/marker_p.png",
-              size: {
-                width: 24,
-                height: 35
-              },
-            }}
-          >
-            <div style={{ color: '#000', padding: '5px' }}>Bottom Right</div>
-          </MapMarker>
-        )}
+        {/* Development mode boundary markers component */}
+        <MapBoundaryMarkers isDevMode={isDevMode} boundaryPoints={boundaryPoints} />
       </KakaoMap>
     </div>
   );

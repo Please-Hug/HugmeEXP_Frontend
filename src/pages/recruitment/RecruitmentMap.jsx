@@ -10,6 +10,7 @@ import { RecruitmentFilter } from "../../components/recruitment/recruitment_filt
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
 import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
+import { useDevMode } from "../../utils/devModeUtils";
 
 // 한국 좌표 범위 상수 정의
 const KOREA_BOUNDS = {
@@ -52,6 +53,8 @@ function RecruitmentMapPage() {
     experienceOptions: [],
   });
   const [filterDataLoading, setFilterDataLoading] = useState(true);
+    const isDevMode = useDevMode();
+  
 
   // 기술 스택 ID로 기술 스택 정보 찾기 함수
   const findTechStackById = (id) => {
@@ -399,7 +402,9 @@ function RecruitmentMapPage() {
           )}
         
         <div className={styles.mapWrapper}>
+          {isDevMode && (
           <MapBoundsDisplay bounds={mapBounds} />
+          )}
           <MapContainer
             onSearchCurrentMap={handleSearchCurrentMap}
             jobs={recruitments} // API 데이터로 변경

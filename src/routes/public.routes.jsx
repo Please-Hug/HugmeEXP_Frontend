@@ -9,6 +9,8 @@ export default [
       { path: "/", element: <HomePage /> },
       { path: "/recruitment/map", element: <RecruitmentMapPage /> },
       { path: "/recruitment/map/:jobId", element: <RecruitmentMapPage /> },
+      { path: "/dev-recruitment/map", element: <RecruitmentMapPage /> },
+      { path: "/dev-recruitment/map/:jobId", element: <RecruitmentMapPage /> },
     ],
   },
 ];
