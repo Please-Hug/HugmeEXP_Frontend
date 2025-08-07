@@ -5,6 +5,7 @@ import RecruitmentMapHeader from "../../components/recruitment/recruitment_map/R
 import RecruitmentList from "../../components/recruitment/recruitment_map/RecruitmentList";
 import RecruitmentDetail from "../../components/recruitment/recruitment_map/RecruitmentDetail";
 import MapContainer from "../../components/recruitment/recruitment_map/MapContainer";
+import { BookmarkProvider } from "../../contexts/BookmarkContext";
 
 import { RecruitmentFilter } from "../../components/recruitment/recruitment_filter";
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
@@ -332,6 +333,7 @@ function RecruitmentMapPage() {
     <FilterDataContext.Provider
       value={{ filterData, loading: filterDataLoading, findTechStackById }}
     >
+    <BookmarkProvider>
       <div className={styles.pageContainer}>
         <RecruitmentMapHeader />
         <main className={styles.mainContent}>
@@ -397,6 +399,7 @@ function RecruitmentMapPage() {
         </div>
       </main>
     </div>
+    </BookmarkProvider>
     </FilterDataContext.Provider>
   );
 }

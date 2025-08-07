@@ -2,7 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import styles from "./RecruitmentDetail.module.scss";
 import { getRecruitmentDetail } from "../../../api/recruitmentService";
 import { iconDefinitions } from "../../../constants/recruitmentConstants";
+import { useBookmark } from '../../../contexts/BookmarkContext';
 import { FilterDataContext } from "../../../pages/recruitment/RecruitmentMap";
+import { FaRegBookmark, FaBookmark } from 'react-icons/fa6';
 
 // 기술 스택 아이콘은 공유 상수 파일에서 가져옴
 
@@ -10,6 +12,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
   const [detailData, setDetailData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { checkBookmarked, toggleBookmark, isLoading: isBookmarkLoading } = useBookmark();
   const { filterData, loading: filterDataLoading, findTechStackById } = useContext(FilterDataContext);
 
   // 이전에 불러온 작업 상세 데이터를 캐싱하기 위한 ref
@@ -46,6 +49,15 @@ const RecruitmentDetail = ({ job, onClose }) => {
 
     fetchJobDetail();
   }, [job?.id]); // job 전체가 아닌 job.id만 의존성으로 지정
+  
+  // 즐겨찾기 토글 함수
+  const handleToggleBookmark = (e) => {
+    e.stopPropagation(); // 이벤트 버블링 방지
+    
+    if (!job?.id) return;
+    
+    toggleBookmark(job.id);
+  };
 
   // 기술 스택 렌더링 헬퍼 함수
   const renderSkillTag = (skill, index) => {
@@ -175,9 +187,19 @@ const RecruitmentDetail = ({ job, onClose }) => {
 
   return (
     <div className={styles.container}>
-      <button className={styles.closeButton} onClick={onClose}>
-        X
-      </button>
+      <div className={styles.headerButtons}>
+        <button 
+          className={styles.bookmarkButton} 
+          onClick={handleToggleBookmark}
+          disabled={isBookmarkLoading}
+          aria-label={checkBookmarked(job.id) ? '즐겨찾기 삭제' : '즐겨찾기 추가'}
+        >
+          {checkBookmarked(job.id) ? <FaBookmark className={styles.bookmarkIcon} /> : <FaRegBookmark className={styles.bookmarkIcon} />}
+        </button>
+        <button className={styles.closeButton} onClick={onClose}>
+          X
+        </button>
+      </div>
       
       {loading && (
         <div className={styles.loading}>
