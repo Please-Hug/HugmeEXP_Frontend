@@ -11,14 +11,45 @@
   flex-direction: column;
 }
 
+.headerButtons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
 .closeButton {
-  align-self: flex-end;
   background: none;
   border: none;
   font-size: 24px;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 10px;
+}
+
+.bookmarkButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.bookmarkIcon {
+  font-size: 22px;
+  color: #f59f00; // 노란색 계열 (즐겨찾기 색상)
 }
 
 .titleWrapper {
