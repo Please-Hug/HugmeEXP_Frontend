@@ -11,6 +11,7 @@ import RecruitmentSearch from "../../components/recruitment/recruitment_map/Recr
 import styles from "./RecruitmentMap.module.scss";
 import MapBoundsDisplay from "../../components/recruitment/develop/MapBoundsDisplay";
 import { useDevMode } from "../../utils/devModeUtils";
+import { useNavigate } from 'react-router-dom';
 
 // 한국 좌표 범위 상수 정의
 const KOREA_BOUNDS = {
@@ -45,6 +46,9 @@ function RecruitmentMapPage() {
   const [page, setPage] = useState(0); // 현재 페이지 번호
   const [isLastPage, setIsLastPage] = useState(false); // 마지막 페이지 여부
   const [loadingMore, setLoadingMore] = useState(false); // 추가 데이터 로딩 상태
+  
+  const navigate = useNavigate();
+
 
   // 필터 데이터 상태
   const [filterData, setFilterData] = useState({
@@ -64,6 +68,8 @@ function RecruitmentMapPage() {
 
   const handleSelectJob = (job) => {
     setSelectedJob(job);
+    
+    navigate(`/recruitment/map/${job.id}`);
   };
 
   const handleFilterChange = (type) => {
