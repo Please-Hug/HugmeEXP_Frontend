@@ -10,6 +10,7 @@ function RecruitmentItem({ job, isSelected, onSelectJob }) {
   const formatExperience = (min, max) => {
     if (min === 0 && max === 0) return '신입';
     if (min === 0) return `신입~${max}년`;
+    if (max === 0 || max===100) return `${min}년 이상`;
     if (max === null || max === undefined) return `${min}년 이상`;
     if (min === max) return `${min}년`;
     return `${min}~${max}년`;
