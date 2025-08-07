@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import styles from "./RecruitmentFilter.module.scss";
@@ -6,16 +6,36 @@ import styles from "./RecruitmentFilter.module.scss";
 // Define experience levels array
 const experienceLevels = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 10];
 
-const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
+const ExperienceRangeSlider = ({ experience, onExperienceChange, closeDropdown }) => {
+  // State for temporary experience values (only update parent on apply)
+  const [tempExperience, setTempExperience] = useState(experience);
+  
   // Find indices in experienceLevels array that match current experience values
-  const minIndex = experienceLevels.findIndex(level => level === experience[0]);
-  const maxIndex = experienceLevels.findIndex(level => level === experience[1]);
+  const minIndex = experienceLevels.findIndex(level => level === tempExperience[0]);
+  const maxIndex = experienceLevels.findIndex(level => level === tempExperience[1]);
+  
+  // Update local state when parent props change
+  useEffect(() => {
+    setTempExperience(experience);
+  }, [experience]);
   
   // Validate experience values
   if (minIndex === -1 || maxIndex === -1) {
-    console.error('Invalid experience values provided:', experience);
+    console.error('Invalid experience values provided:', tempExperience);
     return null; // Return null to prevent rendering with invalid values
   }
+  
+  // Apply changes to parent component
+  const handleApply = () => {
+    onExperienceChange(tempExperience);
+    closeDropdown(); // Close dropdown after applying changes
+  };
+  
+  // Reset to original values
+  const handleReset = () => {
+    setTempExperience([-1, 10]); // Reset to default values
+    onExperienceChange([-1, 10]); // Also update parent
+  };
   
   // Function to get the label for an experience level
   const getExperienceLabel = (level) => {
@@ -24,7 +44,7 @@ const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
     return `${level}년`;
   };
   return (
-    <div className={styles.filterGroup}>
+    <div className={`${styles.dropdownMenu} ${styles.filterGroup}`} style={{ backgroundColor: 'white' }}>
       <h4>경력</h4>
       <div className={styles.rangeContainer}>
         <div className={styles.rangeSliderWrapper}>
@@ -48,7 +68,7 @@ const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
               value={minIndex}
               onChange={(index) => {
                 if (index <= maxIndex) {
-                  onExperienceChange([experienceLevels[index], experience[1]]);
+                  setTempExperience([experienceLevels[index], tempExperience[1]]);
                 }
               }}
               trackStyle={{ backgroundColor: 'transparent' }}
@@ -65,7 +85,7 @@ const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
               value={maxIndex}
               onChange={(index) => {
                 if (index >= minIndex) {
-                  onExperienceChange([experience[0], experienceLevels[index]]);
+                  setTempExperience([tempExperience[0], experienceLevels[index]]);
                 }
               }}
               trackStyle={{ backgroundColor: 'transparent' }}
@@ -75,15 +95,19 @@ const ExperienceRangeSlider = ({ experience, onExperienceChange }) => {
           </div>
         </div>
         <div className={styles.experienceRangeLabels}>
-          <span>{getExperienceLabel(experience[0])}</span>
-          <span>{getExperienceLabel(experience[1])}</span>
+          <span>{getExperienceLabel(tempExperience[0])}</span>
+          <span>{getExperienceLabel(tempExperience[1])}</span>
         </div>
         <div className={styles.experienceLabel}>
           <span>
-            {experience[0] === experience[1]
-              ? getExperienceLabel(experience[0])
-              : `${getExperienceLabel(experience[0])} ~ ${getExperienceLabel(experience[1])}`}
+            {tempExperience[0] === tempExperience[1]
+              ? getExperienceLabel(tempExperience[0])
+              : `${getExperienceLabel(tempExperience[0])} ~ ${getExperienceLabel(tempExperience[1])}`}
           </span>
+        </div>
+        <div className={styles.buttonContainer}>
+          <button className={styles.resetButton} onClick={handleReset}>초기화</button>
+          <button className={styles.applyButton} onClick={handleApply}>적용</button>
         </div>
       </div>
     </div>
