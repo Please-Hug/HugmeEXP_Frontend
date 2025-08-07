@@ -77,8 +77,17 @@ function RecruitmentMapPage() {
   // 필터링된 공고 목록 업데이트 함수
   const handleFilteredJobsChange = useCallback((jobs, isBookmarkMode) => {
     setFilteredRecruitments(jobs);
+    
+    // 북마크 모드 변경 시 isLastPage 초기화
+    if (showOnlyBookmarked !== isBookmarkMode) {
+      // 북마크 모드에서 일반 모드로 변경 시 isLastPage 초기화
+      if (showOnlyBookmarked && !isBookmarkMode) {
+        setIsLastPage(false);
+      }
+    }
+    
     setShowOnlyBookmarked(isBookmarkMode);
-  }, []);
+  }, [showOnlyBookmarked]);
 
   const handleFilterChange = (type) => {
     setFilterType(type);
@@ -210,7 +219,16 @@ function RecruitmentMapPage() {
       setLoadingMore(true);
       
       const nextPage = page + 1;
-      const params = buildSearchParams();
+      const params = validateAndBuildParams({
+        filterType,
+        regionFilter,
+        salary,
+        experience,
+        education,
+        selectedSkills,
+        isMapSearchActive,
+        mapBounds
+      });
       const { content, isLastPage: lastPage } = await getRecruitments(params, nextPage);
       
       if (content.length > 0) {
