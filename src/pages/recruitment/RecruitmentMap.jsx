@@ -9,7 +9,7 @@ import MapContainer from "../../components/recruitment/recruitment_map/MapContai
 import { RecruitmentFilter } from "../../components/recruitment/recruitment_filter";
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
-import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
+import MapBoundsDisplay from "../../components/recruitment/develop/MapBoundsDisplay";
 import { useDevMode } from "../../utils/devModeUtils";
 
 // 한국 좌표 범위 상수 정의
