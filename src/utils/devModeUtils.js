@@ -13,6 +13,9 @@ import { useMemo } from 'react';
  * @returns {boolean} 개발 모드이면 true, 아니면 false
  */
 export const isDevMode = () => {
+  // SSR 환경에서 window 객체가 없을 경우 방어 코드
+  if (typeof window === 'undefined') return false;
+
   // URL 파라미터 확인 (예: ?dev=1)
   const urlParams = new URLSearchParams(window.location.search);
   const hasDevParam = urlParams.get('dev') === '1';
