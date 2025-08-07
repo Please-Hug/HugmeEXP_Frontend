@@ -33,9 +33,8 @@ export function BookmarkProvider({ children }) {
   }, []);
 
   // 즐겨찾기 여부 확인 함수
-  const checkBookmarked = useCallback((jobId) => {
-    console.log("BookmarkProvider.checkBookmarked",jobId);
-    // console.log("bookmarkedJobs",bookmarkedJobs);
+  const checkIsBookmarked = useCallback((jobId) => {
+    if (!jobId) return false;
     return bookmarkedJobs.has(jobId);
   }, [bookmarkedJobs]);
 
@@ -82,9 +81,8 @@ export function BookmarkProvider({ children }) {
 
   // 컨텍스트 값
   const value = {
-    bookmarkedJobs,
     isLoading,
-    checkBookmarked,
+    checkIsBookmarked,
     addBookmark,
     removeBookmark,
     toggleBookmark,

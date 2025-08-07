@@ -6,7 +6,7 @@ import { useBookmark } from "../../../contexts/BookmarkContext";
 function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading, isLastPage }) {
   const observerRef = useRef(null); // Intersection Observer 참조
   const loadingRef = useRef(null); // 로딩 요소 참조
-  const { bookmarkedJobs } = useBookmark();
+  const { checkIsBookmarked } = useBookmark();
 
   // 스크롤 감지 콜백 함수
   const handleObserver = useCallback((entries) => {
@@ -53,7 +53,7 @@ function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading
           job={job}
           isSelected={selectedJob === job}
           onSelectJob={onSelectJob}
-          isBookmarked={bookmarkedJobs.has(job.id)}
+          isBookmarked={checkIsBookmarked(job.id)}
         />
       ))}
       

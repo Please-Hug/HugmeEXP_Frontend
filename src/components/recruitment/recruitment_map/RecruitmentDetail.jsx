@@ -12,7 +12,7 @@ const RecruitmentDetail = ({ job, onClose }) => {
   const [detailData, setDetailData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { checkBookmarked, toggleBookmark, isLoading: isBookmarkLoading } = useBookmark();
+  const { checkIsBookmarked, toggleBookmark, isLoading: isBookmarkLoading } = useBookmark();
   const { filterData, loading: filterDataLoading, findTechStackById } = useContext(FilterDataContext);
 
   // 이전에 불러온 작업 상세 데이터를 캐싱하기 위한 ref
@@ -192,9 +192,9 @@ const RecruitmentDetail = ({ job, onClose }) => {
           className={styles.bookmarkButton} 
           onClick={handleToggleBookmark}
           disabled={isBookmarkLoading}
-          aria-label={checkBookmarked(job.id) ? '즐겨찾기 삭제' : '즐겨찾기 추가'}
+          aria-label={checkIsBookmarked(job.id) ? '즐겨찾기 삭제' : '즐겨찾기 추가'}
         >
-          {checkBookmarked(job.id) ? <FaBookmark className={styles.bookmarkIcon} /> : <FaRegBookmark className={styles.bookmarkIcon} />}
+          {checkIsBookmarked(job.id) ? <FaBookmark className={styles.bookmarkIcon} /> : <FaRegBookmark className={styles.bookmarkIcon} />}
         </button>
         <button className={styles.closeButton} onClick={onClose}>
           X
