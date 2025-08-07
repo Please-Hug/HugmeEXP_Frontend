@@ -1,12 +1,14 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styles from "./RecruitmentList.module.scss";
 import RecruitmentItem from "./RecruitmentItem";
 import { useBookmark } from "../../../contexts/BookmarkContext";
+import { FaFilter, FaBookmark } from 'react-icons/fa6';
 
-function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading, isLastPage }) {
+function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading, isLastPage, onFilteredJobsChange }) {
   const observerRef = useRef(null); // Intersection Observer 참조
   const loadingRef = useRef(null); // 로딩 요소 참조
   const { checkIsBookmarked } = useBookmark();
+  const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false);
 
   // 스크롤 감지 콜백 함수
   const handleObserver = useCallback((entries) => {
@@ -45,9 +47,40 @@ function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading
     };
   }, [handleObserver, jobs]);
   
+  // 북마크 필터링 토글 핸들러
+  const toggleBookmarkFilter = () => {
+    setShowOnlyBookmarked(prev => !prev);
+  };
+
+  // 필터링된 채용 공고 목록
+  const filteredJobs = showOnlyBookmarked
+    ? jobs.filter(job => checkIsBookmarked(job.id))
+    : jobs;
+    
+  // 북마크 필터 상태가 변경될 때만 상위 컴포넌트에 알림
+  useEffect(() => {
+    if (onFilteredJobsChange) {
+      const filtered = showOnlyBookmarked
+        ? jobs.filter(job => checkIsBookmarked(job.id))
+        : jobs;
+      onFilteredJobsChange(filtered, showOnlyBookmarked);
+    }
+  }, [showOnlyBookmarked, jobs, checkIsBookmarked, onFilteredJobsChange]);
+
   return (
     <div className={styles.listContainer}>
-      {Array.isArray(jobs) && jobs.map((job, index) => (
+      <div className={styles.filterContainer}>
+        <button 
+          className={`${styles.filterButton} ${showOnlyBookmarked ? styles.active : ''}`}
+          onClick={toggleBookmarkFilter}
+          aria-label="북마크한 공고만 보기"
+        >
+          <FaBookmark className={styles.filterIcon} />
+          <span>북마크만 보기</span>
+        </button>
+      </div>
+      
+      {Array.isArray(filteredJobs) && filteredJobs.map((job, index) => (
         <RecruitmentItem
           key={job.id || index} // ID가 있으면 ID 사용, 없으면 인덱스 사용
           job={job}
@@ -60,8 +93,9 @@ function RecruitmentList({ jobs, selectedJob, onSelectJob, onLoadMore, isLoading
       {/* 로딩 상태 표시 및 Intersection Observer 타겟 */}
       <div ref={loadingRef} className={styles.loadingContainer}>
         {isLoading && <div className={styles.loadingSpinner}>로딩 중...</div>}
-        {isLastPage && jobs.length > 0 && <div className={styles.endMessage}>모든 채용 공고를 불러왔습니다.</div>}
-        {!isLoading && jobs.length === 0 && <div className={styles.noResults}>검색 결과가 없습니다.</div>}
+        {isLastPage && filteredJobs.length > 0 && <div className={styles.endMessage}>모든 채용 공고를 불러왔습니다.</div>}
+        {!isLoading && filteredJobs.length === 0 && !showOnlyBookmarked && <div className={styles.noResults}>검색 결과가 없습니다.</div>}
+        {!isLoading && filteredJobs.length === 0 && showOnlyBookmarked && <div className={styles.noResults}>북마크한 공고가 없습니다.</div>}
       </div>
     </div>
   );

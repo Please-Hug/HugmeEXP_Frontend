@@ -10,7 +10,9 @@ import { BookmarkProvider } from "../../contexts/BookmarkContext";
 import { RecruitmentFilter } from "../../components/recruitment/recruitment_filter";
 import RecruitmentSearch from "../../components/recruitment/recruitment_map/RecruitmentSearch";
 import styles from "./RecruitmentMap.module.scss";
-import MapBoundsDisplay from "../../components/recruitment/recruitment_map/MapBoundsDisplay";
+import MapBoundsDisplay from "../../components/recruitment/develop/MapBoundsDisplay";
+import { useDevMode } from "../../utils/devModeUtils";
+import { useNavigate } from 'react-router-dom';
 
 // 한국 좌표 범위 상수 정의
 const KOREA_BOUNDS = {
@@ -40,11 +42,16 @@ function RecruitmentMapPage() {
 
   // API 연동 상태
   const [recruitments, setRecruitments] = useState([]);
+  const [filteredRecruitments, setFilteredRecruitments] = useState([]); // 필터링된 공고 목록
+  const [showOnlyBookmarked, setShowOnlyBookmarked] = useState(false); // 북마크만 보기 모드
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(0); // 현재 페이지 번호
   const [isLastPage, setIsLastPage] = useState(false); // 마지막 페이지 여부
   const [loadingMore, setLoadingMore] = useState(false); // 추가 데이터 로딩 상태
+  
+  const navigate = useNavigate();
+
 
   // 필터 데이터 상태
   const [filterData, setFilterData] = useState({
@@ -53,6 +60,7 @@ function RecruitmentMapPage() {
     experienceOptions: [],
   });
   const [filterDataLoading, setFilterDataLoading] = useState(true);
+  const isDevMode = useDevMode();
 
   // 기술 스택 ID로 기술 스택 정보 찾기 함수
   const findTechStackById = (id) => {
@@ -60,9 +68,17 @@ function RecruitmentMapPage() {
     return filterData.techStacks.find((stack) => stack.id === id) || null;
   };
 
-  const handleSelectJob = (job) => {
+  const handleSelectJob = useCallback((job) => {
     setSelectedJob(job);
-  };
+    setMapCenter({ lat: job.latitude, lng: job.longitude });
+    navigate(`/recruitment/map/${job.id}`);
+  }, []);
+
+  // 필터링된 공고 목록 업데이트 함수
+  const handleFilteredJobsChange = useCallback((jobs, isBookmarkMode) => {
+    setFilteredRecruitments(jobs);
+    setShowOnlyBookmarked(isBookmarkMode);
+  }, []);
 
   const handleFilterChange = (type) => {
     setFilterType(type);
@@ -146,12 +162,18 @@ function RecruitmentMapPage() {
 
         // 데이터 설정
         if (resetPage) {
-          setRecruitments(result.content);
+          // 페이지 리셋 시 중복 제거된 새 데이터로 설정
+          const uniqueItems = Array.from(new Map(result.content.map(item => [item.id, item])).values());
+          setRecruitments(uniqueItems);
         } else {
           // 기존 데이터에 새 데이터 추가 (중복 방지를 위해 ID 기준으로 필터링)
           const existingIds = new Set(recruitments.map(item => item.id));
           const newItems = result.content.filter(item => !existingIds.has(item.id));
-          setRecruitments(prev => [...prev, ...newItems]);
+          
+          // 중복 제거 로직 강화 - Map을 사용하여 ID 기준으로 중복 제거
+          const allItems = [...recruitments, ...newItems];
+          const uniqueItems = Array.from(new Map(allItems.map(item => [item.id, item])).values());
+          setRecruitments(uniqueItems);
         }
         
         // 마지막 페이지 여부 설정
@@ -175,14 +197,33 @@ function RecruitmentMapPage() {
   // 추가 데이터 로드 함수
   const loadMoreRecruitments = async () => {
     // 이미 로딩 중이거나 마지막 페이지인 경우 무시
-    if (loadingMore || isLastPage) return;
+    if (isLastPage || loadingMore) return;
     
-    // 다음 페이지로 설정
-    const nextPage = page + 1;
-    setPage(nextPage);
+    // 북마크만 보기 모드일 경우 추가 로드하지 않음 (북마크 API는 페이지네이션 지원하지 않음)
+    if (showOnlyBookmarked) {
+      setIsLastPage(true); // 북마크 모드에서는 추가 로드 없음
+      setLoadingMore(false);
+      return;
+    }
     
-    // 추가 데이터 로드 (페이지 초기화 없이)
-    await fetchRecruitments(false);
+    try {
+      setLoadingMore(true);
+      
+      const nextPage = page + 1;
+      const params = buildSearchParams();
+      const { content, isLastPage: lastPage } = await getRecruitments(params, nextPage);
+      
+      if (content.length > 0) {
+        setRecruitments(prev => [...prev, ...content]);
+        setPage(nextPage);
+      }
+      
+      setIsLastPage(lastPage);
+    } catch (error) {
+      console.error("Error loading more recruitments:", error);
+    } finally {
+      setLoadingMore(false);
+    }
   };
 
   // 채용 정보 API 호출 - 필터 변경시에만 자동으로 호출
@@ -291,15 +332,20 @@ function RecruitmentMapPage() {
       });
       
       // getRecruitments API 호출하여 키워드로 채용 정보 검색
-      const data = await getRecruitments(params);
-      setRecruitments(data);
+      const result = await getRecruitments(params);
+      
+      // 결과에서 content 배열만 추출하여 설정
+      setRecruitments(result.content);
+      setIsLastPage(result.isLastPage);
+      setPage(0); // 페이지 초기화
       setIsMapSearchActive(false);
       setShouldUseMapBounds(false);
       
       // 검색 결과가 있고 첫 번째 결과에 좌표가 있으면 지도 중심 이동
-      if (data.length > 0 && data[0].latitude && data[0].longitude) {
-        let lat = parseFloat(data[0].latitude);
-        let lng = parseFloat(data[0].longitude);
+      const recruitmentResults = result.content;
+      if (recruitmentResults.length > 0 && recruitmentResults[0].latitude && recruitmentResults[0].longitude) {
+        let lat = parseFloat(recruitmentResults[0].latitude);
+        let lng = parseFloat(recruitmentResults[0].longitude);
         
         // 좌표가 올바른 범위에 있는지 확인
         const isValidKoreaLat = lat >= KOREA_BOUNDS.LAT_MIN && lat <= KOREA_BOUNDS.LAT_MAX;
@@ -310,9 +356,12 @@ function RecruitmentMapPage() {
           // 좌표를 바꿔서 재검증
           const swappedLat = lng;
           const swappedLng = lat;
+          
           if (swappedLat >= KOREA_BOUNDS.LAT_MIN && swappedLat <= KOREA_BOUNDS.LAT_MAX &&
               swappedLng >= KOREA_BOUNDS.LNG_MIN && swappedLng <= KOREA_BOUNDS.LNG_MAX) {
-            [lat, lng] = [swappedLat, swappedLng];
+            // 바꿈 좌표가 유효하면 사용
+            lat = swappedLat;
+            lng = swappedLng;
           }
         }
         
@@ -371,6 +420,7 @@ function RecruitmentMapPage() {
                     onLoadMore={loadMoreRecruitments}
                     isLoading={loadingMore}
                     isLastPage={isLastPage}
+                    onFilteredJobsChange={handleFilteredJobsChange}
                   />
                 </div>
               )}
@@ -387,10 +437,12 @@ function RecruitmentMapPage() {
           )}
         
         <div className={styles.mapWrapper}>
+          {isDevMode && (
           <MapBoundsDisplay bounds={mapBounds} />
+          )}
           <MapContainer
             onSearchCurrentMap={handleSearchCurrentMap}
-            jobs={recruitments} // API 데이터로 변경
+            jobs={filteredRecruitments.length > 0 ? filteredRecruitments : recruitments} // 필터링된 공고가 있으면 필터링된 목록 사용
             selectedJob={selectedJob}
             onSelectJob={handleSelectJob}
             onBoundsChange={handleBoundsChange}
